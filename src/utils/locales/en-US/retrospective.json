@@ -1,0 +1,28 @@
+{
+  "retrospective": {
+    "title": "Sprint Retrospective",
+    "categories": {
+      "communicate": "Communication",
+      "process": "Process",
+      "estimate": "Estimation",
+      "timebound": "Time Management",
+      "quality": "Quality"
+    },
+    "boards": {
+      "enhancement": "Enhancement Todo",
+      "continues": "Continues Todo"
+    },
+    "actions": {
+      "addItem": "Add Item",
+      "removeItem": "Remove Item",
+      "editItem": "Edit Item"
+    },
+    "form": {
+      "title": "Title",
+      "description": "Description",
+      "category": "Category",
+      "priority": "Priority",
+      "assignee": "Assignee"
+    }
+  }
+}
