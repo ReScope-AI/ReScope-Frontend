@@ -82,13 +82,13 @@ const AppLayout: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container py-6">
+      <main className="w-full py-6">
         <Outlet />
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-background">
-        <div className="container py-4 text-center text-sm text-muted-foreground">
+      <footer className="border-t bg-background w-full">
+        <div className="py-4 text-center text-sm text-muted-foreground w-full">
           &copy; {new Date().getFullYear()} Sprint Retrospective. All rights reserved.
         </div>
       </footer>
