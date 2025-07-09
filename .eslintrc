@@ -2,7 +2,7 @@
   "env": {
     "browser": true,
     "es2021": true,
-    "node": true // Add Node.js environment globally
+    "node": true, // Add Node.js environment globally
   },
   "extends": [
     "eslint:recommended",
@@ -13,11 +13,13 @@
     {
       "files": ["commitlint.config.js"],
       "env": {
-        "node": true
-      }
-    }
+        "node": true,
+      },
+    },
   ],
   "parser": "@typescript-eslint/parser",
   "plugins": ["react", "@typescript-eslint"],
-  "rules": {}
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+  },
 }

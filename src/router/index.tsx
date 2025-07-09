@@ -1,7 +1,8 @@
-import { Route, Routes } from 'react-router';
-import AppLayout from '@/components/layouts/app-layout';
+import SidebarLayout from '@/components/layouts/sidebar';
+import DashboardPage from '@/pages/dashboard/dashboard-page';
 import NotFoundPage from '@/pages/NotFound';
 import React from 'react';
+import { Route, Routes } from 'react-router-dom';
 
 // Lazy-loaded components
 const SprintsPage = React.lazy(() => import('@/pages/Retrospective/SprintsPage'));
@@ -18,19 +19,39 @@ export const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/">
-        <Route element={<AppLayout />}>
-          <Route
-            index
-            element={
-              <React.Suspense fallback={<PageLoader />}>
-                <SprintsPage />
-              </React.Suspense>
-            }
-          />
-        </Route>
-      </Route>
+      {/* Root route */}
+      <Route
+        path="/"
+        element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SprintsPage />
+          </React.Suspense>
+        }
+      />
 
+      {/* Sprints route */}
+      <Route
+        path="/sprints"
+        element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SprintsPage />
+          </React.Suspense>
+        }
+      />
+
+      {/* Dashboard route */}
+      <Route
+        path="/dashboard"
+        element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SidebarLayout>
+              <DashboardPage />
+            </SidebarLayout>
+          </React.Suspense>
+        }
+      />
+
+      {/* 404 route */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
