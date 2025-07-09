@@ -1,6 +1,7 @@
 import SidebarLayout from '@/components/layouts/sidebar';
 import DashboardPage from '@/pages/dashboard/dashboard-page';
 import NotFoundPage from '@/pages/NotFound';
+import SelectBoard from '@/pages/select-board/select-board';
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
@@ -47,6 +48,16 @@ export const AppRoutes = () => {
             <SidebarLayout>
               <DashboardPage />
             </SidebarLayout>
+          </React.Suspense>
+        }
+      />
+
+      {/* Select Board route */}
+      <Route
+        path="/select-board"
+        element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SelectBoard />
           </React.Suspense>
         }
       />

@@ -2,9 +2,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Calendar, FileText, Star, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
+
   const recentMeetings = [
     {
       id: 1,
@@ -29,13 +34,23 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full h-full px-20">
       {/* Start a Meeting Section */}
+
       <div>
-        <h2 className="text-xl font-semibold mb-4">Start a Meeting</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardContent className="py-6">
+        <div className="flex items-center mb-4">
+          <SidebarTrigger className="-ml-1" />
+
+          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:w-4" />
+
+          <h2 className="text-xl font-semibold">Start a Meeting</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          <Card
+            className="cursor-pointer hover:shadow-md transition-shadow h-full flex flex-col justify-center"
+            onClick={() => navigate('/select-board')}
+          >
+            <CardContent className="py-6 flex flex-col justify-center h-full">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                   <FileText className="h-5 w-5 text-blue-600" />
@@ -48,8 +63,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardContent className="py-6">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow h-full flex flex-col justify-center">
+            <CardContent className="py-6 flex flex-col justify-center h-full">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                   <Zap className="h-5 w-5 text-purple-600" />
@@ -66,19 +81,22 @@ export default function DashboardPage() {
 
       {/* Recent Meetings */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-semibold">Your Recent Meetings</h2>
+        <div className="flex items-start justify-between mb-4 mt-8">
+          <div className="flex flex-col items-start mx-2">
+            <h2 className="text-xl font-semibold ">Your Recent Meetings</h2>
             <p className="text-sm text-gray-600">
               Meetings that you have either created or joined recently
             </p>
           </div>
-          <Button className="bg-purple-600 hover:bg-purple-700">CREATE NEW MEETING</Button>
+          <Button className="bg-blue-600 hover:bg-blue-700">CREATE NEW MEETING</Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {recentMeetings.map((meeting) => (
-            <Card key={meeting.id} className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card
+              key={meeting.id}
+              className="cursor-pointer hover:shadow-md transition-shadow h-full flex flex-col"
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -94,7 +112,7 @@ export default function DashboardPage() {
                 </div>
                 <p className="text-xs text-gray-500">{meeting.date}</p>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 flex flex-col flex-1 justify-between">
                 <div className="flex items-center justify-between mb-3">
                   <Badge variant="secondary" className="text-xs">
                     <FileText className="h-3 w-3 mr-1" />
@@ -102,7 +120,7 @@ export default function DashboardPage() {
                   </Badge>
                   <span className="text-xs text-gray-500">{meeting.items} items</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 mt-auto">
                   {meeting.participants.map((participant, index) => (
                     <Avatar key={index} className="h-6 w-6">
                       <AvatarImage src={participant.avatar || '/placeholder.svg'} />
@@ -115,8 +133,8 @@ export default function DashboardPage() {
           ))}
 
           {/* Empty state card */}
-          <Card className="border-dashed border-2 border-gray-300 bg-gray-50">
-            <CardContent className="p-6 text-center">
+          <Card className="border-dashed border-2 border-gray-300 bg-gray-50 h-full flex flex-col justify-center">
+            <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
               <div className="text-gray-400 mb-2">
                 <Calendar className="h-8 w-8 mx-auto" />
               </div>
