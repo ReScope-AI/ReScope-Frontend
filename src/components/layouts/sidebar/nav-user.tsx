@@ -18,6 +18,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/utils/config/firebase';
+import { useNavigate } from 'react-router-dom';
 
 export function NavUser({
   user,
@@ -29,6 +32,15 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login');
+    } catch (err) {
+      console.error('Error during sign-out: ', err);
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -91,7 +103,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleSignOut}>
               <LogOut />
               Log out
             </DropdownMenuItem>

@@ -1,3 +1,4 @@
+import ModuleAccessLayout from '@/components/layouts/app-layout/access-layout';
 import SidebarLayout from '@/components/layouts/sidebar';
 import DashboardPage from '@/pages/dashboard/dashboard-page';
 import NotFoundPage from '@/pages/NotFound';
@@ -7,6 +8,7 @@ import { Route, Routes } from 'react-router-dom';
 
 // Lazy-loaded components
 const SprintsPage = React.lazy(() => import('@/pages/Retrospective/SprintsPage'));
+const Login = React.lazy(() => import('@/pages/auth/login'));
 
 export const AppRoutes = () => {
   const PageLoader = () => (
@@ -20,12 +22,24 @@ export const AppRoutes = () => {
 
   return (
     <Routes>
+      {/* Login route */}
+      <Route
+        path="/login"
+        element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Login />
+          </React.Suspense>
+        }
+      />
+
       {/* Root route */}
       <Route
         path="/"
         element={
           <React.Suspense fallback={<PageLoader />}>
-            <SprintsPage />
+            <ModuleAccessLayout>
+              <SprintsPage />
+            </ModuleAccessLayout>
           </React.Suspense>
         }
       />
@@ -35,7 +49,9 @@ export const AppRoutes = () => {
         path="/sprints"
         element={
           <React.Suspense fallback={<PageLoader />}>
-            <SprintsPage />
+            <ModuleAccessLayout>
+              <SprintsPage />
+            </ModuleAccessLayout>
           </React.Suspense>
         }
       />
@@ -45,9 +61,11 @@ export const AppRoutes = () => {
         path="/dashboard"
         element={
           <React.Suspense fallback={<PageLoader />}>
-            <SidebarLayout>
-              <DashboardPage />
-            </SidebarLayout>
+            <ModuleAccessLayout>
+              <SidebarLayout>
+                <DashboardPage />
+              </SidebarLayout>
+            </ModuleAccessLayout>
           </React.Suspense>
         }
       />
@@ -57,7 +75,9 @@ export const AppRoutes = () => {
         path="/select-board"
         element={
           <React.Suspense fallback={<PageLoader />}>
-            <SelectBoard />
+            <ModuleAccessLayout>
+              <SelectBoard />
+            </ModuleAccessLayout>
           </React.Suspense>
         }
       />
