@@ -1,12 +1,21 @@
 import { Button } from '@/components/ui/button';
 import { auth, googleProvider } from '@/config/firebase';
+import { useLogin } from '@/hooks/use-auth';
 import { signInWithPopup } from 'firebase/auth';
 
 export default function GoogleSignInButton() {
+  const loginMutation = useLogin();
+
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      console.log('User signed in: ', result.user);
+      const user = result.user;
+      if (user) {
+        const googleId = user.uid;
+        const email = user.email || '';
+        const name = user.displayName || '';
+        loginMutation.mutate({ googleId, email, name });
+      }
     } catch (err) {
       console.error('Error during sign-in: ', err);
     }
