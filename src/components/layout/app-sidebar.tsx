@@ -44,6 +44,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Icons } from '../icons';
 import { OrgSwitcher } from '../org-switcher';
+import { useSignOut } from '@/hooks/use-auth';
 export const company = {
   name: 'Acme Inc',
   logo: IconPhotoUp,
@@ -57,6 +58,7 @@ const tenants = [
 ];
 
 export default function AppSidebar() {
+  const signOutMutation = useSignOut();
   const pathname = usePathname();
   const { isOpen } = useMediaQuery();
   const router = useRouter();
@@ -158,8 +160,7 @@ export default function AppSidebar() {
                 sideOffset={4}
               >
                 <DropdownMenuLabel className='p-0 font-normal'>
-                  <div className='px-1 py-1.5'>
-                  </div>
+                  <div className='px-1 py-1.5'></div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
@@ -180,7 +181,7 @@ export default function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => signOutMutation.mutate()}>
                   <IconLogout className='mr-2 h-4 w-4' />
                   Sign Out
                 </DropdownMenuItem>
