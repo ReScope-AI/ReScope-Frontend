@@ -1,4 +1,5 @@
 import SidebarLayout from '@/components/layouts/sidebar';
+import RetroPage from '@/pages/board';
 import DashboardPage from '@/pages/dashboard/dashboard-page';
 import NotFoundPage from '@/pages/NotFound';
 import SelectBoard from '@/pages/select-board/select-board';
@@ -58,6 +59,15 @@ export const AppRoutes = () => {
         element={
           <React.Suspense fallback={<PageLoader />}>
             <SelectBoard />
+          </React.Suspense>
+        }
+      />
+
+      <Route
+        path="/board"
+        element={
+          <React.Suspense fallback={<PageLoader />}>
+            <RetroPage />
           </React.Suspense>
         }
       />
