@@ -12,13 +12,14 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const [openDialogSelectBoard, setOpenDialogSelectBoard] = useState(false);
+  const [selectedBoard, setSelectedBoard] = useState<string>('');
 
   const handleOpenDialogSelectBoard = () => {
     setOpenDialogSelectBoard(true);
   };
 
   const handleSelectBoard = (board: string) => {
-    console.log(board);
+    setSelectedBoard(board);
   };
 
   const handleNext = () => {
@@ -167,7 +168,7 @@ export default function DashboardPage() {
       <DialogSelectBoard
         open={openDialogSelectBoard}
         onOpenChange={setOpenDialogSelectBoard}
-        selectedBoard='standard'
+        selectedBoard={selectedBoard}
         onSelect={handleSelectBoard}
         onNext={handleNext}
       />
