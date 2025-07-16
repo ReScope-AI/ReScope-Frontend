@@ -12,12 +12,14 @@ export const useLogin = () => {
     mutationFn: ({
       googleId,
       email,
-      name
+      name,
+      avatar
     }: {
       googleId: string;
       email: string;
       name: string;
-    }) => loginWithGoogle(googleId, email, name),
+      avatar: string;
+    }) => loginWithGoogle(googleId, email, name, avatar),
     onSuccess: (data) => {
       const { accessToken, refreshToken } = data.data.token;
       setTokens(accessToken.token, refreshToken.token);

@@ -1,17 +1,25 @@
-import axios from 'axios';
+import { API_KEYS } from '@/config/proxy';
+import request from '@/config/request';
 
 export const loginWithGoogle = async (
   googleId: string,
   email: string,
-  name: string
+  name: string,
+  avatar: string
 ) => {
-  const response = await axios.post(
-    'https://be-rescope.bieprs.io.vn/api/auth/login-google',
+  const response = await request(
+    '/auth/login-google',
     {
-      googleId,
-      email,
-      name
-    }
+      method: 'POST',
+      data: {
+        googleId,
+        email,
+        name,
+        avatar
+      },
+      noAuth: true
+    },
+    API_KEYS.BASE_API
   );
-  return response.data;
+  return response;
 };
