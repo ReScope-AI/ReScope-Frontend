@@ -1,4 +1,10 @@
+'use client';
+import { useRouter } from 'next/navigation';
 
-export default async function Dashboard() {
-  return <div>Dashboard</div>;
-}
+const DashboardPage = () => {
+  const router = useRouter();
+  router.push('/dashboard/overview');
+  return null;
+};
+
+export default DashboardPage;

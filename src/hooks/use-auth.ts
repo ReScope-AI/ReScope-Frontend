@@ -24,7 +24,7 @@ export const useLogin = () => {
     onSuccess: (data) => {
       const { accessToken, refreshToken } = data.data.token;
       setTokens(accessToken.token, refreshToken.token);
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     },
     onError: (error) => {
       showNotification('error', error?.message || 'Something went wrong');
