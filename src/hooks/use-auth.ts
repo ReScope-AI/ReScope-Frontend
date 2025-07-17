@@ -1,4 +1,5 @@
-import { loginWithGoogle } from '@/services/auth';
+import { showNotification } from '@/components/common';
+import { loginWithGoogle } from '@/config/api/auth';
 import { useAuthStore } from '@/stores/authStore';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -26,7 +27,7 @@ export const useLogin = () => {
       router.push('/dashboard');
     },
     onError: (error) => {
-      console.error('Login failed:', error);
+      showNotification('error', error?.message || 'Something went wrong');
     }
   });
 };
@@ -43,7 +44,7 @@ export const useSignOut = () => {
       router.push('/auth/sign-in');
     },
     onError: (error) => {
-      console.log('Sign out failed:', error);
+      showNotification('error', error?.message || 'Something went wrong');
       router.push('/auth/sign-in');
     }
   });

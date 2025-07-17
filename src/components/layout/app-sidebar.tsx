@@ -62,6 +62,7 @@ export default function AppSidebar() {
   const pathname = usePathname();
   const { isOpen } = useMediaQuery();
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleSwitchTenant = (_tenantId: string) => {
     // Tenant switching functionality would be implemented here
   };
