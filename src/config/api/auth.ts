@@ -23,3 +23,14 @@ export const loginWithGoogle = async (
   );
   return response;
 };
+
+export const getProfileAPI = async () => {
+  const response = await request(
+    '/user/profile',
+    {
+      method: 'GET'
+    },
+    API_KEYS.BASE_API
+  );
+  return response;
+};

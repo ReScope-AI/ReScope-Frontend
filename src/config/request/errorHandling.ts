@@ -29,7 +29,7 @@ export interface ApiErrorResponse {
 // Handle errors by showing notifications and throwing the original error
 export const errorHandling = (
   error: AxiosError<ApiErrorResponse>,
-  isShowError?: boolean
+  isHideNotification = false
 ): never => {
   let message: string;
 
@@ -45,9 +45,9 @@ export const errorHandling = (
     message = error.message || 'An unexpected error occurred.';
   }
 
-  if (isShowError) {
+  if (!isHideNotification) {
     showNotification('error', message);
   }
 
-  throw error; // Throw the original AxiosError for downstream handling
+  throw error;
 };

@@ -32,7 +32,7 @@ const request = async (
     params = {},
     responseType = '',
     noAuth = false,
-    isShowError = true,
+    isHideNotification = false,
     timeout = undefined
   } = options;
 
@@ -96,7 +96,7 @@ const request = async (
       throw e; // Propagate cancellation errors
     }
     // Pass error to errorHandling, which will throw the original AxiosError
-    return errorHandling(e as AxiosError<ApiErrorResponse>, isShowError);
+    return errorHandling(e as AxiosError<ApiErrorResponse>, isHideNotification);
   }
 };
 

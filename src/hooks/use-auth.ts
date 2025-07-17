@@ -1,4 +1,4 @@
-import { loginWithGoogle } from '@/services/auth';
+import { loginWithGoogle } from '@/config/api/auth';
 import { useAuthStore } from '@/stores/authStore';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
