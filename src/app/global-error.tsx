@@ -7,7 +7,6 @@ export default function GlobalError({
 }: {
   error: Error & { digest?: string };
 }) {
-  console.log(error);
   return (
     <html>
       <body>
@@ -15,7 +14,10 @@ export default function GlobalError({
         definition requires a `statusCode` prop. However, since the App Router
         does not expose status codes for errors, we simply pass 0 to render a
         generic error message. */}
-        <NextError statusCode={0} />
+        <NextError
+          statusCode={0}
+          title={error?.message || 'Something went wrong'}
+        />
       </body>
     </html>
   );

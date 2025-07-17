@@ -23,6 +23,7 @@ export default function GoogleSignInButton() {
         await loginMutation.mutateAsync({ googleId, email, name, avatar });
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('Error during sign-in: ', err);
     } finally {
       setIsLoading(false);
