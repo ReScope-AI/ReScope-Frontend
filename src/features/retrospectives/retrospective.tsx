@@ -23,7 +23,7 @@ export default function DashboardPage() {
   };
 
   const handleNext = () => {
-    console.log('next');
+    router.push(`/dashboard/retrospective/${selectedBoard}`);
   };
 
   const recentMeetings = [
