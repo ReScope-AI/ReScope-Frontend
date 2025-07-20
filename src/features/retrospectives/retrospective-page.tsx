@@ -27,8 +27,10 @@ import { Calendar, EllipsisVertical, FileText, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import DialogSelectBoard from './components/dialog-select-board';
 import { RetroSession, Sprint, Team, useRetrospectiveStore } from './stores';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [openDialogSelectBoard, setOpenDialogSelectBoard] = useState(false);
   const [openDialogConfirmDelete, setOpenDialogConfirmDelete] = useState(false);
   const [retroSessionToDelete, setRetroSessionToDelete] =
@@ -147,6 +149,9 @@ export default function DashboardPage() {
         <div className='grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {retroSessions.map((meeting) => (
             <Card
+              onClick={() => {
+                router.push(`/dashboard/retrospective/${meeting.id}`);
+              }}
               key={meeting.id}
               className='flex h-full cursor-pointer flex-col transition-shadow hover:shadow-md'
             >
