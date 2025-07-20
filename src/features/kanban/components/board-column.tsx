@@ -187,7 +187,7 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
 export function BoardContainer({ children }: { children: React.ReactNode }) {
   const dndContext = useDndContext();
 
-  const variations = cva('flex w-full', {
+  const variations = cva('flex max-w-screen-lg', {
     variants: {
       dragging: {
         default: '',
@@ -197,7 +197,7 @@ export function BoardContainer({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <ScrollArea className='h-full w-full'>
+    <ScrollArea className='h-full flex-row items-start gap-4'>
       <div
         className={variations({
           dragging: dndContext.active ? 'active' : 'default'
