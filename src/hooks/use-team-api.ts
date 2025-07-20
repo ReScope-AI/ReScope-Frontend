@@ -1,9 +1,11 @@
+/* eslint-disable no-console */
 import {
   createTeam,
   deleteTeam,
   getTeams,
   ICreateTeam
 } from '@/config/api/team';
+import { QUERY_CONSTANTS } from '@/constants/query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const useCreateTeam = () => {
@@ -17,6 +19,7 @@ export const useCreateTeam = () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
     onError: (error) => {
+      // eslint-disable-next-line no-console
       console.error('Failed to create team:', error);
     }
   });
@@ -24,7 +27,7 @@ export const useCreateTeam = () => {
 
 export const useGetTeams = () => {
   return useQuery({
-    queryKey: ['teams'],
+    queryKey: [QUERY_CONSTANTS.TEAM.GET_TEAMS],
     queryFn: getTeams,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
