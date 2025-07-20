@@ -3,53 +3,96 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Calendar, FileText, Star, Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import {
+  useDeleteRetroSession,
+  useGetRetroSessions
+} from '@/hooks/use-retro-session-api';
+import { Calendar, EllipsisVertical, FileText, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import DialogSelectBoard from './components/dialog-select-board';
+import { RetroSession, Sprint, Team, useRetrospectiveStore } from './stores';
+import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const router = useRouter();
-
   const [openDialogSelectBoard, setOpenDialogSelectBoard] = useState(false);
-  const [selectedBoard, setSelectedBoard] = useState<string>('');
+  const [openDialogConfirmDelete, setOpenDialogConfirmDelete] = useState(false);
+  const [retroSessionToDelete, setRetroSessionToDelete] =
+    useState<RetroSession | null>(null);
+  const getAllRetroSessions = useGetRetroSessions();
+  const deleteRetroSession = useDeleteRetroSession();
+  const { setRetroSessions, retroSessions } = useRetrospectiveStore();
+  const retroSessionData = getAllRetroSessions.data?.data;
 
   const handleOpenDialogSelectBoard = () => {
     setOpenDialogSelectBoard(true);
   };
 
-  const handleSelectBoard = (board: string) => {
-    setSelectedBoard(board);
-  };
-
-  const handleNext = () => {
-    router.push(`/dashboard/retrospective/${selectedBoard}`);
-  };
-
-  const recentMeetings = [
-    {
-      id: 1,
-      title: 'Tue, Jul 8, 2025',
-      date: '7/8/2025',
-      type: 'Retrospective',
-      items: 4,
-      participants: [
-        { name: 'User 1', avatar: '/placeholder.svg?height=32&width=32' },
-        { name: 'User 2', avatar: '/placeholder.svg?height=32&width=32' },
-        { name: 'User 3', avatar: '/placeholder.svg?height=32&width=32' }
-      ]
-    },
-    {
-      id: 2,
-      title: 'Thu, Jun 26, 2025',
-      date: '6/26/2025',
-      type: 'Retrospective',
-      items: 0,
-      participants: [
-        { name: 'Kane', avatar: '/placeholder.svg?height=32&width=32' }
-      ]
+  useEffect(() => {
+    if (retroSessionData) {
+      setRetroSessions(
+        retroSessionData.map((retroSession) => ({
+          ...retroSession,
+          team: retroSession.team_id as Team,
+          sprint: retroSession.sprint_id as Sprint,
+          id: retroSession._id,
+          created_at: retroSession.created_at,
+          updated_at: retroSession.updated_at
+        }))
+      );
     }
-  ];
+  }, [retroSessionData, setRetroSessions]);
+
+  const renderDialogConfirmDelete = () => {
+    return (
+      <Dialog
+        open={openDialogConfirmDelete}
+        onOpenChange={setOpenDialogConfirmDelete}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Meeting</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this meeting?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => setOpenDialogConfirmDelete(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant='destructive'
+              onClick={() => {
+                deleteRetroSession.mutate(retroSessionToDelete?.id || '');
+                setOpenDialogConfirmDelete(false);
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   return (
     <div className='h-full w-full p-4'>
@@ -104,8 +147,11 @@ export default function DashboardPage() {
         </div>
 
         <div className='grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3'>
-          {recentMeetings.map((meeting) => (
+          {retroSessions.map((meeting) => (
             <Card
+              onClick={() => {
+                router.push(`/dashboard/retrospective/${meeting.id}`);
+              }}
               key={meeting.id}
               className='flex h-full cursor-pointer flex-col transition-shadow hover:shadow-md'
             >
@@ -114,39 +160,53 @@ export default function DashboardPage() {
                   <div className='flex items-center gap-2'>
                     <Avatar className='h-6 w-6'>
                       <AvatarImage
-                        src={
-                          meeting.participants[0]?.avatar || '/placeholder.svg'
-                        }
+                        src={meeting.team.name || '/placeholder.svg'}
                       />
                       <AvatarFallback>U</AvatarFallback>
                     </Avatar>
-                    <span className='text-sm font-medium'>{meeting.title}</span>
+                    <span className='text-sm font-medium'>{meeting.name}</span>
                   </div>
-                  <Button variant='ghost' size='sm'>
-                    <Star className='h-4 w-4' />
-                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant='ghost' size='sm'>
+                        <EllipsisVertical className='h-4 w-4' />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className='text-red-500'
+                        onClick={() => {
+                          setRetroSessionToDelete(meeting);
+                          setOpenDialogConfirmDelete(true);
+                        }}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <p className='text-xs text-gray-500'>{meeting.date}</p>
+                <p className='text-xs text-gray-500'>{meeting.end_date}</p>
               </CardHeader>
               <CardContent className='flex flex-1 flex-col justify-between pt-0'>
                 <div className='mb-3 flex items-center justify-between'>
                   <Badge variant='secondary' className='text-xs'>
                     <FileText className='mr-1 h-3 w-3' />
-                    {meeting.type}
+                    {meeting.sprint.name}
                   </Badge>
                   <span className='text-xs text-gray-500'>
-                    {meeting.items} items
+                    {meeting.sprint.name}
                   </span>
                 </div>
                 <div className='mt-auto flex items-center gap-1'>
-                  {meeting.participants.map((participant, index) => (
-                    <Avatar key={index} className='h-6 w-6'>
-                      <AvatarImage
-                        src={participant.avatar || '/placeholder.svg'}
-                      />
-                      <AvatarFallback>{participant.name[0]}</AvatarFallback>
-                    </Avatar>
-                  ))}
+                  <Avatar className='h-6 w-6'>
+                    <AvatarImage
+                      src={meeting.team.name || '/placeholder.svg'}
+                    />
+                    <AvatarFallback>{meeting.team.name[0]}</AvatarFallback>
+                  </Avatar>
                 </div>
               </CardContent>
             </Card>
@@ -168,10 +228,9 @@ export default function DashboardPage() {
       <DialogSelectBoard
         open={openDialogSelectBoard}
         onOpenChange={setOpenDialogSelectBoard}
-        selectedBoard={selectedBoard}
-        onSelect={handleSelectBoard}
-        onNext={handleNext}
       />
+
+      {renderDialogConfirmDelete()}
     </div>
   );
 }

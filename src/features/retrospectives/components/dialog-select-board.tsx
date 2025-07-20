@@ -1,14 +1,12 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,134 +19,181 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { ChevronRight, Copy, FileText, Workflow } from 'lucide-react';
-
-const boardTypes = {
-  retrospective: [
-    {
-      id: 'standard',
-      title: 'Standard',
-      description:
-        'A standard retrospective board with no predefined flow. This board is perfect for teams that want to run a free-form retrospective.',
-      icon: FileText,
-      selected: true
-    },
-    {
-      id: 'guided',
-      title: 'Guided',
-      description:
-        "A guided retrospective that follows a step-by-step process. You can customize the flow to fit your team's needs.",
-      icon: Workflow,
-      selected: false
-    }
-  ],
-  'planning-poker': [
-    {
-      id: 'standard',
-      title: 'Standard Planning Poker',
-      description:
-        'A standard planning poker session for story point estimation with your team.',
-      icon: FileText,
-      selected: true
-    }
-  ]
-};
+import { useCreateRetroSession } from '@/hooks/use-retro-session-api';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { sprintFormSchema, type SprintFormData } from '../schemas/validation';
+import SprintNameSelector from './sprint-name-selector';
+import TeamNameSelector from './team-name-selector';
 
 type DialogSelectBoardProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedBoard: string;
-  onSelect: (board: string) => void;
-  onNext: () => void;
 };
 
-const DialogSelectBoard = ({
-  open,
-  onOpenChange,
-  selectedBoard,
-  onSelect,
-  onNext
-}: DialogSelectBoardProps) => {
-  const boards = boardTypes.retrospective;
+const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const form = useForm<SprintFormData>({
+    resolver: zodResolver(sprintFormSchema),
+    defaultValues: {
+      sprintId: '',
+      retroName: '',
+      teamId: '',
+      template: 'daki'
+    }
+  });
+
+  const createRetroSessionMutation = useCreateRetroSession();
+
+  const handleSubmit = async (data: SprintFormData) => {
+    if (!data.teamId) {
+      toast.error('Please select a team');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const retroResult = await createRetroSessionMutation.mutateAsync({
+        name: data.retroName,
+        team_id: data.teamId,
+        sprint_id: data.sprintId,
+        end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      });
+
+      toast.success('Sprint and Retro Session created successfully!');
+
+      router.push(`/dashboard/retrospective/${retroResult.data._id}`);
+    } catch (error) {
+      toast.error('Failed to create retro session. ' + error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleTeamChange = (teamId: string) => {
+    form.setValue('teamId', teamId);
+  };
+
+  const handleSprintChange = (sprintId: string) => {
+    form.setValue('sprintId', sprintId);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal>
-      <DialogContent className='min-w-4xl'>
+      <DialogContent className='min-w-3xl'>
         <DialogHeader>
-          <DialogTitle className='text-2xl font-bold'>Select Board</DialogTitle>
+          <DialogTitle className='text-2xl font-bold'>
+            Create Sprint & Retro
+          </DialogTitle>
         </DialogHeader>
-        <div className='h-full w-full'>
-          <div className='flex flex-col gap-4'>
-            <div className='flex flex-col gap-2'>
-              <Label>Retro Name</Label>
-              <Input placeholder='Retro Name' className='w-full' />
-            </div>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <div className='max-h-[70vh] w-full overflow-y-auto'>
+            <div className='flex flex-col gap-4'>
+              <div className='flex flex-col gap-2'>
+                <Label htmlFor='retroName'>Retro Name</Label>
+                <Input
+                  id='retroName'
+                  placeholder='Retro Name'
+                  className='w-full'
+                  {...form.register('retroName')}
+                />
+                {form.formState.errors.retroName && (
+                  <span className='text-sm text-red-500'>
+                    {form.formState.errors.retroName.message}
+                  </span>
+                )}
+              </div>
 
-            <div className='flex flex-col gap-2'>
-              <Label>Select Templates</Label>
-              <Select>
-                <SelectTrigger className='w-full'>
-                  <SelectValue placeholder='Select a timezone' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Common Templates</SelectLabel>
-                    <SelectItem value='est'>Start-Stop-Continue</SelectItem>
-                    <SelectItem value='cst'>Glad, Sad, Mad</SelectItem>
-                    <SelectItem value='mst'>
-                      DAKI - Drop, Add, Keep, Improve
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <div className='flex flex-col gap-2'>
+                <Label>Sprint Name</Label>
+                <SprintNameSelector
+                  value={form.watch('sprintId')}
+                  onValueChange={handleSprintChange}
+                />
+                {form.formState.errors.teamId && (
+                  <span className='text-sm text-red-500'>
+                    {form.formState.errors.teamId.message}
+                  </span>
+                )}
+              </div>
+
+              <div className='flex flex-col gap-2'>
+                <Label>Team Name</Label>
+                <TeamNameSelector
+                  value={form.watch('teamId')}
+                  onValueChange={handleTeamChange}
+                />
+                {form.formState.errors.teamId && (
+                  <span className='text-sm text-red-500'>
+                    {form.formState.errors.teamId.message}
+                  </span>
+                )}
+              </div>
+
+              <div className='flex flex-col gap-2'>
+                <Label htmlFor='template'>Select Templates</Label>
+                <Select
+                  defaultValue='daki'
+                  onValueChange={(value) => form.setValue('template', value)}
+                >
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='Select a template' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Common Templates</SelectLabel>
+                      <SelectItem value='start-stop-continue'>
+                        Start-Stop-Continue
+                      </SelectItem>
+                      <SelectItem value='glad-sad-mad'>
+                        Glad, Sad, Mad
+                      </SelectItem>
+                      <SelectItem value='daki'>
+                        DAKI - Drop, Add, Keep, Improve
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.template && (
+                  <span className='text-sm text-red-500'>
+                    {form.formState.errors.template.message}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-
-          <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-2'>
-            {boards.map((board) => (
-              <Card
-                key={board.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedBoard === board.id
-                    ? 'border-blue-500 ring-2 ring-blue-500'
-                    : 'border-gray-200'
-                }`}
-                onClick={() => onSelect(board.id)}
+          <DialogFooter>
+            <div className='mt-4 flex justify-end'>
+              <Button
+                type='submit'
+                className='bg-blue-600 px-8 hover:bg-blue-700'
+                disabled={
+                  isSubmitting ||
+                  !form.watch('teamId') ||
+                  !form.watch('sprintId') ||
+                  !form.watch('retroName')
+                }
               >
-                <CardContent className='p-6'>
-                  {/* Preview Image Area */}
-                  <div className='mb-4 flex aspect-video items-center justify-center rounded-lg bg-gray-100'>
-                    <div className='text-gray-400'>
-                      <board.icon className='h-12 w-12' />
-                    </div>
-                  </div>
-
-                  {/* Board Type Info */}
-                  <div className='space-y-3'>
-                    <div className='flex items-center gap-2'>
-                      <board.icon className='h-5 w-5 text-blue-600' />
-                      <h3 className='text-lg font-semibold'>{board.title}</h3>
-                    </div>
-                    <p className='text-sm leading-relaxed text-gray-600'>
-                      {board.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-        <DialogFooter>
-          <div className='mt-8 flex justify-end'>
-            <Button
-              onClick={onNext}
-              className='bg-blue-600 px-8 hover:bg-blue-700'
-            >
-              Next
-              <ChevronRight className='ml-2 h-4 w-4' />
-            </Button>
-          </div>
-        </DialogFooter>
+                {isSubmitting ? (
+                  <>
+                    Creating...
+                    <ChevronRight className='ml-2 h-4 w-4 animate-pulse' />
+                  </>
+                ) : (
+                  <>
+                    Create Retro Session
+                    <ChevronRight className='ml-2 h-4 w-4' />
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
