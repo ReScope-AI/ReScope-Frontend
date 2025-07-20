@@ -7,6 +7,8 @@ import { Calendar, FileText, Star, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import DialogSelectBoard from './components/dialog-select-board';
+import { recentMeetings } from './data';
+import { type SprintFormData } from './schemas/validation';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -22,34 +24,11 @@ export default function DashboardPage() {
     setSelectedBoard(board);
   };
 
-  const handleNext = () => {
+  const handleNext = (formData: SprintFormData) => {
+    console.log('Form data:', formData);
+    // TODO: Handle form data before navigation
     router.push(`/dashboard/retrospective/${selectedBoard}`);
   };
-
-  const recentMeetings = [
-    {
-      id: 1,
-      title: 'Tue, Jul 8, 2025',
-      date: '7/8/2025',
-      type: 'Retrospective',
-      items: 4,
-      participants: [
-        { name: 'User 1', avatar: '/placeholder.svg?height=32&width=32' },
-        { name: 'User 2', avatar: '/placeholder.svg?height=32&width=32' },
-        { name: 'User 3', avatar: '/placeholder.svg?height=32&width=32' }
-      ]
-    },
-    {
-      id: 2,
-      title: 'Thu, Jun 26, 2025',
-      date: '6/26/2025',
-      type: 'Retrospective',
-      items: 0,
-      participants: [
-        { name: 'Kane', avatar: '/placeholder.svg?height=32&width=32' }
-      ]
-    }
-  ];
 
   return (
     <div className='h-full w-full p-4'>

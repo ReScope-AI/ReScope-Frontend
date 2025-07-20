@@ -1,7 +1,7 @@
 import { API_KEYS } from '@/config/proxy';
 import request from '@/config/request';
 
-interface ICreateSprint {
+export interface ICreateSprint {
   name: string;
   startDate: string;
   endDate: string;

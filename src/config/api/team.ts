@@ -1,16 +1,13 @@
 import { API_KEYS } from '@/config/proxy';
 import request from '@/config/request';
 
-export interface ICreateRetroSession {
+export interface ICreateTeam {
   name: string;
-  team_id: string;
-  sprint_id: string;
-  end_date: string;
 }
 
-export const createRetroSession = async (data: ICreateRetroSession) => {
+export const createTeam = async (data: ICreateTeam) => {
   const response = await request(
-    '/retro-sessions',
+    '/teams/create',
     {
       method: 'POST',
       data,
@@ -21,11 +18,23 @@ export const createRetroSession = async (data: ICreateRetroSession) => {
   return response;
 };
 
-export const getRetroSessions = async () => {
+export const getTeams = async () => {
   const response = await request(
-    '/retro-sessions/list-retro-sessions',
+    '/teams',
     {
       method: 'GET',
+      noAuth: true
+    },
+    API_KEYS.BASE_API
+  );
+  return response;
+};
+
+export const deleteTeam = async (teamId: string) => {
+  const response = await request(
+    `/teams/${teamId}`,
+    {
+      method: 'DELETE',
       noAuth: true
     },
     API_KEYS.BASE_API
