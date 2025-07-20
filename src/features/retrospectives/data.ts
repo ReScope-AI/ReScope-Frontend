@@ -1,24 +1,6 @@
-import { FileText, Workflow } from 'lucide-react';
+import { FileText } from 'lucide-react';
 
 export const boardTypes = {
-  retrospective: [
-    {
-      id: 'standard',
-      title: 'Standard',
-      description:
-        'A standard retrospective board with no predefined flow. This board is perfect for teams that want to run a free-form retrospective.',
-      icon: FileText,
-      selected: true
-    },
-    {
-      id: 'guided',
-      title: 'Guided',
-      description:
-        "A guided retrospective that follows a step-by-step process. You can customize the flow to fit your team's needs.",
-      icon: Workflow,
-      selected: false
-    }
-  ],
   'planning-poker': [
     {
       id: 'standard',

@@ -3,9 +3,9 @@ import request from '@/config/request';
 
 export interface ICreateSprint {
   name: string;
-  startDate: string;
-  endDate: string;
-  createdBy: string;
+  start_date: string;
+  end_date: string;
+  created_by: string;
 }
 
 export const createSprint = async (data: ICreateSprint) => {
@@ -13,8 +13,7 @@ export const createSprint = async (data: ICreateSprint) => {
     '/sprints',
     {
       method: 'POST',
-      data,
-      noAuth: true
+      data
     },
     API_KEYS.BASE_API
   );
@@ -25,8 +24,7 @@ export const getSprints = async () => {
   const response = await request(
     '/sprints',
     {
-      method: 'GET',
-      noAuth: true
+      method: 'GET'
     },
     API_KEYS.BASE_API
   );

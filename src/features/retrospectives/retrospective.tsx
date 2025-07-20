@@ -4,30 +4,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Calendar, FileText, Star, Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import DialogSelectBoard from './components/dialog-select-board';
 import { recentMeetings } from './data';
-import { type SprintFormData } from './schemas/validation';
 
 export default function DashboardPage() {
-  const router = useRouter();
-
   const [openDialogSelectBoard, setOpenDialogSelectBoard] = useState(false);
-  const [selectedBoard, setSelectedBoard] = useState<string>('');
 
   const handleOpenDialogSelectBoard = () => {
     setOpenDialogSelectBoard(true);
-  };
-
-  const handleSelectBoard = (board: string) => {
-    setSelectedBoard(board);
-  };
-
-  const handleNext = (formData: SprintFormData) => {
-    console.log('Form data:', formData);
-    // TODO: Handle form data before navigation
-    router.push(`/dashboard/retrospective/${selectedBoard}`);
   };
 
   return (
@@ -147,9 +132,6 @@ export default function DashboardPage() {
       <DialogSelectBoard
         open={openDialogSelectBoard}
         onOpenChange={setOpenDialogSelectBoard}
-        selectedBoard={selectedBoard}
-        onSelect={handleSelectBoard}
-        onNext={handleNext}
       />
     </div>
   );

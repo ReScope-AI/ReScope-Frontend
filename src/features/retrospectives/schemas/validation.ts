@@ -8,6 +8,12 @@ export const sprintFormSchema = z.object({
     .max(100, 'Sprint name must be less than 100 characters')
     .trim()
     .refine((val) => val.length > 0, 'Sprint name is required'),
+  retroName: z
+    .string()
+    .min(2, 'Retro name must be at least 2 characters')
+    .max(100, 'Retro name must be less than 100 characters')
+    .trim()
+    .refine((val) => val.length > 0, 'Retro name is required'),
   teamId: z
     .string()
     .min(1, 'Please select a team')

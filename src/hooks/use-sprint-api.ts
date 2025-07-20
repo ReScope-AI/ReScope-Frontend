@@ -1,27 +1,24 @@
 import { createSprint, getSprints, ICreateSprint } from '@/config/api/sprint';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export const useCreateSprint = () => {
-  const createSprintMutation = useMutation({
+  return useMutation({
     mutationFn: (data: ICreateSprint) => createSprint(data),
     onSuccess: (data) => {
-      console.log(data);
+      console.log('Sprint created successfully:', data);
     },
     onError: (error) => {
-      console.log(error);
+      toast.error(error.message);
     }
   });
-
-  return {
-    createSprintMutation
-  };
 };
 
 export const useGetSprints = () => {
-  const getSprintsMutation = useMutation({
-    mutationFn: getSprints,
-    onSuccess: (data) => {
-      console.log(data);
-    }
+  return useQuery({
+    queryKey: ['sprints'],
+    queryFn: getSprints,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000 // 10 minutes
   });
 };

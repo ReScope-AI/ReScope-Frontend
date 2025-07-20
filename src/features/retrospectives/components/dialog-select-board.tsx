@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -20,46 +19,89 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { ChevronRight } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useCreateRetroSession } from '@/hooks/use-retro-session-api';
+import { useCreateSprint } from '@/hooks/use-sprint-api';
+import { useUserStore } from '@/stores/userStore';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { boardTypes } from '../data';
+import { ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { sprintFormSchema, type SprintFormData } from '../schemas/validation';
 import TeamNameSelector from './team-name-selector';
 
 type DialogSelectBoardProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedBoard: string;
-  onSelect: (board: string) => void;
-  onNext: (data: SprintFormData) => void;
 };
 
-const DialogSelectBoard = ({
-  open,
-  onOpenChange,
-  selectedBoard,
-  onSelect,
-  onNext
-}: DialogSelectBoardProps) => {
-  const boards = boardTypes.retrospective;
-
+const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useUserStore();
+  const router = useRouter();
   const form = useForm<SprintFormData>({
     resolver: zodResolver(sprintFormSchema),
     defaultValues: {
       sprintName: '',
+      retroName: '',
       teamId: '',
       template: 'daki'
     }
   });
 
-  const handleSubmit = (data: SprintFormData) => {
-    // Include selected board in the form data
-    const formData = {
-      ...data,
-      boardType: selectedBoard
-    };
-    onNext(formData);
+  const createSprintMutation = useCreateSprint();
+  const createRetroSessionMutation = useCreateRetroSession();
+
+  const handleSubmit = async (data: SprintFormData) => {
+    if (!data.teamId) {
+      toast.error('Please select a team');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Step 1: Create Sprint
+      const sprintData = {
+        name: data.sprintName,
+        start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        created_by: user?._id || ''
+      };
+
+      const sprintResult = await createSprintMutation.mutateAsync(sprintData);
+
+      if (!sprintResult?.data?._id) {
+        throw new Error('Failed to create sprint - no ID returned');
+      }
+
+      const sprintId = sprintResult.data._id;
+
+      // Step 2: Create Retro Session with Sprint ID
+      const retroSessionData = {
+        name: data.retroName,
+        team_id: data.teamId,
+        sprint_id: sprintId,
+        end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      };
+
+      const retroResult =
+        await createRetroSessionMutation.mutateAsync(retroSessionData);
+
+      if (retroResult?.data) {
+        toast.success('Sprint and Retro Session created successfully!');
+
+        router.push(`/dashboard/retrospective/${retroResult.data._id}`);
+      } else {
+        throw new Error('Failed to create retro session - no data returned');
+      }
+    } catch (error) {
+      toast.error(
+        'Failed to create sprint or retro session. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleTeamChange = (teamId: string) => {
@@ -70,10 +112,12 @@ const DialogSelectBoard = ({
     <Dialog open={open} onOpenChange={onOpenChange} modal>
       <DialogContent className='min-w-3xl'>
         <DialogHeader>
-          <DialogTitle className='text-2xl font-bold'>Select Board</DialogTitle>
+          <DialogTitle className='text-2xl font-bold'>
+            Create Sprint & Retro
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <div className='h-full w-full'>
+          <div className='max-h-[70vh] w-full overflow-y-auto'>
             <div className='flex flex-col gap-4'>
               <div className='flex flex-col gap-2'>
                 <Label htmlFor='sprintName'>Sprint Name</Label>
@@ -86,6 +130,21 @@ const DialogSelectBoard = ({
                 {form.formState.errors.sprintName && (
                   <span className='text-sm text-red-500'>
                     {form.formState.errors.sprintName.message}
+                  </span>
+                )}
+              </div>
+
+              <div className='flex flex-col gap-2'>
+                <Label htmlFor='retroName'>Retro Name</Label>
+                <Input
+                  id='retroName'
+                  placeholder='Retro Name'
+                  className='w-full'
+                  {...form.register('retroName')}
+                />
+                {form.formState.errors.retroName && (
+                  <span className='text-sm text-red-500'>
+                    {form.formState.errors.retroName.message}
                   </span>
                 )}
               </div>
@@ -134,54 +193,32 @@ const DialogSelectBoard = ({
                 )}
               </div>
             </div>
-
-            <div className='mt-6 grid grid-cols-1 gap-4 md:grid-cols-2'>
-              {boards.map((board) => (
-                <Card
-                  key={board.id}
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    selectedBoard === board.id
-                      ? 'border-blue-500 ring-2 ring-blue-500'
-                      : 'border-gray-200'
-                  }`}
-                  onClick={() => onSelect(board.id)}
-                >
-                  <CardContent className='p-4'>
-                    {/* Preview Image Area */}
-                    <div className='mb-4 flex aspect-video items-center justify-center rounded-lg bg-gray-100'>
-                      <div className='text-gray-400'>
-                        <board.icon className='h-12 w-12' />
-                      </div>
-                    </div>
-
-                    {/* Board Type Info */}
-                    <div className='space-y-2'>
-                      <div className='flex items-center gap-2'>
-                        <board.icon className='h-5 w-5 text-blue-600' />
-                        <h3 className='text-lg font-semibold'>{board.title}</h3>
-                      </div>
-                      <p className='text-sm leading-relaxed text-gray-600'>
-                        {board.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </div>
           <DialogFooter>
-            <div className='mt-8 flex justify-end'>
+            <div className='mt-4 flex justify-end'>
               <Button
                 type='submit'
                 className='bg-blue-600 px-8 hover:bg-blue-700'
                 disabled={
-                  !selectedBoard ||
+                  isSubmitting ||
                   !form.watch('teamId') ||
-                  !form.watch('sprintName')
+                  !form.watch('sprintName') ||
+                  !form.watch('retroName') ||
+                  createSprintMutation.isPending ||
+                  createRetroSessionMutation.isPending
                 }
               >
-                Next
-                <ChevronRight className='ml-2 h-4 w-4' />
+                {isSubmitting ? (
+                  <>
+                    Creating...
+                    <ChevronRight className='ml-2 h-4 w-4 animate-pulse' />
+                  </>
+                ) : (
+                  <>
+                    Create Sprint & Retro
+                    <ChevronRight className='ml-2 h-4 w-4' />
+                  </>
+                )}
               </Button>
             </div>
           </DialogFooter>

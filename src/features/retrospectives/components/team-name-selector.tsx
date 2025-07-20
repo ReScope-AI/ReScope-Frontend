@@ -2,7 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   useCreateTeam,
   useDeleteTeam,
@@ -113,41 +112,39 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
     <div className='flex flex-col gap-2'>
       <div className='flex flex-col gap-2'>
         {/* Teams list with scroll */}
-        <ScrollArea className='h-[200px] w-full rounded-md border'>
-          <div className='flex flex-col gap-1 p-2'>
-            {teams.map((team) => (
-              <div
-                key={team.id}
-                className={`flex cursor-pointer items-center justify-between rounded-md border p-2 transition-colors ${
-                  value === team.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => onValueChange(team.id)}
-              >
-                <span className='flex-1 text-sm'>{team.name}</span>
-                <div className='flex items-center gap-1'>
-                  {value === team.id && (
-                    <Check className='h-4 w-4 text-blue-500' />
-                  )}
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    type='button'
-                    className='h-6 w-6 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteTeam(team.id);
-                    }}
-                    disabled={deleteTeamMutation.isPending}
-                  >
-                    <X className='h-3 w-3' />
-                  </Button>
-                </div>
+        <div className='flex max-h-[200px] flex-col gap-1 overflow-y-auto p-2'>
+          {teams.map((team) => (
+            <div
+              key={team.id}
+              className={`flex cursor-pointer items-center justify-between rounded-md border p-2 transition-colors ${
+                value === team.id
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+              onClick={() => onValueChange(team.id)}
+            >
+              <span className='flex-1 text-sm'>{team.name}</span>
+              <div className='flex items-center gap-1'>
+                {value === team.id && (
+                  <Check className='h-4 w-4 text-blue-500' />
+                )}
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  type='button'
+                  className='h-6 w-6 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteTeam(team.id);
+                  }}
+                  disabled={deleteTeamMutation.isPending}
+                >
+                  <X className='h-3 w-3' />
+                </Button>
               </div>
-            ))}
-          </div>
-        </ScrollArea>
+            </div>
+          ))}
+        </div>
 
         {/* Add new team form */}
         {isAdding && (

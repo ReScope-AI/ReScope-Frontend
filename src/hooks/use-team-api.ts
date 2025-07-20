@@ -5,6 +5,7 @@ import {
   ICreateTeam
 } from '@/config/api/team';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export const useCreateTeam = () => {
   const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ export const useCreateTeam = () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
     onError: (error) => {
-      console.error('Failed to create team:', error);
+      toast.error(error.message);
     }
   });
 };
@@ -42,7 +43,7 @@ export const useDeleteTeam = () => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
     onError: (error) => {
-      console.error('Failed to delete team:', error);
+      toast.error(error.message);
     }
   });
 };
