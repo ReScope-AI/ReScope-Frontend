@@ -26,6 +26,7 @@ const request = async (
   options: any = {},
   apiKey = API_KEYS.BASE_API
 ) => {
+  const clearTokens = useAuthStore.getState().clearTokens;
   const {
     method = 'POST',
     data = {},
@@ -67,10 +68,10 @@ const request = async (
       if (token && isTokenExpired(token)) {
         const error = {
           response: {
-            status: 401,
-            data: { message: 'Token expired' }
+            status: 401
           }
         };
+        clearTokens();
         return Promise.reject(error);
       }
       if (responseType) {
