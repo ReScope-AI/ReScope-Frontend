@@ -1,8 +1,4 @@
 'use client';
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Task, useTaskStore } from '../utils/store';
-import { hasDraggableData } from '../utils';
 import {
   Announcements,
   DndContext,
@@ -16,40 +12,25 @@ import {
   type DragOverEvent,
   type DragStartEvent
 } from '@dnd-kit/core';
-import { SortableContext, arrayMove } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext } from '@dnd-kit/sortable';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { hasDraggableData } from '../utils';
+import { defaultCols, Task, useTaskStore, type Status } from '../utils/store';
 import type { Column } from './board-column';
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
 import { TaskCard } from './task-card';
-// import { coordinateGetter } from "./multipleContainersKeyboardPreset";
-
-const defaultCols = [
-  {
-    id: 'TODO' as const,
-    title: 'Todo'
-  },
-  {
-    id: 'IN_PROGRESS' as const,
-    title: 'In progress'
-  },
-  {
-    id: 'DONE' as const,
-    title: 'Done'
-  }
-] satisfies Column[];
-
-export type ColumnId = (typeof defaultCols)[number]['id'];
 
 export function KanbanBoard() {
-  // const [columns, setColumns] = useState<Column[]>(defaultCols);
   const columns = useTaskStore((state) => state.columns);
   const setColumns = useTaskStore((state) => state.setCols);
-  const pickedUpTaskColumn = useRef<ColumnId | 'TODO' | 'IN_PROGRESS' | 'DONE'>(
-    'TODO'
+  const pickedUpTaskColumn = useRef<Status>(defaultCols[0].id as Status);
+  const columnsId = useMemo(
+    () => columns.map((col) => col.id as Status),
+    [columns]
   );
-  const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
 
-  // const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const tasks = useTaskStore((state) => state.tasks);
   const setTasks = useTaskStore((state) => state.setTasks);
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
@@ -57,13 +38,7 @@ export function KanbanBoard() {
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
-  const sensors = useSensors(
-    useSensor(MouseSensor),
-    useSensor(TouchSensor)
-    // useSensor(KeyboardSensor, {
-    //   coordinateGetter: coordinateGetter,
-    // }),
-  );
+  const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   useEffect(() => {
     setIsMounted(true);
@@ -74,7 +49,7 @@ export function KanbanBoard() {
   }, []);
   if (!isMounted) return;
 
-  function getDraggingTaskData(taskId: UniqueIdentifier, columnId: ColumnId) {
+  function getDraggingTaskData(taskId: UniqueIdentifier, columnId: Status) {
     const tasksInColumn = tasks.filter((task) => task.status === columnId);
     const taskPosition = tasksInColumn.findIndex((task) => task.id === taskId);
     const column = columns.find((col) => col.id === columnId);
@@ -138,7 +113,7 @@ export function KanbanBoard() {
     },
     onDragEnd({ active, over }) {
       if (!hasDraggableData(active) || !hasDraggableData(over)) {
-        pickedUpTaskColumn.current = 'TODO';
+        pickedUpTaskColumn.current = defaultCols[0].id as Status;
         return;
       }
       if (
@@ -169,10 +144,10 @@ export function KanbanBoard() {
           tasksInColumn.length
         } in column ${column?.title}`;
       }
-      pickedUpTaskColumn.current = 'TODO';
+      pickedUpTaskColumn.current = defaultCols[0].id as Status;
     },
     onDragCancel({ active }) {
-      pickedUpTaskColumn.current = 'TODO';
+      pickedUpTaskColumn.current = defaultCols[0].id as Status;
       if (!hasDraggableData(active)) return;
       return `Dragging ${active.data.current?.type} cancelled.`;
     }
@@ -304,7 +279,7 @@ export function KanbanBoard() {
       const activeIndex = tasks.findIndex((t) => t.id === activeId);
       const activeTask = tasks[activeIndex];
       if (activeTask) {
-        activeTask.status = overId as ColumnId;
+        activeTask.status = overId as Status;
         setTasks(arrayMove(tasks, activeIndex, activeIndex));
       }
     }
