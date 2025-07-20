@@ -504,57 +504,6 @@ export default function PollModal() {
               </Button>
             </div>
 
-            {/* Settings Section */}
-            <div>
-              <label className='mb-3 block text-xs font-medium tracking-wide text-gray-500 uppercase'>
-                SETTINGS
-              </label>
-              <div className='space-y-3'>
-                <div className='flex items-start space-x-3'>
-                  <Checkbox
-                    id='anonymous'
-                    checked={anonymousVoting}
-                    onCheckedChange={(checked) =>
-                      setAnonymousVoting(checked === true)
-                    }
-                    className='data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600'
-                  />
-                  <div className='grid gap-1.5 leading-none'>
-                    <label
-                      htmlFor='anonymous'
-                      className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                    >
-                      Anonymous Voting
-                    </label>
-                    <p className='text-xs text-gray-600'>
-                      Voters will be anonymous.
-                    </p>
-                  </div>
-                </div>
-                <div className='flex items-start space-x-3'>
-                  <Checkbox
-                    id='autoreveal'
-                    checked={autoReveal}
-                    onCheckedChange={(checked) =>
-                      setAutoReveal(checked === true)
-                    }
-                    className='data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600'
-                  />
-                  <div className='grid gap-1.5 leading-none'>
-                    <label
-                      htmlFor='autoreveal'
-                      className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                    >
-                      Auto Reveal
-                    </label>
-                    <p className='text-xs text-gray-600'>
-                      Results are visible after voting.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* AI Generator Section */}
             <AIGenerator
               isVisible={showAIGenerator}

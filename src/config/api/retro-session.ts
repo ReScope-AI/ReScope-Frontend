@@ -4,7 +4,8 @@ import request from '@/config/request';
 const SESSION_API_URL = {
   CREATE: '/retro-session',
   LIST: '/retro-session/list-retro-sessions',
-  DELETE: '/retro-session'
+  DELETE: '/retro-session',
+  GET: '/retro-session'
 };
 
 export interface ICreateRetroSession {
@@ -42,6 +43,17 @@ export const deleteRetroSession = async (id: string) => {
     `${SESSION_API_URL.DELETE}/${id}`,
     {
       method: 'DELETE'
+    },
+    API_KEYS.BASE_API
+  );
+  return response;
+};
+
+export const getRetroSessionById = async (id: string) => {
+  const response = await request(
+    `${SESSION_API_URL.GET}/${id}`,
+    {
+      method: 'GET'
     },
     API_KEYS.BASE_API
   );

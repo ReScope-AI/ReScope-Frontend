@@ -9,11 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { useRouter } from 'next/navigation';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { useSignOut } from '@/hooks/use-auth';
 import { useUserStore } from '@/stores/userStore';
+import { IconLogout } from '@tabler/icons-react';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 export function UserNav() {
-  const router = useRouter();
+  const signOutMutation = useSignOut();
   const user = useUserStore((state) => state.user);
   return (
     <DropdownMenu>
@@ -42,15 +43,11 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
-            Profile
+          <DropdownMenuItem onClick={() => signOutMutation.mutate()}>
+            <IconLogout className='mr-2 h-4 w-4' />
+            Sign out
           </DropdownMenuItem>
-          <DropdownMenuItem>Billing</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem></DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
