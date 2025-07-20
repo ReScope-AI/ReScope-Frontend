@@ -2,12 +2,10 @@ import { z } from 'zod';
 
 // Sprint form validation schema
 export const sprintFormSchema = z.object({
-  sprintName: z
+  sprintId: z
     .string()
-    .min(2, 'Sprint name must be at least 2 characters')
-    .max(100, 'Sprint name must be less than 100 characters')
-    .trim()
-    .refine((val) => val.length > 0, 'Sprint name is required'),
+    .min(1, 'Please select a sprint')
+    .refine((val) => val.length > 0, 'Sprint selection is required'),
   retroName: z
     .string()
     .min(2, 'Retro name must be at least 2 characters')

@@ -3,70 +3,79 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  useCreateTeam,
-  useDeleteTeam,
-  useGetTeams
-} from '@/hooks/use-team-api';
+  useCreateSprint,
+  useDeleteSprint,
+  useGetSprintsByUser
+} from '@/hooks/use-sprint-api';
+import { useUserStore } from '@/stores/userStore';
 import { Check, Plus, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useRetrospectiveStore } from '../stores';
 
-interface TeamNameSelectorProps {
+interface SprintNameSelectorProps {
   value?: string;
   onValueChange: (value: string) => void;
 }
 
-const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
-  const { teams, addTeam, removeTeam, setTeams } = useRetrospectiveStore();
+const SprintNameSelector = ({
+  value,
+  onValueChange
+}: SprintNameSelectorProps) => {
+  const { user } = useUserStore();
+  const { sprints, addSprint, removeSprint, setSprints } =
+    useRetrospectiveStore();
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [teamName, setTeamName] = useState('');
+  const [sprintName, setSprintName] = useState('');
 
   // API hooks
   const {
-    data: apiTeams,
-    isLoading: isLoadingTeams,
-    error: teamsError
-  } = useGetTeams();
-  const createTeamMutation = useCreateTeam();
-  const deleteTeamMutation = useDeleteTeam();
+    data: apiSprints,
+    isLoading: isLoadingSprints,
+    error: sprintsError
+  } = useGetSprintsByUser();
+  const createSprintMutation = useCreateSprint();
+  const deleteSprintMutation = useDeleteSprint();
 
   // Sync API teams with local store
   useEffect(() => {
-    if (apiTeams?.data) {
-      const formattedTeams = apiTeams.data.map((team: any) => ({
-        id: team.id || team._id,
-        name: team.name
+    if (apiSprints?.data) {
+      const formattedSprints = apiSprints.data.map((sprint: any) => ({
+        id: sprint.id || sprint._id,
+        name: sprint.name
       }));
-      setTeams(formattedTeams);
+      setSprints(formattedSprints);
     }
-  }, [apiTeams, setTeams]);
+  }, [apiSprints, setSprints]);
 
   const handleAddTeam = async () => {
-    if (!teamName.trim()) return;
+    if (!sprintName.trim()) return;
 
     setIsLoading(true);
     try {
-      const result = await createTeamMutation.mutateAsync({
-        name: teamName
+      const result = await createSprintMutation.mutateAsync({
+        name: sprintName,
+        start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        created_by: user?._id || ''
       });
 
       if (result?.data) {
-        const newTeam = {
+        const newSprint = {
           id: result.data.id || result.data._id,
           name: result.data.name
         };
-        addTeam(newTeam.name);
+        addSprint(newSprint.name);
 
         setIsAdding(false);
 
-        onValueChange(newTeam.id);
+        onValueChange(newSprint.id);
 
-        setTeamName('');
+        setSprintName('');
       }
     } catch (error) {
-      toast.error('Failed to add team name');
+      toast.error('Failed to add sprint name');
     } finally {
       setIsLoading(false);
     }
@@ -76,34 +85,34 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
     setIsAdding(false);
   };
 
-  const handleDeleteTeam = async (teamId: string) => {
+  const handleDeleteSprint = async (sprintId: string) => {
     try {
-      await deleteTeamMutation.mutateAsync(teamId);
+      await deleteSprintMutation.mutateAsync(sprintId);
 
-      removeTeam(teamId);
+      removeSprint(sprintId);
 
-      if (value === teamId) {
+      if (value === sprintId) {
         onValueChange('');
       }
     } catch (error) {
-      toast.error('Failed to delete team name');
+      toast.error('Failed to delete sprint name');
     }
   };
 
-  const selectedTeam = teams.find((team) => team.id === value);
+  const selectedSprint = sprints.find((sprint) => sprint.id === value);
 
-  if (isLoadingTeams) {
+  if (isLoadingSprints) {
     return (
       <div className='flex items-center justify-center p-4'>
-        <div className='text-sm text-gray-500'>Loading teams...</div>
+        <div className='text-sm text-gray-500'>Loading sprints...</div>
       </div>
     );
   }
 
-  if (teamsError) {
+  if (sprintsError) {
     return (
       <div className='flex items-center justify-center p-4'>
-        <div className='text-sm text-red-500'>Failed to load teams</div>
+        <div className='text-sm text-red-500'>Failed to load sprints</div>
       </div>
     );
   }
@@ -113,19 +122,19 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
       <div className='flex flex-col gap-2'>
         {/* Teams list with scroll */}
         <div className='flex max-h-[200px] flex-col gap-1 overflow-y-auto'>
-          {teams.map((team) => (
+          {sprints.map((sprint) => (
             <div
-              key={team.id}
+              key={sprint.id}
               className={`flex cursor-pointer items-center justify-between rounded-md border p-2 transition-colors ${
-                value === team.id
+                value === sprint.id
                   ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
-              onClick={() => onValueChange(team.id)}
+              onClick={() => onValueChange(sprint.id)}
             >
-              <span className='flex-1 text-sm'>{team.name}</span>
+              <span className='flex-1 text-sm'>{sprint.name}</span>
               <div className='flex items-center gap-1'>
-                {value === team.id && (
+                {value === sprint.id && (
                   <Check className='h-4 w-4 text-blue-500' />
                 )}
                 <Button
@@ -135,9 +144,9 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
                   className='h-6 w-6 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteTeam(team.id);
+                    handleDeleteSprint(sprint.id);
                   }}
-                  disabled={deleteTeamMutation.isPending}
+                  disabled={deleteSprintMutation.isPending}
                 >
                   <X className='h-3 w-3' />
                 </Button>
@@ -150,12 +159,12 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
         {isAdding && (
           <div className='flex items-center gap-2 rounded-md border border-gray-200 p-2'>
             <Input
-              placeholder='Enter team name...'
+              placeholder='Enter sprint name...'
               className='flex-1'
               autoFocus
               disabled={isLoading}
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
+              value={sprintName}
+              onChange={(e) => setSprintName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
@@ -194,29 +203,29 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
             type='button'
             className='w-full justify-start text-gray-500 hover:text-gray-700'
             onClick={() => setIsAdding(true)}
-            disabled={createTeamMutation.isPending}
+            disabled={createSprintMutation.isPending}
           >
             <Plus className='mr-2 h-4 w-4' />
-            Add new team
+            Add new sprint
           </Button>
         )}
       </div>
 
       {/* Team count indicator */}
-      {teams.length > 0 && (
+      {sprints.length > 0 && (
         <div className='text-xs text-gray-500'>
-          {teams.length} team{teams.length !== 1 ? 's' : ''} available
+          {sprints.length} sprint{sprints.length !== 1 ? 's' : ''} available
         </div>
       )}
 
       {/* Display selected value */}
-      {selectedTeam && (
+      {selectedSprint && (
         <div className='mt-1 text-sm text-gray-600'>
-          Selected: <span className='font-medium'>{selectedTeam.name}</span>
+          Selected: <span className='font-medium'>{selectedSprint.name}</span>
         </div>
       )}
     </div>
   );
 };
 
-export default TeamNameSelector;
+export default SprintNameSelector;

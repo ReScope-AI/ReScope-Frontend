@@ -20,8 +20,6 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { useCreateRetroSession } from '@/hooks/use-retro-session-api';
-import { useCreateSprint } from '@/hooks/use-sprint-api';
-import { useUserStore } from '@/stores/userStore';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -29,6 +27,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { sprintFormSchema, type SprintFormData } from '../schemas/validation';
+import SprintNameSelector from './sprint-name-selector';
 import TeamNameSelector from './team-name-selector';
 
 type DialogSelectBoardProps = {
@@ -38,19 +37,17 @@ type DialogSelectBoardProps = {
 
 const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user } = useUserStore();
   const router = useRouter();
   const form = useForm<SprintFormData>({
     resolver: zodResolver(sprintFormSchema),
     defaultValues: {
-      sprintName: '',
+      sprintId: '',
       retroName: '',
       teamId: '',
       template: 'daki'
     }
   });
 
-  const createSprintMutation = useCreateSprint();
   const createRetroSessionMutation = useCreateRetroSession();
 
   const handleSubmit = async (data: SprintFormData) => {
@@ -61,44 +58,18 @@ const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
 
     setIsSubmitting(true);
     try {
-      // Step 1: Create Sprint
-      const sprintData = {
-        name: data.sprintName,
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        created_by: user?._id || ''
-      };
-
-      const sprintResult = await createSprintMutation.mutateAsync(sprintData);
-
-      if (!sprintResult?.data?._id) {
-        throw new Error('Failed to create sprint - no ID returned');
-      }
-
-      const sprintId = sprintResult.data._id;
-
-      // Step 2: Create Retro Session with Sprint ID
-      const retroSessionData = {
+      const retroResult = await createRetroSessionMutation.mutateAsync({
         name: data.retroName,
         team_id: data.teamId,
-        sprint_id: sprintId,
+        sprint_id: data.sprintId,
         end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      };
+      });
 
-      const retroResult =
-        await createRetroSessionMutation.mutateAsync(retroSessionData);
+      toast.success('Sprint and Retro Session created successfully!');
 
-      if (retroResult?.data) {
-        toast.success('Sprint and Retro Session created successfully!');
-
-        router.push(`/dashboard/retrospective/${retroResult.data._id}`);
-      } else {
-        throw new Error('Failed to create retro session - no data returned');
-      }
+      router.push(`/dashboard/retrospective/${retroResult.data._id}`);
     } catch (error) {
-      toast.error(
-        'Failed to create sprint or retro session. Please try again.'
-      );
+      toast.error('Failed to create retro session. ' + error);
     } finally {
       setIsSubmitting(false);
     }
@@ -106,6 +77,10 @@ const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
 
   const handleTeamChange = (teamId: string) => {
     form.setValue('teamId', teamId);
+  };
+
+  const handleSprintChange = (sprintId: string) => {
+    form.setValue('sprintId', sprintId);
   };
 
   return (
@@ -120,21 +95,6 @@ const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
           <div className='max-h-[70vh] w-full overflow-y-auto'>
             <div className='flex flex-col gap-4'>
               <div className='flex flex-col gap-2'>
-                <Label htmlFor='sprintName'>Sprint Name</Label>
-                <Input
-                  id='sprintName'
-                  placeholder='Sprint Name'
-                  className='w-full'
-                  {...form.register('sprintName')}
-                />
-                {form.formState.errors.sprintName && (
-                  <span className='text-sm text-red-500'>
-                    {form.formState.errors.sprintName.message}
-                  </span>
-                )}
-              </div>
-
-              <div className='flex flex-col gap-2'>
                 <Label htmlFor='retroName'>Retro Name</Label>
                 <Input
                   id='retroName'
@@ -145,6 +105,19 @@ const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
                 {form.formState.errors.retroName && (
                   <span className='text-sm text-red-500'>
                     {form.formState.errors.retroName.message}
+                  </span>
+                )}
+              </div>
+
+              <div className='flex flex-col gap-2'>
+                <Label>Sprint Name</Label>
+                <SprintNameSelector
+                  value={form.watch('sprintId')}
+                  onValueChange={handleSprintChange}
+                />
+                {form.formState.errors.teamId && (
+                  <span className='text-sm text-red-500'>
+                    {form.formState.errors.teamId.message}
                   </span>
                 )}
               </div>
@@ -202,10 +175,8 @@ const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
                 disabled={
                   isSubmitting ||
                   !form.watch('teamId') ||
-                  !form.watch('sprintName') ||
-                  !form.watch('retroName') ||
-                  createSprintMutation.isPending ||
-                  createRetroSessionMutation.isPending
+                  !form.watch('sprintId') ||
+                  !form.watch('retroName')
                 }
               >
                 {isSubmitting ? (
@@ -215,7 +186,7 @@ const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
                   </>
                 ) : (
                   <>
-                    Create Sprint & Retro
+                    Create Retro Session
                     <ChevronRight className='ml-2 h-4 w-4' />
                   </>
                 )}
