@@ -28,7 +28,7 @@ export interface Sprint {
 }
 
 export interface RetroSession {
-  id: string;
+  _id: string;
   name: string;
   team: Team;
   sprint: Sprint;

@@ -24,7 +24,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (retro && retro.code === 200) {
-      setRetroSession(retro);
+      setRetroSession(retro.data);
     }
   }, [retro, setRetroSession]);
 
