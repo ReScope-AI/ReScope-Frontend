@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +10,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent } from '@/components/ui/tooltip';
+import { createPollQuestion } from '@/config/api/poll-question';
+import { QUERY_CONSTANTS } from '@/constants/query';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { ICreatePollQuestion } from '@/types';
 import { TooltipTrigger } from '@radix-ui/react-tooltip';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart3,
   Calendar,
@@ -26,15 +30,7 @@ import {
   X
 } from 'lucide-react';
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { QUERY_CONSTANTS } from '@/constants/query';
-import {
-  getPollQuestions,
-  createPollQuestion
-} from '@/config/api/poll-question';
-import { ICreatePollQuestion, Response } from '@/types';
-import { useRetroSessionStore } from '@/stores/retroSessionStore';
-import { RetroSession } from '@/features/retrospectives/stores';
+import { useTaskStore } from '../utils/store';
 
 interface PollOption {
   id: string;
@@ -111,19 +107,6 @@ function TemplateSelector({
 }) {
   const [selectedCategory, setSelectedCategory] = useState('Default Polls');
   const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
-
-  // const { data: pollQuestions, isLoading } = useQuery({
-  //   queryKey: [QUERY_CONSTANTS.POLL_QUESTIONS.LIST],
-  //   queryFn: async () => {
-  //     const response = await getPollQuestions();
-  //     return response.data.map((poll: any) => ({
-  //       id: poll._id,
-  //       question: poll.text,
-  //       options: poll.options
-  //     }));
-  //   },
-  //   enabled: isOpen,
-  // });
 
   const getCurrentPolls = () => {
     switch (selectedCategory) {
@@ -406,14 +389,16 @@ export default function PollModal() {
   const [autoReveal, setAutoReveal] = useState(true);
 
   const queryClient = useQueryClient();
+  const addPollsCol = useTaskStore((state) => state.addPollsCol);
 
   const createPollMutation = useMutation({
     mutationFn: (data: ICreatePollQuestion) => createPollQuestion(data),
-    onSuccess: () => {
+    onSuccess: (response) => {
       setIsOpen(false);
       queryClient.invalidateQueries({
         queryKey: [QUERY_CONSTANTS.POLL_QUESTIONS.LIST]
       });
+      addPollsCol(response.data.text, response.data.options);
     },
     onError: (error) => {
       console.error(error);
