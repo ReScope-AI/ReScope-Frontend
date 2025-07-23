@@ -160,7 +160,7 @@ export default function DashboardPage() {
                   <div className='flex items-center gap-2'>
                     <Avatar className='h-6 w-6'>
                       <AvatarImage
-                        src={meeting.team.name || '/placeholder.svg'}
+                        src={meeting?.team?.name || '/placeholder.svg'}
                       />
                       <AvatarFallback>U</AvatarFallback>
                     </Avatar>
@@ -203,9 +203,9 @@ export default function DashboardPage() {
                 <div className='mt-auto flex items-center gap-1'>
                   <Avatar className='h-6 w-6'>
                     <AvatarImage
-                      src={meeting.team.name || '/placeholder.svg'}
+                      src={meeting?.team?.name || '/placeholder.svg'}
                     />
-                    <AvatarFallback>{meeting.team.name[0]}</AvatarFallback>
+                    <AvatarFallback>{meeting?.team?.name[0]}</AvatarFallback>
                   </Avatar>
                 </div>
               </CardContent>
