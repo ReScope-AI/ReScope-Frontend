@@ -21,8 +21,14 @@ import type { Column } from './board-column';
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
 import { TaskCard } from './task-card';
+import { ConnectedUsers } from './connected-users';
+import { useSocket } from '@/hooks/use-socket';
 
-export function KanbanBoard() {
+export function KanbanBoard({
+  boardId = 'default-board'
+}: {
+  boardId?: string;
+}) {
   const columns = useTaskStore((state) => state.columns);
   const setColumns = useTaskStore((state) => state.setCols);
   const pickedUpTaskColumn = useRef<Status>(defaultCols[0].id as Status);
@@ -40,6 +46,17 @@ export function KanbanBoard() {
 
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
+  // Socket integration
+  const {
+    connectedUsers,
+    isConnected,
+    emitAddTask,
+    emitUpdateTask,
+    emitDeleteTask,
+    emitMoveTask,
+    emitVoteTask
+  } = useSocket(boardId);
+
   useEffect(() => {
     setIsMounted(true);
   }, [isMounted]);
@@ -47,7 +64,8 @@ export function KanbanBoard() {
   useEffect(() => {
     useTaskStore.persist.rehydrate();
   }, []);
-  if (!isMounted) return;
+
+  if (!isMounted) return null;
 
   function getDraggingTaskData(taskId: UniqueIdentifier, columnId: Status) {
     const tasksInColumn = tasks.filter((task) => task.status === columnId);
@@ -154,49 +172,64 @@ export function KanbanBoard() {
   };
 
   return (
-    <DndContext
-      accessibility={{
-        announcements
-      }}
-      sensors={sensors}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-    >
-      <BoardContainer>
-        <SortableContext items={columnsId}>
-          {columns?.map((col, index) => (
-            <Fragment key={col.id}>
-              <BoardColumn
-                column={col}
-                tasks={tasks.filter((task) => task.status === col.id)}
-              />
-              {index === columns?.length - 1 && (
-                <div className='w-[300px]'>
-                  <NewSectionDialog />
-                </div>
-              )}
-            </Fragment>
-          ))}
-          {!columns.length && <NewSectionDialog />}
-        </SortableContext>
-      </BoardContainer>
+    <div className='flex flex-col gap-4'>
+      <div className='flex items-center justify-between'>
+        <h1 className='text-2xl font-bold'>Kanban Board</h1>
+        <ConnectedUsers boardId={boardId} />
+      </div>
 
-      {'document' in window &&
-        createPortal(
-          <DragOverlay>
-            {activeColumn && (
-              <BoardColumn
-                isOverlay
-                column={activeColumn}
-                tasks={tasks.filter((task) => task.status === activeColumn.id)}
-              />
-            )}
-            {activeTask && <TaskCard task={activeTask} isOverlay />}
-          </DragOverlay>,
-          document.body
-        )}
-    </DndContext>
+      <DndContext
+        accessibility={{
+          announcements
+        }}
+        sensors={sensors}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragOver={onDragOver}
+      >
+        <BoardContainer>
+          <SortableContext items={columnsId}>
+            {columns?.map((col, index) => (
+              <Fragment key={col.id}>
+                <BoardColumn
+                  column={col}
+                  tasks={tasks.filter((task) => task.status === col.id)}
+                  // onAddTask={(title, description) =>
+                  //   emitAddTask(title, description, col.id)
+                  // }
+                  // onUpdateTask={emitUpdateTask}
+                  // onDeleteTask={emitDeleteTask}
+                  // onVoteTask={emitVoteTask}
+                />
+                {index === columns?.length - 1 && (
+                  <div className='w-[300px]'>
+                    <NewSectionDialog />
+                  </div>
+                )}
+              </Fragment>
+            ))}
+            {!columns.length && <NewSectionDialog />}
+          </SortableContext>
+        </BoardContainer>
+
+        {'document' in window &&
+          createPortal(
+            <DragOverlay>
+              {activeColumn && (
+                <BoardColumn
+                  isOverlay
+                  column={activeColumn}
+                  tasks={tasks.filter(
+                    (task) => task.status === activeColumn.id
+                  )}
+                />
+              )}
+              {activeTask && <TaskCard task={activeTask} isOverlay />}
+            </DragOverlay>,
+            document.body
+          )}
+      </DndContext>
+    </div>
   );
 
   function onDragStart(event: DragStartEvent) {
@@ -233,7 +266,6 @@ export function KanbanBoard() {
     if (!isActiveAColumn) return;
 
     const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
-
     const overColumnIndex = columns.findIndex((col) => col.id === overId);
 
     setColumns(arrayMove(columns, activeColumnIndex, overColumnIndex));
@@ -254,33 +286,31 @@ export function KanbanBoard() {
     const overData = over.data.current;
 
     const isActiveATask = activeData?.type === 'Task';
-    const isOverATask = activeData?.type === 'Task';
+    const isOverATask = overData?.type === 'Task';
 
     if (!isActiveATask) return;
 
-    // Im dropping a Task over another Task
+    // Handle task movement between columns
     if (isActiveATask && isOverATask) {
       const activeIndex = tasks.findIndex((t) => t.id === activeId);
       const overIndex = tasks.findIndex((t) => t.id === overId);
       const activeTask = tasks[activeIndex];
       const overTask = tasks[overIndex];
-      if (activeTask && overTask && activeTask.status !== overTask.status) {
-        activeTask.status = overTask.status;
-        setTasks(arrayMove(tasks, activeIndex, overIndex - 1));
-      }
 
-      setTasks(arrayMove(tasks, activeIndex, overIndex));
+      if (activeTask && overTask && activeTask.status !== overTask.status) {
+        emitMoveTask(activeTask.id, overTask.status);
+      }
     }
 
     const isOverAColumn = overData?.type === 'Column';
 
-    // Im dropping a Task over a column
+    // Handle task dropped on column
     if (isActiveATask && isOverAColumn) {
       const activeIndex = tasks.findIndex((t) => t.id === activeId);
       const activeTask = tasks[activeIndex];
+
       if (activeTask) {
-        activeTask.status = overId as Status;
-        setTasks(arrayMove(tasks, activeIndex, activeIndex));
+        emitMoveTask(activeTask.id, overId as Status);
       }
     }
   }
