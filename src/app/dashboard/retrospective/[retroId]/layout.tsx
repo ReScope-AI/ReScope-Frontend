@@ -2,8 +2,10 @@
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getPollQuestions } from '@/config/api/poll-question';
 import { getRetroSessionById } from '@/config/api/retro-session';
 import { QUERY_CONSTANTS } from '@/constants/query';
+import { useTaskStore } from '@/features/kanban/utils/store';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { useQuery } from '@tanstack/react-query';
 import { notFound, useParams } from 'next/navigation';
@@ -13,6 +15,7 @@ import { useRetroSocket } from '@/hooks/use-retro-socket';
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
   const { setRetroSession } = useRetroSessionStore();
+  const addPollsCol = useTaskStore((state) => state.addPollsCol);
   const retroId = params.retroId as string;
 
   const { data: retro, isLoading } = useQuery({
@@ -28,7 +31,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (retro && retro.code === 200) {
-      setRetroSession(retro);
+      setRetroSession(retro.data);
+
+      // If there are polls, add them to the store
+      if (retro.data.questions.length > 0) {
+        retro.data.questions.forEach((question: any) => {
+          addPollsCol(
+            question.text,
+            question.options.map((option: any) => option.text)
+          );
+        });
+      }
     }
   }, [retro, setRetroSession]);
 

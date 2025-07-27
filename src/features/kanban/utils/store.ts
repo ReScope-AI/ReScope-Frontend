@@ -120,6 +120,7 @@ const initialTasks: Task[] = [
 export type Actions = {
   addTask: (title: string, description?: string, status?: Status) => void;
   addCol: (title: string) => void;
+  addPollsCol: (question: string, options: string[]) => void;
   dragTask: (id: string | null) => void;
   removeTask: (title: string) => void;
   removeCol: (id: UniqueIdentifier) => void;
@@ -163,6 +164,20 @@ export const useTaskStore = create<State & Actions>()(
               color: 'gray',
               icon: 'default'
             }
+          ]
+        })),
+      addPollsCol: (question: string, options: string[]) =>
+        set((state) => ({
+          columns: [
+            {
+              title: 'Polls',
+              id: 'POLLS',
+              question,
+              color: 'gray',
+              icon: 'default',
+              options: options
+            },
+            ...state.columns
           ]
         })),
       dragTask: (id: string | null) => set({ draggedTask: id }),
