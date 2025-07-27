@@ -12,8 +12,5 @@ export const QUERY_CONSTANTS = {
   },
   SPRINT: {
     GET_SPRINTS_BY_USER: 'getSprintsByUser'
-  },
-  POLL_QUESTIONS: {
-    LIST: 'listPollQuestions'
   }
 };
