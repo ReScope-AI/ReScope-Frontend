@@ -82,7 +82,7 @@ export default function DashboardPage() {
             <Button
               variant='destructive'
               onClick={() => {
-                deleteRetroSession.mutate(retroSessionToDelete?.id || '');
+                deleteRetroSession.mutate(retroSessionToDelete?._id || '');
                 setOpenDialogConfirmDelete(false);
               }}
             >
@@ -150,9 +150,9 @@ export default function DashboardPage() {
           {retroSessions.map((meeting) => (
             <Card
               onClick={() => {
-                router.push(`/dashboard/retrospective/${meeting.id}`);
+                router.push(`/dashboard/retrospective/${meeting._id}`);
               }}
-              key={meeting.id}
+              key={meeting._id}
               className='flex h-full cursor-pointer flex-col transition-shadow hover:shadow-md'
             >
               <CardHeader className='pb-3'>

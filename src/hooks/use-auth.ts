@@ -12,7 +12,6 @@ import { useRouter } from 'next/navigation';
 // Sign In
 export const useLogin = () => {
   const setTokens = useAuthStore((state) => state.setTokens);
-  const router = useRouter();
 
   return useMutation({
     mutationFn: ({
@@ -31,9 +30,8 @@ export const useLogin = () => {
       setTokens(accessToken.token, refreshToken.token);
       window.location.href = '/dashboard';
     },
-    onError: (error) => {
-      showNotification('error', error?.message || 'Something went wrong');
-    }
+    // Not showing error message because it's handled in the request/errorHandling.ts
+    onError: () => {}
   });
 };
 

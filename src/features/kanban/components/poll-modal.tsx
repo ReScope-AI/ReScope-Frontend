@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { usePollStore } from '@/stores/pollStore';
+import { showNotification } from '@/components/common';
 
 interface PollOption {
   id: string;
@@ -108,18 +109,18 @@ function TemplateSelector({
   const [selectedCategory, setSelectedCategory] = useState('Default Polls');
   const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
 
-  const getCurrentPolls = () => {
-    switch (selectedCategory) {
-      case 'Default Polls':
-        return defaultPolls;
-      case 'Previous Polls':
-        return [];
-      case 'AI Generated Polls':
-        return [];
-      default:
-        return defaultPolls;
-    }
-  };
+  // const getCurrentPolls = () => {
+  //   switch (selectedCategory) {
+  //     case 'Default Polls':
+  //       return defaultPolls;
+  //     case 'Previous Polls':
+  //       return [];
+  //     case 'AI Generated Polls':
+  //       return [];
+  //     default:
+  //       return defaultPolls;
+  //   }
+  // };
 
   const handleSelect = () => {
     if (selectedPoll) {
@@ -399,7 +400,7 @@ export default function PollModal() {
       addPollsColumn(response.data.text);
     },
     onError: (error) => {
-      console.error(error);
+      showNotification('error', error?.message || 'Something went wrong');
     }
   });
 
