@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware';
 export interface RetroSessionState {
   retroSession: IRetroSession | null;
   setRetroSession: (retroSession: IRetroSession) => void;
-  clearRetroSession: () => void;
+  clearStorage: () => void;
 }
 
 export const useRetroSessionStore = create<RetroSessionState>()(
@@ -13,7 +13,7 @@ export const useRetroSessionStore = create<RetroSessionState>()(
     (set) => ({
       retroSession: null,
       setRetroSession: (retroSession) => set({ retroSession }),
-      clearRetroSession: () => set({ retroSession: null })
+      clearStorage: () => set({ retroSession: null })
     }),
     {
       name: 'retro-session-storage'

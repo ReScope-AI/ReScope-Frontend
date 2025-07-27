@@ -55,6 +55,7 @@ export type Actions = {
   addSprint: (name: string) => void;
   removeSprint: (id: string) => void;
   setSprints: (updatedSprints: SprintName[]) => void;
+  clearStorage: () => void;
 };
 
 export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
@@ -83,7 +84,14 @@ export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
           sprints: state.sprints.filter((sprint) => sprint.id !== id)
         })),
       setSprints: (updatedSprints: SprintName[]) =>
-        set({ sprints: updatedSprints })
+        set({ sprints: updatedSprints }),
+      clearStorage: () => {
+        set({
+          teams: [],
+          retroSessions: [],
+          sprints: []
+        });
+      }
     }),
     { name: 'retrospective-store', skipHydration: true }
   )

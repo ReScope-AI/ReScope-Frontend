@@ -76,7 +76,7 @@ export function TaskCard({
     transition,
     isDragging
   } = useSortable({
-    id: task.id,
+    id: task._id,
     data: {
       type: 'Task',
       task
@@ -141,7 +141,7 @@ export function TaskCard({
               variant='ghost'
               size='sm'
               className='h-6 w-6 p-0'
-              onClick={() => updateTaskVotes(task.id, false)}
+              onClick={() => updateTaskVotes(task._id, false)}
             >
               <IconMinus className='h-3 w-3' />
             </Button>
@@ -152,7 +152,7 @@ export function TaskCard({
               variant='ghost'
               size='sm'
               className='h-6 w-6 p-0'
-              onClick={() => updateTaskVotes(task.id, true)}
+              onClick={() => updateTaskVotes(task._id, true)}
             >
               <IconPlus className='h-3 w-3' />
             </Button>

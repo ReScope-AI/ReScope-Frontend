@@ -12,7 +12,12 @@ import React, { useEffect } from 'react';
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
   const { setRetroSession } = useRetroSessionStore();
-  const { addPollsColumn, removePollsColumn } = usePollStore((state) => state);
+  const {
+    addPollsColumn,
+    removePollsColumn,
+    setPollQuestions,
+    clearPollQuestions
+  } = usePollStore((state) => state);
   const retroId = params.retroId as string;
 
   const { data: retro, isLoading } = useQuery({
@@ -29,13 +34,23 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (retro && retro.code === 200) {
       setRetroSession(retro.data);
+
+      // Clear existing poll options when session changes
+      clearPollQuestions();
+
       // If there are polls, add them to the store
       if (retro.data.questions.length > 0) {
+        // Remove existing polls column
         removePollsColumn();
+        clearPollQuestions();
+
+        // Add new polls column
         addPollsColumn('Polls Question');
+        setPollQuestions(retro.data.questions);
       }
     }
-  }, [retro, setRetroSession, addPollsColumn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [retro, retroId]);
 
   if (isLoading) {
     return <Skeleton className='h-10 w-full' />;

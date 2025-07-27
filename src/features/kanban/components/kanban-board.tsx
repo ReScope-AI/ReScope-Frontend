@@ -1,4 +1,5 @@
 'use client';
+import { usePollStore } from '@/stores/pollStore';
 import {
   Announcements,
   DndContext,
@@ -17,15 +18,16 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { hasDraggableData } from '../utils';
 import { defaultCols, Task, useTaskStore, type Status } from '../utils/store';
-import { usePollStore } from '@/stores/pollStore';
 import type { Column } from './board-column';
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
+import { PollsColumn } from './polls-column';
 import { TaskCard } from './task-card';
 
 export function KanbanBoard() {
   const columns = useTaskStore((state) => state.columns);
   const pollsCol = usePollStore((state) => state.getPollsColumn());
+  const pollQuestions = usePollStore((state) => state.pollQuestions);
   const setColumns = useTaskStore((state) => state.setCols);
   const pickedUpTaskColumn = useRef<Status>(defaultCols[0].id as Status);
   const columnsId = useMemo(
@@ -53,7 +55,7 @@ export function KanbanBoard() {
 
   function getDraggingTaskData(taskId: UniqueIdentifier, columnId: Status) {
     const tasksInColumn = tasks.filter((task) => task.status === columnId);
-    const taskPosition = tasksInColumn.findIndex((task) => task.id === taskId);
+    const taskPosition = tasksInColumn.findIndex((task) => task._id === taskId);
     const column = columns.find((col) => col.id === columnId);
     return {
       tasksInColumn,
@@ -159,10 +161,7 @@ export function KanbanBoard() {
     <section className='flex flex-row'>
       {pollsCol && (
         <BoardContainer>
-          <BoardColumn
-            column={pollsCol}
-            tasks={tasks.filter((task) => task.status === pollsCol.id)}
-          />
+          <PollsColumn column={pollsCol} questions={pollQuestions} />
         </BoardContainer>
       )}
       <DndContext
@@ -274,8 +273,8 @@ export function KanbanBoard() {
 
     // Im dropping a Task over another Task
     if (isActiveATask && isOverATask) {
-      const activeIndex = tasks.findIndex((t) => t.id === activeId);
-      const overIndex = tasks.findIndex((t) => t.id === overId);
+      const activeIndex = tasks.findIndex((t) => t._id === activeId);
+      const overIndex = tasks.findIndex((t) => t._id === overId);
       const activeTask = tasks[activeIndex];
       const overTask = tasks[overIndex];
       if (activeTask && overTask && activeTask.status !== overTask.status) {
@@ -290,7 +289,7 @@ export function KanbanBoard() {
 
     // Im dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
-      const activeIndex = tasks.findIndex((t) => t.id === activeId);
+      const activeIndex = tasks.findIndex((t) => t._id === activeId);
       const activeTask = tasks[activeIndex];
       if (activeTask) {
         activeTask.status = overId as Status;

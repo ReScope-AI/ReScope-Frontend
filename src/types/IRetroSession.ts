@@ -40,7 +40,7 @@ export interface IQuestion {
   updated_by: string;
   created_at: string;
   updated_at: string;
-  options: IOption[];
+  options: IOption[] | [];
   votes: string[];
 }
 
@@ -52,3 +52,10 @@ export interface IOption {
   created_at: string;
   updated_at: string;
 }
+
+// export interface ICreatePollQuestion extends Omit<IQuestion, '_id' | 'votes' | 'created_by' | 'updated_by' | 'created_at' | 'updated_at'> {
+//   text: string;
+//   session_id: string;
+//   criterion: 'communication' | 'quality' | 'process' | 'estimate' | 'timeBound';
+//   options: string[];
+// }

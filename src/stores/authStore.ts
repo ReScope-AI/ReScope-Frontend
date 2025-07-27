@@ -9,7 +9,7 @@ export const useAuthStore = create<IAuthState>()(
       refreshToken: null,
       setTokens: (accessToken, refreshToken) =>
         set({ accessToken, refreshToken }),
-      clearTokens: () => set({ accessToken: null, refreshToken: null })
+      clearStorage: () => set({ accessToken: null, refreshToken: null })
     }),
     {
       name: 'auth-storage'

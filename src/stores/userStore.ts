@@ -7,7 +7,7 @@ export const useUserStore = create<IUserState>()(
     (set) => ({
       user: null,
       setUser: (user) => set({ user }),
-      clearUser: () => set({ user: null })
+      clearStorage: () => set({ user: null })
     }),
     {
       name: 'user-storage'
