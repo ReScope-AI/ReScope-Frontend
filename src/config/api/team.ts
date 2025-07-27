@@ -10,8 +10,7 @@ export const createTeam = async (data: ICreateTeam) => {
     '/teams/create',
     {
       method: 'POST',
-      data,
-      noAuth: true
+      data
     },
     API_KEYS.BASE_API
   );
@@ -22,8 +21,7 @@ export const getTeams = async () => {
   const response = await request(
     '/teams',
     {
-      method: 'GET',
-      noAuth: true
+      method: 'GET'
     },
     API_KEYS.BASE_API
   );
@@ -34,8 +32,7 @@ export const deleteTeam = async (teamId: string) => {
   const response = await request(
     `/teams/${teamId}`,
     {
-      method: 'DELETE',
-      noAuth: true
+      method: 'DELETE'
     },
     API_KEYS.BASE_API
   );

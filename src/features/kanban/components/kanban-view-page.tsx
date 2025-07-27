@@ -1,3 +1,4 @@
+'use client';
 import { KanbanBoard } from './kanban-board';
 import NewTaskDialog from './new-task-dialog';
 import {
@@ -11,7 +12,9 @@ import {
   MessageCircle,
   CreditCard
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import PollModal from './poll-modal';
+import { Button } from '@/components/ui/button';
 
 export default function KanbanViewPage() {
   return (
@@ -31,51 +34,64 @@ export default function KanbanViewPage() {
 }
 
 export function HeaderBar() {
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
   return (
-    <div className='flex w-full items-center justify-between space-x-2 border-b bg-white px-4 pb-4 text-sm'>
+    <div className='mt-4 flex w-full items-center justify-between space-x-2 border-b bg-white px-4 pb-4 text-sm'>
       {/* Left section */}
       <div className='flex items-center gap-2'>
-        <div className='relative'>
-          <Avatar className='h-10 w-10 overflow-hidden rounded-full border'>
-            <AvatarImage src='/avatars/01.png' alt='User' />
-            <AvatarFallback className='bg-gray-200 text-xs'>KA</AvatarFallback>
-          </Avatar>
-          <div className='absolute -right-1 -bottom-1 h-5 w-5'>
-            {/* <div className='flex h-4 w-4 items-center justify-center rounded-full shadow'>
-              <MessageSquareMore className='h-3 w-3 text-gray-500' />
-            </div> */}
-          </div>
-        </div>
-
-        <button className='rounded-xl border px-6 py-1.5'>Ready 0/2</button>
+        <h2 className='text-3xl font-bold tracking-tight'>
+          {retroSession?.name}
+        </h2>
       </div>
 
       {/* Right section */}
-      <div className='flex items-center gap-2'>
-        <ThumbsUp className='h-4 w-4 text-gray-600' />
+      <div className='flex items-center gap-3'>
+        <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-700 shadow-sm transition-all duration-200 hover:bg-green-100 hover:shadow-md'>
+          <ThumbsUp className='h-4 w-4' />
+          <span className='text-sm font-medium'>24</span>
+        </Button>
 
-        <MessageSquareMore className='h-4 w-4 text-gray-600' />
-
-        <span className='text-gray-600'>6</span>
+        <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-700 shadow-sm transition-all duration-200 hover:bg-blue-100 hover:shadow-md'>
+          <MessageSquareMore className='h-4 w-4' />
+          <span className='text-sm font-medium'>6</span>
+        </Button>
 
         <div className='relative'>
-          <Search className='absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 text-gray-400' />
+          <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400' />
           <input
             type='text'
             placeholder='Search items...'
-            className='rounded-md border py-2 pr-2 pl-8 text-sm focus:outline-none'
+            className='h-10 w-64 rounded-lg border border-gray-200 bg-white py-2 pr-4 pl-10 text-sm shadow-sm transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none'
           />
         </div>
 
-        <CreditCard className='h-6 w-auto text-gray-600' />
-        <SortAsc className='h-6 w-auto text-gray-600' />
-        <Filter className='h-6 w-auto text-gray-600' />
+        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md'>
+          <CreditCard className='h-4 w-4' />
+        </Button>
 
-        <div className='mx-2 h-6 w-px bg-gray-300' />
+        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md'>
+          <SortAsc className='h-4 w-4' />
+        </Button>
 
-        <RotateCcw className='h-6 w-auto text-gray-600' />
-        <SquarePen className='h-6 w-auto text-gray-600' />
-        <MessageCircle className='h-6 w-auto text-gray-600' />
+        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md'>
+          <Filter className='h-4 w-4' />
+        </Button>
+
+        <PollModal />
+
+        <div className='mx-2 h-8 w-px bg-gray-300' />
+
+        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md'>
+          <RotateCcw className='h-4 w-4' />
+        </Button>
+
+        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md'>
+          <SquarePen className='h-4 w-4' />
+        </Button>
+
+        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md'>
+          <MessageCircle className='h-4 w-4' />
+        </Button>
       </div>
     </div>
   );

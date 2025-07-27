@@ -30,7 +30,7 @@ import {
   X
 } from 'lucide-react';
 import { useState } from 'react';
-import { useTaskStore } from '../utils/store';
+import { usePollStore } from '@/stores/pollStore';
 
 interface PollOption {
   id: string;
@@ -385,20 +385,18 @@ export default function PollModal() {
     { id: '1', text: '' },
     { id: '2', text: '' }
   ]);
-  const [anonymousVoting, setAnonymousVoting] = useState(false);
-  const [autoReveal, setAutoReveal] = useState(true);
 
   const queryClient = useQueryClient();
-  const addPollsCol = useTaskStore((state) => state.addPollsCol);
+  const addPollsColumn = usePollStore((state) => state.addPollsColumn);
 
   const createPollMutation = useMutation({
     mutationFn: (data: ICreatePollQuestion) => createPollQuestion(data),
     onSuccess: (response) => {
       setIsOpen(false);
       queryClient.invalidateQueries({
-        queryKey: [QUERY_CONSTANTS.POLL_QUESTIONS.LIST]
+        queryKey: [QUERY_CONSTANTS.RETRO_SESSION.GET_RETRO_SESSION_BY_ID]
       });
-      addPollsCol(response.data.text, response.data.options);
+      addPollsColumn(response.data.text);
     },
     onError: (error) => {
       console.error(error);
@@ -441,8 +439,6 @@ export default function PollModal() {
       { id: '1', text: '' },
       { id: '2', text: '' }
     ]);
-    setAnonymousVoting(false);
-    setAutoReveal(true);
     setShowAIGenerator(false);
   };
 
@@ -473,7 +469,7 @@ export default function PollModal() {
             <TooltipTrigger asChild>
               <Button
                 onClick={() => setIsOpen(true)}
-                className='cursor-pointer bg-purple-600 text-white shadow-lg transition-all duration-200 hover:bg-purple-700 hover:shadow-xl'
+                className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md'
               >
                 <ChartGantt className='h-4 w-4' />
               </Button>

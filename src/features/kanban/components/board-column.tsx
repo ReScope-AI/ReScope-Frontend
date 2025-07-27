@@ -16,6 +16,7 @@ import { useMemo } from 'react';
 import { Task, useTaskStore } from '../utils/store';
 import { ColumnActions } from './column-action';
 import { TaskCard } from './task-card';
+import { cn } from '@/lib/utils';
 
 export interface Column {
   id: UniqueIdentifier;
@@ -23,6 +24,7 @@ export interface Column {
   question?: string;
   color?: string;
   icon?: string;
+  disableDragExternal?: boolean;
 }
 
 export type ColumnType = 'Column';
@@ -30,12 +32,14 @@ export type ColumnType = 'Column';
 export interface ColumnDragData {
   type: ColumnType;
   column: Column;
+  allowDragExternal?: boolean;
 }
 
 interface BoardColumnProps {
   column: Column;
   tasks: Task[];
   isOverlay?: boolean;
+  disableDragExternal?: boolean;
 }
 
 const getColumnIcon = (icon: string) => {
@@ -86,7 +90,12 @@ const getColumnColorClasses = (color: string) => {
   }
 };
 
-export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
+export function BoardColumn({
+  column,
+  tasks,
+  isOverlay,
+  disableDragExternal = false
+}: BoardColumnProps) {
   const tasksIds = useMemo(() => {
     return tasks.map((task) => task.id);
   }, [tasks]);
@@ -106,7 +115,8 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
     } satisfies ColumnDragData,
     attributes: {
       roleDescription: `Column: ${column.title}`
-    }
+    },
+    disabled: disableDragExternal
   });
 
   const setOpenDialog = useTaskStore((state) => state.setOpenDialog);
@@ -167,7 +177,11 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
         <ScrollArea className='h-full'>
           <SortableContext items={tasksIds}>
             {tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                disableDragExternal={disableDragExternal}
+              />
             ))}
             <Button
               variant='outline'
@@ -184,7 +198,13 @@ export function BoardColumn({ column, tasks, isOverlay }: BoardColumnProps) {
   );
 }
 
-export function BoardContainer({ children }: { children: React.ReactNode }) {
+export function BoardContainer({
+  children,
+  scrollClassName
+}: {
+  children: React.ReactNode;
+  scrollClassName?: string;
+}) {
   const dndContext = useDndContext();
 
   const variations = cva('flex max-w-screen-lg', {
@@ -197,7 +217,9 @@ export function BoardContainer({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <ScrollArea className='h-full flex-row items-start gap-4'>
+    <ScrollArea
+      className={cn('h-full flex-row items-start gap-4', scrollClassName)}
+    >
       <div
         className={variations({
           dragging: dndContext.active ? 'active' : 'default'

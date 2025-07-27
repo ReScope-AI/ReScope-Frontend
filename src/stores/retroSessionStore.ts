@@ -1,10 +1,10 @@
-import { RetroSession } from '@/features/retrospectives/stores';
+import { IRetroSession } from '@/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface RetroSessionState {
-  retroSession: RetroSession | null;
-  setRetroSession: (retroSession: RetroSession) => void;
+  retroSession: IRetroSession | null;
+  setRetroSession: (retroSession: IRetroSession) => void;
   clearRetroSession: () => void;
 }
 

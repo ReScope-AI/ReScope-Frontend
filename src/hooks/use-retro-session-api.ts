@@ -2,9 +2,9 @@
 import {
   createRetroSession,
   deleteRetroSession,
-  getRetroSessions,
-  ICreateRetroSession
+  getRetroSessions
 } from '@/config/api/retro-session';
+import { ICreateRetroSession } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 type GetRetroSessionResponse = {

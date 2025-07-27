@@ -17,6 +17,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { hasDraggableData } from '../utils';
 import { defaultCols, Task, useTaskStore, type Status } from '../utils/store';
+import { usePollStore } from '@/stores/pollStore';
 import type { Column } from './board-column';
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
@@ -24,6 +25,7 @@ import { TaskCard } from './task-card';
 
 export function KanbanBoard() {
   const columns = useTaskStore((state) => state.columns);
+  const pollsCol = usePollStore((state) => state.getPollsColumn());
   const setColumns = useTaskStore((state) => state.setCols);
   const pickedUpTaskColumn = useRef<Status>(defaultCols[0].id as Status);
   const columnsId = useMemo(
@@ -154,49 +156,61 @@ export function KanbanBoard() {
   };
 
   return (
-    <DndContext
-      accessibility={{
-        announcements
-      }}
-      sensors={sensors}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-    >
-      <BoardContainer>
-        <SortableContext items={columnsId}>
-          {columns?.map((col, index) => (
-            <Fragment key={col.id}>
-              <BoardColumn
-                column={col}
-                tasks={tasks.filter((task) => task.status === col.id)}
-              />
-              {index === columns?.length - 1 && (
-                <div className='w-[300px]'>
-                  <NewSectionDialog />
-                </div>
-              )}
-            </Fragment>
-          ))}
-          {!columns.length && <NewSectionDialog />}
-        </SortableContext>
-      </BoardContainer>
+    <section className='flex flex-row'>
+      {pollsCol && (
+        <BoardContainer>
+          <BoardColumn
+            column={pollsCol}
+            tasks={tasks.filter((task) => task.status === pollsCol.id)}
+          />
+        </BoardContainer>
+      )}
+      <DndContext
+        accessibility={{
+          announcements
+        }}
+        sensors={sensors}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragOver={onDragOver}
+      >
+        <BoardContainer scrollClassName='flex-1'>
+          <SortableContext items={columnsId}>
+            {columns?.map((col, index) => (
+              <Fragment key={col.id}>
+                <BoardColumn
+                  column={col}
+                  tasks={tasks.filter((task) => task.status === col.id)}
+                />
+                {index === columns?.length - 1 && (
+                  <div className='w-[300px]'>
+                    <NewSectionDialog />
+                  </div>
+                )}
+              </Fragment>
+            ))}
+            {!columns.length && <NewSectionDialog />}
+          </SortableContext>
+        </BoardContainer>
 
-      {'document' in window &&
-        createPortal(
-          <DragOverlay>
-            {activeColumn && (
-              <BoardColumn
-                isOverlay
-                column={activeColumn}
-                tasks={tasks.filter((task) => task.status === activeColumn.id)}
-              />
-            )}
-            {activeTask && <TaskCard task={activeTask} isOverlay />}
-          </DragOverlay>,
-          document.body
-        )}
-    </DndContext>
+        {'document' in window &&
+          createPortal(
+            <DragOverlay>
+              {activeColumn && (
+                <BoardColumn
+                  isOverlay
+                  column={activeColumn}
+                  tasks={tasks.filter(
+                    (task) => task.status === activeColumn.id
+                  )}
+                />
+              )}
+              {activeTask && <TaskCard task={activeTask} isOverlay />}
+            </DragOverlay>,
+            document.body
+          )}
+      </DndContext>
+    </section>
   );
 
   function onDragStart(event: DragStartEvent) {

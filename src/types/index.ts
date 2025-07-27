@@ -42,3 +42,4 @@ export interface Response<T> {
 export * from './IAuth';
 export * from './IUser';
 export * from './IPoll';
+export * from './IRetroSession';

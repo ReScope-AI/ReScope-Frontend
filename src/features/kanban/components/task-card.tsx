@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 interface TaskCardProps {
   task: Task;
   isOverlay?: boolean;
+  disableDragExternal?: boolean;
 }
 
 export type TaskType = 'Task';
@@ -62,7 +63,11 @@ const getTaskColorClasses = (status: string) => {
   }
 };
 
-export function TaskCard({ task, isOverlay }: TaskCardProps) {
+export function TaskCard({
+  task,
+  isOverlay,
+  disableDragExternal = false
+}: TaskCardProps) {
   const {
     setNodeRef,
     attributes,
@@ -78,7 +83,8 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
     } satisfies TaskDragData,
     attributes: {
       roleDescription: 'Task'
-    }
+    },
+    disabled: disableDragExternal
   });
 
   const updateTaskVotes = useTaskStore((state) => state.updateTaskVotes);
