@@ -1,5 +1,6 @@
 import { API_KEYS } from '@/config/proxy';
 import request from '@/config/request';
+import { ICreateRetroSession, IRetroSession, Response } from '@/types';
 
 const SESSION_API_URL = {
   CREATE: '/retro-session',
@@ -8,14 +9,9 @@ const SESSION_API_URL = {
   GET: '/retro-session'
 };
 
-export interface ICreateRetroSession {
-  name: string;
-  team_id: string;
-  sprint_id: string;
-  end_date: string;
-}
-
-export const createRetroSession = async (data: ICreateRetroSession) => {
+export const createRetroSession = async (
+  data: ICreateRetroSession
+): Promise<Response<IRetroSession>> => {
   const response = await request(
     SESSION_API_URL.CREATE,
     {
@@ -49,7 +45,9 @@ export const deleteRetroSession = async (id: string) => {
   return response;
 };
 
-export const getRetroSessionById = async (id: string) => {
+export const getRetroSessionById = async (
+  id: string
+): Promise<Response<IRetroSession>> => {
   const response = await request(
     `${SESSION_API_URL.GET}/${id}`,
     {

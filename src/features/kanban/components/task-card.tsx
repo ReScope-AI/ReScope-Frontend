@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 interface TaskCardProps {
   task: Task;
   isOverlay?: boolean;
+  disableDragExternal?: boolean;
 }
 
 export type TaskType = 'Task';
@@ -62,7 +63,11 @@ const getTaskColorClasses = (status: string) => {
   }
 };
 
-export function TaskCard({ task, isOverlay }: TaskCardProps) {
+export function TaskCard({
+  task,
+  isOverlay,
+  disableDragExternal = false
+}: TaskCardProps) {
   const {
     setNodeRef,
     attributes,
@@ -71,14 +76,15 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
     transition,
     isDragging
   } = useSortable({
-    id: task.id,
+    id: task._id,
     data: {
       type: 'Task',
       task
     } satisfies TaskDragData,
     attributes: {
       roleDescription: 'Task'
-    }
+    },
+    disabled: disableDragExternal
   });
 
   const updateTaskVotes = useTaskStore((state) => state.updateTaskVotes);
@@ -135,7 +141,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
               variant='ghost'
               size='sm'
               className='h-6 w-6 p-0'
-              onClick={() => updateTaskVotes(task.id, false)}
+              onClick={() => updateTaskVotes(task._id, false)}
             >
               <IconMinus className='h-3 w-3' />
             </Button>
@@ -146,7 +152,7 @@ export function TaskCard({ task, isOverlay }: TaskCardProps) {
               variant='ghost'
               size='sm'
               className='h-6 w-6 p-0'
-              onClick={() => updateTaskVotes(task.id, true)}
+              onClick={() => updateTaskVotes(task._id, true)}
             >
               <IconPlus className='h-3 w-3' />
             </Button>

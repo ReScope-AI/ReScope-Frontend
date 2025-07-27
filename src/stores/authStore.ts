@@ -1,15 +1,15 @@
-import { AuthState } from '@/types';
+import { IAuthState } from '@/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export const useAuthStore = create<AuthState>()(
+export const useAuthStore = create<IAuthState>()(
   persist(
     (set) => ({
       accessToken: null,
       refreshToken: null,
       setTokens: (accessToken, refreshToken) =>
         set({ accessToken, refreshToken }),
-      clearTokens: () => set({ accessToken: null, refreshToken: null })
+      clearStorage: () => set({ accessToken: null, refreshToken: null })
     }),
     {
       name: 'auth-storage'

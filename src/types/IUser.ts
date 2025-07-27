@@ -1,4 +1,4 @@
-export interface User {
+export interface IUser {
   _id: string;
   email: string;
   googleId: string;
@@ -6,4 +6,10 @@ export interface User {
   isActive: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface IUserState {
+  user: IUser | null;
+  setUser: (user: IUser) => void;
+  clearStorage: () => void;
 }

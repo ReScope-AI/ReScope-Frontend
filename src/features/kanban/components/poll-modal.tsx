@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +10,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent } from '@/components/ui/tooltip';
+import { createPollQuestion } from '@/config/api/poll-question';
+import { QUERY_CONSTANTS } from '@/constants/query';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { ICreatePollQuestion } from '@/types';
 import { TooltipTrigger } from '@radix-ui/react-tooltip';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart3,
   Calendar,
@@ -26,6 +30,7 @@ import {
   X
 } from 'lucide-react';
 import { useState } from 'react';
+import { usePollStore } from '@/stores/pollStore';
 
 interface PollOption {
   id: string;
@@ -90,15 +95,6 @@ const defaultPolls: Poll[] = [
   }
 ];
 
-const previousPolls: Poll[] = [
-  {
-    id: 'prev1',
-    question: 'Create Poll',
-    options: ['Option A', 'Option B'],
-    date: 'Sun, Jul 13, 2025'
-  }
-];
-
 // Template Selector Component
 function TemplateSelector({
   isOpen,
@@ -117,7 +113,7 @@ function TemplateSelector({
       case 'Default Polls':
         return defaultPolls;
       case 'Previous Polls':
-        return previousPolls;
+        return [];
       case 'AI Generated Polls':
         return [];
       default:
@@ -167,7 +163,7 @@ function TemplateSelector({
                     }}
                     className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-all duration-200 ${
                       selectedCategory === category
-                        ? 'bg-purple-100 text-purple-700 shadow-sm'
+                        ? 'shadow- sm bg-purple-100 text-purple-700'
                         : 'text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -193,16 +189,31 @@ function TemplateSelector({
               {selectedCategory.toUpperCase()}
             </h4>
 
-            {getCurrentPolls().length === 0 ? (
+            {/* {selectedCategory === 'Previous Polls' && isLoading ? (
+              <div className='py-12 text-center'>Loading previous polls...</div>
+            ) : getCurrentPolls().length === 0 ? (
               <div className='py-12 text-center'>
-                <Sparkles className='mx-auto mb-4 h-12 w-12 text-gray-300' />
-                <h3 className='mb-2 text-lg font-medium text-gray-900'>
-                  No AI Generated Polls Found
-                </h3>
-                <p className='text-gray-600'>
-                  Polls that you have previously generated with AI will show up
-                  here.
-                </p>
+                {selectedCategory === 'Previous Polls' ? (
+                  <>
+                    <Clipboard className='mx-auto mb-4 h-12 w-12 text-gray-300' />
+                    <h3 className='mb-2 text-lg font-medium text-gray-900'>
+                      No Previous Polls Found
+                    </h3>
+                    <p className='text-gray-600'>
+                      Polls that you have previously created will show up here.
+                    </p>
+                  </>
+                ) : selectedCategory === 'AI Generated Polls' ? (
+                  <>
+                    <Sparkles className='mx-auto mb-4 h-12 w-12 text-gray-300' />
+                    <h3 className='mb-2 text-lg font-medium text-gray-900'>
+                      No AI Generated Polls Found
+                    </h3>
+                    <p className='text-gray-600'>
+                      Polls that you have previously generated with AI will show up here.
+                    </p>
+                  </>
+                ) : null}
               </div>
             ) : (
               <div className='space-y-3'>
@@ -216,9 +227,7 @@ function TemplateSelector({
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className='font-medium text-gray-900'>
-                      {poll.question}
-                    </div>
+                    <div className='font-medium text-gray-900'>{poll.question}</div>
                     {poll.date && (
                       <div className='mt-2 flex items-center gap-1 text-xs text-gray-500'>
                         <Calendar className='h-3 w-3' />
@@ -228,7 +237,7 @@ function TemplateSelector({
                   </button>
                 ))}
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Selected Poll Preview */}
@@ -366,6 +375,8 @@ function AIGenerator({
 
 // Main Poll Modal Component
 export default function PollModal() {
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
+
   const [isOpen, setIsOpen] = useState(false);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
@@ -374,8 +385,23 @@ export default function PollModal() {
     { id: '1', text: '' },
     { id: '2', text: '' }
   ]);
-  const [anonymousVoting, setAnonymousVoting] = useState(false);
-  const [autoReveal, setAutoReveal] = useState(true);
+
+  const queryClient = useQueryClient();
+  const addPollsColumn = usePollStore((state) => state.addPollsColumn);
+
+  const createPollMutation = useMutation({
+    mutationFn: (data: ICreatePollQuestion) => createPollQuestion(data),
+    onSuccess: (response) => {
+      setIsOpen(false);
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_CONSTANTS.RETRO_SESSION.GET_RETRO_SESSION_BY_ID]
+      });
+      addPollsColumn(response.data.text);
+    },
+    onError: (error) => {
+      console.error(error);
+    }
+  });
 
   const addOption = () => {
     const newOption: PollOption = {
@@ -413,8 +439,6 @@ export default function PollModal() {
       { id: '1', text: '' },
       { id: '2', text: '' }
     ]);
-    setAnonymousVoting(false);
-    setAutoReveal(true);
     setShowAIGenerator(false);
   };
 
@@ -425,6 +449,18 @@ export default function PollModal() {
     }
   };
 
+  const handleSave = () => {
+    const pollData: ICreatePollQuestion = {
+      text: question,
+      session_id: retroSession?._id || '',
+      criterion: 'communication',
+      options: options
+        .map((opt) => opt.text)
+        .filter((text) => text.trim() !== '')
+    };
+    createPollMutation.mutate(pollData);
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -433,7 +469,7 @@ export default function PollModal() {
             <TooltipTrigger asChild>
               <Button
                 onClick={() => setIsOpen(true)}
-                className='cursor-pointer bg-purple-600 text-white shadow-lg transition-all duration-200 hover:bg-purple-700 hover:shadow-xl'
+                className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md'
               >
                 <ChartGantt className='h-4 w-4' />
               </Button>
@@ -544,7 +580,12 @@ export default function PollModal() {
               >
                 CANCEL
               </Button>
-              <Button className='flex-1 bg-purple-600 shadow-lg hover:bg-purple-700'>
+              <Button
+                onClick={handleSave}
+                className='flex-1 bg-purple-600 shadow-lg hover:bg-purple-700'
+                // disabled={createPollMutation.isLoading}
+              >
+                {/* {createPollMutation.isLoading ? 'SAVING...' : 'SAVE'} */}
                 SAVE
               </Button>
             </div>

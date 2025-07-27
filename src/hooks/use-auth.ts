@@ -1,6 +1,11 @@
 import { showNotification } from '@/components/common';
 import { loginWithGoogle } from '@/config/api/auth';
+import { useTaskStore } from '@/features/kanban/utils/store';
+import { useRetrospectiveStore } from '@/features/retrospectives/stores';
 import { useAuthStore } from '@/stores/authStore';
+import { usePollStore } from '@/stores/pollStore';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { useUserStore } from '@/stores/userStore';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
@@ -35,10 +40,14 @@ export const useLogin = () => {
 // Sign Out
 export const useSignOut = () => {
   const router = useRouter();
-  const clearTokens = useAuthStore((state) => state.clearTokens);
   return useMutation({
     mutationFn: async () => {
-      clearTokens();
+      useAuthStore.persist.clearStorage();
+      useUserStore.persist.clearStorage();
+      useTaskStore.persist.clearStorage();
+      usePollStore.persist.clearStorage();
+      useRetroSessionStore.persist.clearStorage();
+      useRetrospectiveStore.persist.clearStorage();
     },
     onSuccess: () => {
       router.push('/auth/sign-in');

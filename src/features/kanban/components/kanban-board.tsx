@@ -1,4 +1,5 @@
 'use client';
+import { usePollStore } from '@/stores/pollStore';
 import {
   Announcements,
   DndContext,
@@ -20,10 +21,13 @@ import { defaultCols, Task, useTaskStore, type Status } from '../utils/store';
 import type { Column } from './board-column';
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
+import { PollsColumn } from './polls-column';
 import { TaskCard } from './task-card';
 
 export function KanbanBoard() {
   const columns = useTaskStore((state) => state.columns);
+  const pollsCol = usePollStore((state) => state.getPollsColumn());
+  const pollQuestions = usePollStore((state) => state.pollQuestions);
   const setColumns = useTaskStore((state) => state.setCols);
   const pickedUpTaskColumn = useRef<Status>(defaultCols[0].id as Status);
   const columnsId = useMemo(
@@ -51,7 +55,7 @@ export function KanbanBoard() {
 
   function getDraggingTaskData(taskId: UniqueIdentifier, columnId: Status) {
     const tasksInColumn = tasks.filter((task) => task.status === columnId);
-    const taskPosition = tasksInColumn.findIndex((task) => task.id === taskId);
+    const taskPosition = tasksInColumn.findIndex((task) => task._id === taskId);
     const column = columns.find((col) => col.id === columnId);
     return {
       tasksInColumn,
@@ -154,49 +158,58 @@ export function KanbanBoard() {
   };
 
   return (
-    <DndContext
-      accessibility={{
-        announcements
-      }}
-      sensors={sensors}
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-    >
-      <BoardContainer>
-        <SortableContext items={columnsId}>
-          {columns?.map((col, index) => (
-            <Fragment key={col.id}>
-              <BoardColumn
-                column={col}
-                tasks={tasks.filter((task) => task.status === col.id)}
-              />
-              {index === columns?.length - 1 && (
-                <div className='w-[300px]'>
-                  <NewSectionDialog />
-                </div>
-              )}
-            </Fragment>
-          ))}
-          {!columns.length && <NewSectionDialog />}
-        </SortableContext>
-      </BoardContainer>
+    <section className='flex flex-row'>
+      {pollsCol && (
+        <BoardContainer>
+          <PollsColumn column={pollsCol} questions={pollQuestions} />
+        </BoardContainer>
+      )}
+      <DndContext
+        accessibility={{
+          announcements
+        }}
+        sensors={sensors}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragOver={onDragOver}
+      >
+        <BoardContainer scrollClassName='flex-1'>
+          <SortableContext items={columnsId}>
+            {columns?.map((col, index) => (
+              <Fragment key={col.id}>
+                <BoardColumn
+                  column={col}
+                  tasks={tasks.filter((task) => task.status === col.id)}
+                />
+                {index === columns?.length - 1 && (
+                  <div className='w-[300px]'>
+                    <NewSectionDialog />
+                  </div>
+                )}
+              </Fragment>
+            ))}
+            {!columns.length && <NewSectionDialog />}
+          </SortableContext>
+        </BoardContainer>
 
-      {'document' in window &&
-        createPortal(
-          <DragOverlay>
-            {activeColumn && (
-              <BoardColumn
-                isOverlay
-                column={activeColumn}
-                tasks={tasks.filter((task) => task.status === activeColumn.id)}
-              />
-            )}
-            {activeTask && <TaskCard task={activeTask} isOverlay />}
-          </DragOverlay>,
-          document.body
-        )}
-    </DndContext>
+        {'document' in window &&
+          createPortal(
+            <DragOverlay>
+              {activeColumn && (
+                <BoardColumn
+                  isOverlay
+                  column={activeColumn}
+                  tasks={tasks.filter(
+                    (task) => task.status === activeColumn.id
+                  )}
+                />
+              )}
+              {activeTask && <TaskCard task={activeTask} isOverlay />}
+            </DragOverlay>,
+            document.body
+          )}
+      </DndContext>
+    </section>
   );
 
   function onDragStart(event: DragStartEvent) {
@@ -260,8 +273,8 @@ export function KanbanBoard() {
 
     // Im dropping a Task over another Task
     if (isActiveATask && isOverATask) {
-      const activeIndex = tasks.findIndex((t) => t.id === activeId);
-      const overIndex = tasks.findIndex((t) => t.id === overId);
+      const activeIndex = tasks.findIndex((t) => t._id === activeId);
+      const overIndex = tasks.findIndex((t) => t._id === overId);
       const activeTask = tasks[activeIndex];
       const overTask = tasks[overIndex];
       if (activeTask && overTask && activeTask.status !== overTask.status) {
@@ -276,7 +289,7 @@ export function KanbanBoard() {
 
     // Im dropping a Task over a column
     if (isActiveATask && isOverAColumn) {
-      const activeIndex = tasks.findIndex((t) => t.id === activeId);
+      const activeIndex = tasks.findIndex((t) => t._id === activeId);
       const activeTask = tasks[activeIndex];
       if (activeTask) {
         activeTask.status = overId as Status;

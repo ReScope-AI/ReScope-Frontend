@@ -34,5 +34,12 @@ export type MainNavItem = NavItemWithOptionalChildren;
 
 export type SidebarNavItem = NavItemWithChildren;
 
+export interface Response<T> {
+  code: number;
+  data: T;
+}
+
 export * from './IAuth';
 export * from './IUser';
+export * from './IPoll';
+export * from './IRetroSession';

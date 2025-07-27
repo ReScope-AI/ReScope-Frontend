@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Column } from '../components/board-column';
 
-export type Status = 'DROP' | 'ADD' | 'KEEP' | 'IMPROVE';
+export type Status = 'DROP' | 'ADD' | 'KEEP' | 'IMPROVE' | 'POLL';
 
 export const defaultCols = [
   {
@@ -40,7 +40,7 @@ export const defaultCols = [
 export type ColumnId = (typeof defaultCols)[number]['id'];
 
 export type Task = {
-  id: string;
+  _id: string;
   title: string;
   description?: string;
   status: Status;
@@ -56,61 +56,61 @@ export type State = {
 
 const initialTasks: Task[] = [
   {
-    id: 'task1',
+    _id: 'task1',
     status: 'DROP',
     title: 'The excessive documentation...',
     votes: 1
   },
   {
-    id: 'task2',
+    _id: 'task2',
     status: 'DROP',
     title: 'The daily scrum call feels...',
     votes: 1
   },
   {
-    id: 'task3',
+    _id: 'task3',
     status: 'ADD',
     title: 'We should start celebrating...',
     votes: 2
   },
   {
-    id: 'task4',
+    _id: 'task4',
     status: 'ADD',
     title: 'Adding code reviews would...',
     votes: 1
   },
   {
-    id: 'task5',
+    _id: 'task5',
     status: 'KEEP',
     title: 'The pair programming...',
     votes: 2
   },
   {
-    id: 'task6',
+    _id: 'task6',
     status: 'KEEP',
     title: 'Celebrating project...',
     votes: 1
   },
   {
-    id: 'task7',
+    _id: 'task7',
     status: 'IMPROVE',
     title: 'Our code review process...',
     votes: 2
   },
   {
-    id: 'task8',
+    _id: 'task8',
     status: 'IMPROVE',
     title: 'Our deployment process has...',
     votes: 1
   },
   {
-    id: 'task9',
+    _id: 'task9',
     status: 'IMPROVE',
     title: 'I think we need to improve...',
     votes: 1
   },
   {
-    id: 'task10',
+    _id: 'task10',
     status: 'IMPROVE',
     title: 'The onboarding process for...',
     votes: 1
@@ -130,6 +130,7 @@ export type Actions = {
   updateCol: (id: UniqueIdentifier, newName: string) => void;
   setOpenDialog: (open: boolean) => void;
   updateTaskVotes: (taskId: string, increment: boolean) => void;
+  clearStorage: () => void;
 };
 
 export const useTaskStore = create<State & Actions>()(
@@ -143,7 +144,7 @@ export const useTaskStore = create<State & Actions>()(
         set((state) => ({
           tasks: [
             ...state.tasks,
-            { id: uuid(), title, description, status, votes: 0 }
+            { _id: uuid(), title, description, status, votes: 0 }
           ]
         })),
       updateCol: (id: UniqueIdentifier, newName: string) =>
@@ -168,7 +169,7 @@ export const useTaskStore = create<State & Actions>()(
       dragTask: (id: string | null) => set({ draggedTask: id }),
       removeTask: (id: string) =>
         set((state) => ({
-          tasks: state.tasks.filter((task) => task.id !== id)
+          tasks: state.tasks.filter((task) => task._id !== id)
         })),
       removeCol: (id: UniqueIdentifier) =>
         set((state) => ({
@@ -182,14 +183,22 @@ export const useTaskStore = create<State & Actions>()(
       updateTaskVotes: (taskId: string, increment: boolean) =>
         set((state) => ({
           tasks: state.tasks.map((task) =>
-            task.id === taskId
+            task._id === taskId
               ? {
                   ...task,
                   votes: Math.max(0, (task.votes || 0) + (increment ? 1 : -1))
                 }
               : task
           )
-        }))
+        })),
+      clearStorage: () => {
+        set({
+          tasks: [],
+          columns: [],
+          draggedTask: null,
+          openDialog: false
+        });
+      }
     }),
     { name: 'task-store' }
   )

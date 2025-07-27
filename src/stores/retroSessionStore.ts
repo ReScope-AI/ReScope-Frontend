@@ -1,11 +1,11 @@
-import { RetroSession } from '@/features/retrospectives/stores';
+import { IRetroSession } from '@/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface RetroSessionState {
-  retroSession: RetroSession | null;
-  setRetroSession: (retroSession: RetroSession) => void;
-  clearRetroSession: () => void;
+  retroSession: IRetroSession | null;
+  setRetroSession: (retroSession: IRetroSession) => void;
+  clearStorage: () => void;
 }
 
 export const useRetroSessionStore = create<RetroSessionState>()(
@@ -13,7 +13,7 @@ export const useRetroSessionStore = create<RetroSessionState>()(
     (set) => ({
       retroSession: null,
       setRetroSession: (retroSession) => set({ retroSession }),
-      clearRetroSession: () => set({ retroSession: null })
+      clearStorage: () => set({ retroSession: null })
     }),
     {
       name: 'retro-session-storage'

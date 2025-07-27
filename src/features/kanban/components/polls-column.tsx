@@ -1,22 +1,23 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { IQuestion } from '@/types';
 import { useDndContext, type UniqueIdentifier } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
   IconGripVertical,
-  IconPlus,
   IconMinus,
+  IconPlus,
   IconRotate360,
   IconSettings
 } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
 import { useMemo } from 'react';
-import { Task, useTaskStore } from '../utils/store';
+import { useTaskStore } from '../utils/store';
 import { ColumnActions } from './column-action';
 import { TaskCard } from './task-card';
-import { cn } from '@/lib/utils';
 
 export interface Column {
   id: UniqueIdentifier;
@@ -35,9 +36,9 @@ export interface ColumnDragData {
   allowDragExternal?: boolean;
 }
 
-interface BoardColumnProps {
+interface PollsColumnProps {
   column: Column;
-  tasks: Task[];
+  questions: IQuestion[];
   isOverlay?: boolean;
   disableDragExternal?: boolean;
 }
@@ -90,15 +91,15 @@ const getColumnColorClasses = (color: string) => {
   }
 };
 
-export function BoardColumn({
+export function PollsColumn({
   column,
-  tasks,
+  questions,
   isOverlay,
   disableDragExternal = false
-}: BoardColumnProps) {
-  const tasksIds = useMemo(() => {
-    return tasks.map((task) => task._id);
-  }, [tasks]);
+}: PollsColumnProps) {
+  const questionsIds = useMemo(() => {
+    return questions.map((question) => question._id);
+  }, [questions]);
 
   const {
     setNodeRef,
@@ -175,11 +176,16 @@ export function BoardColumn({
       </CardHeader>
       <CardContent className='flex grow flex-col gap-4 overflow-x-hidden p-2'>
         <ScrollArea className='h-full'>
-          <SortableContext items={tasksIds}>
-            {tasks.map((task) => (
+          <SortableContext items={questionsIds}>
+            {questions.map((question) => (
               <TaskCard
-                key={task._id}
-                task={task}
+                key={question._id}
+                task={{
+                  _id: question._id,
+                  title: question.text,
+                  status: 'POLL',
+                  votes: 0
+                }}
                 disableDragExternal={disableDragExternal}
               />
             ))}
