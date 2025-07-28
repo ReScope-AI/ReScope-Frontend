@@ -26,7 +26,7 @@ const request = async (
   options: any = {},
   apiKey = API_KEYS.BASE_API
 ) => {
-  const clearTokens = useAuthStore.getState().clearTokens;
+  const clearTokens = useAuthStore.getState().clearStorage;
   const {
     method = 'POST',
     data = {},
