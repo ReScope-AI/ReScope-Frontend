@@ -11,7 +11,8 @@ import {
   IconMinus,
   IconPlus,
   IconRotate360,
-  IconSettings
+  IconSettings,
+  IconChartHistogram
 } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
 import { useMemo } from 'react';
@@ -53,6 +54,8 @@ const getColumnIcon = (icon: string) => {
       return <IconRotate360 className='h-4 w-4' />;
     case 'gear':
       return <IconSettings className='h-4 w-4' />;
+    case 'chart':
+      return <IconChartHistogram className='h-4 w-4' />;
     default:
       return <IconPlus className='h-4 w-4' />;
   }
@@ -150,29 +153,39 @@ export function PollsColumn({
         dragging: isOverlay ? 'overlay' : isDragging ? 'over' : undefined
       })}
     >
-      <CardHeader className='space-between flex flex-col items-start border-b-2 p-4 text-left'>
-        <div className='flex w-full items-center justify-between'>
-          <Button
-            variant={'ghost'}
-            {...attributes}
-            {...listeners}
-            className={`${colorClasses.icon} relative -ml-2 h-auto cursor-grab p-1`}
-          >
-            <span className='sr-only'>{`Move column: ${column.title}`}</span>
-            <IconGripVertical />
-          </Button>
-          <div className='flex items-center gap-2'>
-            <div className={`${colorClasses.icon}`}>
+      <CardHeader className='flex flex-col items-start space-y-2 border-b-2 p-4 text-left'>
+        <div className='flex w-full items-center justify-between gap-3'>
+          <div className='flex items-center gap-3'>
+            <Button
+              variant={'ghost'}
+              {...attributes}
+              {...listeners}
+              className={`${colorClasses.icon} relative h-8 w-8 cursor-grab p-0 hover:bg-white/50 dark:hover:bg-gray-800/50`}
+            >
+              <span className='sr-only'>{`Move column: ${column.title}`}</span>
+              <IconGripVertical className='h-4 w-4' />
+            </Button>
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-lg bg-white/50 dark:bg-gray-800/50 ${colorClasses.icon}`}
+            >
               {getColumnIcon(column.icon || 'default')}
             </div>
           </div>
-          <ColumnActions id={column.id} title={column.title} />
+          <ColumnActions id={column.id} title={column.question || 'Polls'} />
         </div>
-        {column.question && (
-          <p className={`text-sm ${colorClasses.text} mt-2 opacity-80`}>
-            {column.question}
-          </p>
-        )}
+
+        <div className='w-full space-y-2'>
+          <h3 className={`text-xl font-bold ${colorClasses.text}`}>
+            {column.title}
+          </h3>
+          {column.question && (
+            <p
+              className={`text-sm leading-relaxed ${colorClasses.text} opacity-90`}
+            >
+              {column.question}
+            </p>
+          )}
+        </div>
       </CardHeader>
       <CardContent className='flex grow flex-col gap-4 overflow-x-hidden p-2'>
         <ScrollArea className='h-full'>

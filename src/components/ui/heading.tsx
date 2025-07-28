@@ -1,4 +1,4 @@
-import PollModal from '@/features/kanban/components/poll-modal';
+import PollModal from '@/features/kanban/components/polls/poll-modal';
 
 interface HeadingProps {
   title: string;
