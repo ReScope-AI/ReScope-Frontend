@@ -129,7 +129,7 @@ export function BoardColumn({
   const colorClasses = getColumnColorClasses(column.color || 'gray');
 
   const variants = cva(
-    `h-[75vh] max-h-[75vh] w-[300px] sm:w-[350px] flex flex-col shrink-0 snap-start ${colorClasses.bg} ${colorClasses.border} border-2`,
+    `h-[80vh] max-h-[80vh] w-[300px] sm:w-[350px] flex flex-col shrink-0 snap-start ${colorClasses.bg} ${colorClasses.border} border-2`,
     {
       variants: {
         dragging: {
