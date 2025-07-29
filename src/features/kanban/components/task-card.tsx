@@ -97,7 +97,7 @@ export function TaskCard({
   const colorClasses = getTaskColorClasses(task.status);
 
   const variants = cva(
-    `mb-2 ${colorClasses.bg} ${colorClasses.border} border-2`,
+    `mb-2 ${colorClasses.bg} ${colorClasses.border} border-2 py-2`,
     {
       variants: {
         dragging: {

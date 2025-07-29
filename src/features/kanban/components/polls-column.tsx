@@ -6,18 +6,14 @@ import { IQuestion } from '@/types';
 import { useDndContext, type UniqueIdentifier } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import {
-  IconGripVertical,
-  IconMinus,
-  IconPlus,
-  IconRotate360,
-  IconSettings
-} from '@tabler/icons-react';
+import { IconGripVertical, IconPlus } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTaskStore } from '../utils/store';
 import { ColumnActions } from './column-action';
 import { TaskCard } from './task-card';
+import { getColumnColorClasses, getColumnIcon } from '../utils';
+import { PollQuestionCard } from './poll-question-card';
 
 export interface Column {
   id: UniqueIdentifier;
@@ -43,54 +39,6 @@ interface PollsColumnProps {
   disableDragExternal?: boolean;
 }
 
-const getColumnIcon = (icon: string) => {
-  switch (icon) {
-    case 'minus':
-      return <IconMinus className='h-4 w-4' />;
-    case 'plus':
-      return <IconPlus className='h-4 w-4' />;
-    case 'loop':
-      return <IconRotate360 className='h-4 w-4' />;
-    case 'gear':
-      return <IconSettings className='h-4 w-4' />;
-    default:
-      return <IconPlus className='h-4 w-4' />;
-  }
-};
-
-const getColumnColorClasses = (color: string) => {
-  switch (color) {
-    case 'red':
-      return {
-        bg: 'bg-red-50 dark:bg-red-950/20',
-        border: 'border-red-200 dark:border-red-800',
-        text: 'text-red-700 dark:text-red-300',
-        icon: 'text-red-600 dark:text-red-400'
-      };
-    case 'green':
-      return {
-        bg: 'bg-green-50 dark:bg-green-950/20',
-        border: 'border-green-200 dark:border-green-800',
-        text: 'text-green-700 dark:text-green-300',
-        icon: 'text-green-600 dark:text-green-400'
-      };
-    case 'orange':
-      return {
-        bg: 'bg-orange-50 dark:bg-orange-950/20',
-        border: 'border-orange-200 dark:border-orange-800',
-        text: 'text-orange-700 dark:text-orange-300',
-        icon: 'text-orange-600 dark:text-orange-400'
-      };
-    default:
-      return {
-        bg: 'bg-gray-50 dark:bg-gray-950/20',
-        border: 'border-gray-200 dark:border-gray-800',
-        text: 'text-gray-700 dark:text-gray-300',
-        icon: 'text-gray-600 dark:text-gray-400'
-      };
-  }
-};
-
 export function PollsColumn({
   column,
   questions,
@@ -100,6 +48,11 @@ export function PollsColumn({
   const questionsIds = useMemo(() => {
     return questions.map((question) => question._id);
   }, [questions]);
+  const setOpenDialog = useTaskStore((state) => state.setOpenDialog);
+  const [editingQuestion, setEditingQuestion] = useState<IQuestion | null>(
+    null
+  );
+  const [questionsState, setQuestionsState] = useState<IQuestion[]>(questions);
 
   const {
     setNodeRef,
@@ -120,8 +73,24 @@ export function PollsColumn({
     disabled: disableDragExternal
   });
 
-  const setOpenDialog = useTaskStore((state) => state.setOpenDialog);
+  // Handle edit
+  const handleEdit = (updated: IQuestion) => {
+    setQuestionsState((prev) =>
+      prev.map((q) => (q._id === updated._id ? updated : q))
+    );
+    // TODO: Call API update if needed
+  };
 
+  // Handle delete
+  const handleDelete = (id: string) => {
+    setQuestionsState((prev) => prev.filter((q) => q._id !== id));
+    // TODO: Call API delete if needed
+  };
+
+  // Handle vote
+  const handleVote = (optionId: string) => {
+    // TODO: Call API vote, update vote count if needed
+  };
   const style = {
     transition,
     transform: CSS.Translate.toString(transform)
@@ -130,7 +99,7 @@ export function PollsColumn({
   const colorClasses = getColumnColorClasses(column.color || 'gray');
 
   const variants = cva(
-    `h-[75vh] max-h-[75vh] w-[300px] sm:w-[350px] flex flex-col shrink-0 snap-start ${colorClasses.bg} ${colorClasses.border} border-2`,
+    `h-[80vh] max-h-[80vh] w-[300px] sm:w-[350px] flex flex-col shrink-0 snap-start ${colorClasses.bg} ${colorClasses.border} border-2 gap-2`,
     {
       variants: {
         dragging: {
@@ -150,43 +119,51 @@ export function PollsColumn({
         dragging: isOverlay ? 'overlay' : isDragging ? 'over' : undefined
       })}
     >
-      <CardHeader className='space-between flex flex-col items-start border-b-2 p-4 text-left'>
-        <div className='flex w-full items-center justify-between'>
-          <Button
-            variant={'ghost'}
-            {...attributes}
-            {...listeners}
-            className={`${colorClasses.icon} relative -ml-2 h-auto cursor-grab p-1`}
-          >
-            <span className='sr-only'>{`Move column: ${column.title}`}</span>
-            <IconGripVertical />
-          </Button>
-          <div className='flex items-center gap-2'>
-            <div className={`${colorClasses.icon}`}>
+      <CardHeader className='flex flex-col items-start space-y-2 border-b-2 p-4 text-left'>
+        <div className='flex w-full items-center justify-between gap-3'>
+          <div className='flex items-center gap-3'>
+            <Button
+              variant={'ghost'}
+              {...attributes}
+              {...listeners}
+              className={`${colorClasses.icon} relative h-8 w-8 cursor-grab p-0 hover:bg-white/50 dark:hover:bg-gray-800/50`}
+            >
+              <span className='sr-only'>{`Move column: ${column.title}`}</span>
+              <IconGripVertical className='h-4 w-4' />
+            </Button>
+            <div
+              className={`flex h-8 w-8 items-center justify-center rounded-lg bg-white/50 dark:bg-gray-800/50 ${colorClasses.icon}`}
+            >
               {getColumnIcon(column.icon || 'default')}
             </div>
           </div>
-          <ColumnActions id={column.id} title={column.title} />
+          <ColumnActions id={column.id} title={column.question || 'Polls'} />
         </div>
-        {column.question && (
-          <p className={`text-sm ${colorClasses.text} mt-2 opacity-80`}>
-            {column.question}
-          </p>
-        )}
+
+        <div className='w-full'>
+          <h3 className={`text-xl font-bold ${colorClasses.text}`}>
+            {column.title}
+          </h3>
+          {column.question && (
+            <p
+              className={`text-sm leading-relaxed ${colorClasses.text} opacity-90`}
+            >
+              {column.question}
+            </p>
+          )}
+        </div>
       </CardHeader>
       <CardContent className='flex grow flex-col gap-4 overflow-x-hidden p-2'>
         <ScrollArea className='h-full'>
           <SortableContext items={questionsIds}>
             {questions.map((question) => (
-              <TaskCard
+              <PollQuestionCard
                 key={question._id}
-                task={{
-                  _id: question._id,
-                  title: question.text,
-                  status: 'POLL',
-                  votes: 0
-                }}
+                question={question}
                 disableDragExternal={disableDragExternal}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onVote={handleVote}
               />
             ))}
             <Button

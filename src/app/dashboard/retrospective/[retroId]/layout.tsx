@@ -61,7 +61,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className='flex-1 space-y-4 py-2'>
+    <div className='flex-1 space-y-4'>
       {connectionError && isDev && (
         <div className='rounded bg-yellow-50 p-2 text-sm text-yellow-600'>
           Socket connection issue: {connectionError}

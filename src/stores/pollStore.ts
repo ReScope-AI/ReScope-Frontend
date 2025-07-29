@@ -51,7 +51,7 @@ export const usePollStore = create<IPollStoreState>()(
             id: 'POLLS',
             question: title,
             color: 'gray',
-            icon: 'default',
+            icon: 'chart',
             disableDragExternal: true
           } as Column & {
             question: string;

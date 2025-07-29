@@ -1,5 +1,3 @@
-import PollModal from '@/features/kanban/components/poll-modal';
-
 interface HeadingProps {
   title: string;
   description?: string;
@@ -14,7 +12,6 @@ export const Heading: React.FC<HeadingProps> = ({ title, description }) => {
           <p className='text-muted-foreground text-sm'>{description}</p>
         )}
       </div>
-      <PollModal />
     </div>
   );
 };

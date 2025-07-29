@@ -6,7 +6,8 @@ const POLL_QUESTION_API_URL = {
   CREATE: '/poll-question',
   LIST: '/poll-question/list-poll-questions',
   DELETE: '/poll-question',
-  GET: '/poll-question'
+  GET: '/poll-question',
+  AI_GENERATE: '/ai-generate/generate-polls'
 };
 
 export const createPollQuestion = async (data: ICreatePollQuestion) => {
@@ -25,6 +26,18 @@ export const getPollQuestions = async (sessionId: string) => {
   const response = await request(
     `${POLL_QUESTION_API_URL.LIST}/${sessionId}`,
     { method: 'GET' },
+    API_KEYS.BASE_API
+  );
+  return response;
+};
+
+export const generateAIPolls = async (prompt: string) => {
+  const response = await request(
+    POLL_QUESTION_API_URL.AI_GENERATE,
+    {
+      method: 'POST',
+      data: { userPrompt: prompt }
+    },
     API_KEYS.BASE_API
   );
   return response;

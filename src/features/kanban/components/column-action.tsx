@@ -74,14 +74,6 @@ export function ColumnActions({
           >
             Rename
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-
-          <DropdownMenuItem
-            onSelect={() => setShowDeleteDialog(true)}
-            className='text-red-600'
-          >
-            Delete Section
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
