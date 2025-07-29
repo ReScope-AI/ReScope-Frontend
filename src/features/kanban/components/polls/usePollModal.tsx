@@ -15,6 +15,7 @@ export function usePollModal() {
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [question, setQuestion] = useState('');
+  const [criterion, setCriterion] = useState('communication');
   const [options, setOptions] = useState<PollOption[]>([
     { id: '1', text: '' },
     { id: '2', text: '' }
@@ -54,8 +55,26 @@ export function usePollModal() {
     );
   };
 
+  const handleAIGeneratedPoll = (poll: {
+    question: string;
+    options: string[];
+    criterion?: string;
+  }) => {
+    setQuestion(poll.question);
+    setOptions(
+      poll.options.map((opt, index) => ({
+        id: (index + 1).toString(),
+        text: opt
+      }))
+    );
+    if (poll.criterion) {
+      setCriterion(poll.criterion.toLowerCase());
+    }
+  };
+
   const resetForm = () => {
     setQuestion('');
+    setCriterion('communication');
     setOptions([
       { id: '1', text: '' },
       { id: '2', text: '' }
@@ -67,7 +86,7 @@ export function usePollModal() {
     const pollData: ICreatePollQuestion = {
       text: question,
       session_id: retroSession?._id || '',
-      criterion: 'communication',
+      criterion: criterion as any,
       options: options
         .map((opt) => opt.text)
         .filter((text) => text.trim() !== '')
@@ -84,10 +103,13 @@ export function usePollModal() {
     setShowTemplateSelector,
     question,
     setQuestion,
+    criterion,
+    setCriterion,
     options,
     addOption,
     removeOption,
     updateOption,
+    handleAIGeneratedPoll,
     resetForm,
     handleSave,
     isLoading: createPollMutation.isPending

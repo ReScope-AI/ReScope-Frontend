@@ -1,159 +1,129 @@
 'use client';
-import React, { useState } from 'react';
-import { Poll } from './types';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+
+import type React from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  BarChart3,
-  Calendar,
-  Check,
-  Clipboard,
-  Sparkles,
-  X
-} from 'lucide-react';
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
 
-const TemplateSelector = ({
-  isOpen,
-  onClose,
-  onSelect
-}: {
-  isOpen: boolean;
+// Define the missing types
+interface Category {
+  id: string;
+  name: string;
+  polls: Poll[];
+}
+
+interface Poll {
+  id: string;
+  title: string;
+  description?: string;
+  options: string[];
+}
+
+interface TemplateSelectorProps {
+  open: boolean;
   onClose: () => void;
-  onSelect: (poll: Poll) => void;
+  categories: Category[];
+  selectedCategory: Category | null;
+  setSelectedCategory: (category: Category | null) => void;
+}
+
+// Simple PollPreview component
+const PollPreview: React.FC<{
+  poll: Poll;
+  onClick: () => void;
+  isSelected: boolean;
+}> = ({ poll, onClick, isSelected }) => {
+  return (
+    <div
+      className={`mb-3 cursor-pointer rounded-lg border p-3 transition-all duration-200 ${
+        isSelected
+          ? 'border-purple-500 bg-purple-50 dark:border-purple-400 dark:bg-purple-900/20'
+          : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
+      }`}
+      onClick={onClick}
+    >
+      <h3 className='font-medium text-gray-900 dark:text-white'>
+        {poll.title}
+      </h3>
+      {poll.description && (
+        <p className='mt-1 text-sm text-gray-600 dark:text-gray-400'>
+          {poll.description}
+        </p>
+      )}
+      <div className='mt-2'>
+        <p className='text-xs text-gray-500 dark:text-gray-500'>Options:</p>
+        <div className='mt-1 space-y-1'>
+          {poll.options.map((option, index) => (
+            <div
+              key={index}
+              className='text-xs text-gray-600 dark:text-gray-300'
+            >
+              • {option}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TemplateSelector: React.FC<TemplateSelectorProps> = ({
+  open,
+  onClose,
+  categories,
+  selectedCategory,
+  setSelectedCategory
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState('Default Polls');
   const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
 
-  const handleSelect = () => {
-    if (selectedPoll) {
-      onSelect(selectedPoll);
-      onClose();
-    }
-  };
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className='h-[600px] max-w-6xl p-0'>
+        <DialogTitle className='p-6 text-gray-900 dark:text-white'>
+          Select a Poll Template
+        </DialogTitle>
         <div className='flex h-full'>
-          {/* Categories Sidebar */}
-          <div className='w-64 border-r bg-gradient-to-b from-gray-50 to-gray-100 p-4'>
-            <div className='mb-4 flex items-center justify-between'>
-              <h3 className='font-semibold text-gray-900'>Select Poll</h3>
-              <Button
-                variant='ghost'
-                size='icon'
-                onClick={onClose}
-                className='h-6 w-6 hover:bg-gray-200'
+          <div className='w-64 border-r bg-gradient-to-b from-gray-50 to-gray-100 p-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-900'>
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-all duration-200 ${
+                  selectedCategory === category
+                    ? 'bg-purple-100 text-purple-700 shadow-sm dark:bg-purple-900/30 dark:text-purple-300'
+                    : 'text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
+                onClick={() => setSelectedCategory(category)}
               >
-                <X className='h-4 w-4' />
-              </Button>
-            </div>
-            <p className='mb-6 text-sm text-gray-600'>
-              Select an existing poll to use in your retro
-            </p>
-
-            <div className='space-y-1'>
-              <h4 className='mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase'>
-                CATEGORY
-              </h4>
-              {['Default Polls', 'Previous Polls', 'AI Generated Polls'].map(
-                (category) => (
-                  <button
-                    key={category}
-                    onClick={() => {
-                      setSelectedCategory(category);
-                      setSelectedPoll(null);
-                    }}
-                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-all duration-200 ${
-                      selectedCategory === category
-                        ? 'shadow- sm bg-purple-100 text-purple-700'
-                        : 'text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {category === 'Default Polls' && (
-                      <Clipboard className='h-4 w-4' />
-                    )}
-                    {category === 'Previous Polls' && (
-                      <Calendar className='h-4 w-4' />
-                    )}
-                    {category === 'AI Generated Polls' && (
-                      <Sparkles className='h-4 w-4' />
-                    )}
-                    {category}
-                  </button>
-                )
-              )}
-            </div>
-          </div>
-
-          {/* Polls List */}
-          <div className='flex-1 p-4'>
-            <h4 className='mb-4 text-xs font-medium tracking-wide text-gray-500 uppercase'>
-              {selectedCategory.toUpperCase()}
-            </h4>
-            {/* Poll list content would go here */}
-          </div>
-
-          {/* Selected Poll Preview */}
-          <div className='w-80 border-l bg-gradient-to-b from-gray-50 to-gray-100 p-4'>
-            <h4 className='mb-4 text-xs font-medium tracking-wide text-gray-500 uppercase'>
-              SELECTED POLL
-            </h4>
-
-            {selectedPoll ? (
-              <div className='rounded-lg border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-4 shadow-sm'>
-                <div className='mb-3 flex items-center gap-2'>
-                  <div className='flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 shadow-sm'>
-                    <Check className='h-3 w-3 text-white' />
-                  </div>
-                  <h3 className='font-medium text-blue-900'>
-                    {selectedPoll.question}
-                  </h3>
-                </div>
-
-                <ul className='mb-4 space-y-2'>
-                  {selectedPoll.options.map((option, index) => (
-                    <li
-                      key={index}
-                      className='flex items-center gap-2 text-sm text-blue-800'
-                    >
-                      <div className='flex h-5 w-5 items-center justify-center rounded-full bg-blue-200 text-xs font-medium'>
-                        {index + 1}
-                      </div>
-                      {option}
-                    </li>
-                  ))}
-                </ul>
-
-                {selectedPoll.date && (
-                  <div className='flex items-center gap-1 text-xs text-blue-600'>
-                    <Calendar className='h-3 w-3' />
-                    {selectedPoll.date}
-                  </div>
-                )}
+                {category.name}
               </div>
-            ) : (
-              <div className='py-8 text-center text-gray-500'>
-                <BarChart3 className='mx-auto mb-2 h-8 w-8 text-gray-300' />
-                Select a poll to see preview
+            ))}
+          </div>
+          <div className='w-80 border-l bg-gradient-to-b from-gray-50 to-gray-100 p-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-900'>
+            {selectedCategory && (
+              <div>
+                {selectedCategory.polls.map((poll: Poll) => (
+                  <PollPreview
+                    key={poll.id}
+                    poll={poll}
+                    onClick={() => setSelectedPoll(poll)}
+                    isSelected={selectedPoll === poll}
+                  />
+                ))}
               </div>
             )}
           </div>
         </div>
-
-        {/* Footer */}
-        <div className='flex justify-end gap-3 border-t bg-gray-50 p-4'>
+        <DialogFooter className='flex justify-end gap-3 border-t bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800'>
           <Button variant='outline' onClick={onClose}>
-            CANCEL
+            Cancel
           </Button>
-          <Button
-            onClick={handleSelect}
-            disabled={!selectedPoll}
-            className='bg-purple-600 hover:bg-purple-700'
-          >
-            <Check className='mr-2 h-4 w-4' />
-            SELECT POLL
-          </Button>
-        </div>
+          <Button onClick={onClose}>Select</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

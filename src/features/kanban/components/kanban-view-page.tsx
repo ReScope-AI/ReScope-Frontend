@@ -36,7 +36,7 @@ export default function KanbanViewPage() {
 export function HeaderBar() {
   const retroSession = useRetroSessionStore((state) => state.retroSession);
   return (
-    <div className='mt-4 flex w-full items-center justify-between space-x-2 border-b border-gray-200 bg-white px-4 py-4 text-sm dark:border-gray-700 dark:bg-gray-900'>
+    <div className='mt-4 flex w-full items-center justify-between space-x-2 border-b border-gray-200 bg-white px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-900'>
       {/* Left section */}
       <div className='flex items-center gap-2'>
         <h2 className='text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100'>
