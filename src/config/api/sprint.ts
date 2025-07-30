@@ -11,7 +11,6 @@ export interface ICreateSprint {
   name: string;
   start_date: string;
   end_date: string;
-  created_by: string;
 }
 
 export const createSprint = async (data: ICreateSprint) => {

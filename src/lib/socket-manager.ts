@@ -16,19 +16,43 @@ export function getSocketIo(
   opts?: Partial<ManagerOptions & SocketOptions>
 ): Socket {
   if (socketMap.has(url)) {
-    return socketMap.get(url)!;
+    const existingSocket = socketMap.get(url)!;
+    // If the socket is still connected, return it
+    if (existingSocket.connected) {
+      return existingSocket;
+    }
+    // If disconnected, remove it from the map and create a new one
+    socketMap.delete(url);
   }
+
   const socket = io(url, opts);
   socketMap.set(url, socket);
 
-  // Optional: Clean up the map when the socket disconnects
+  // Clean up the map when the socket disconnects permanently
   const cleanup = () => {
     if (socketMap.get(url) === socket) {
       socketMap.delete(url);
     }
   };
-  socket.on('disconnect', cleanup);
-  socket.on('connect_error', cleanup);
+
+  // Only clean up on permanent disconnection, not temporary ones
+  socket.on('disconnect', (reason) => {
+    if (
+      reason === 'io server disconnect' ||
+      reason === 'io client disconnect'
+    ) {
+      cleanup();
+    }
+  });
 
   return socket;
+}
+
+export function cleanupAllSockets(): void {
+  socketMap.forEach((socket) => {
+    if (socket.connected) {
+      socket.disconnect();
+    }
+  });
+  socketMap.clear();
 }

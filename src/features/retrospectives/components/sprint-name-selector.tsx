@@ -7,7 +7,6 @@ import {
   useDeleteSprint,
   useGetSprintsByUser
 } from '@/hooks/use-sprint-api';
-import { useUserStore } from '@/stores/userStore';
 import { Check, Plus, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -22,7 +21,6 @@ const SprintNameSelector = ({
   value,
   onValueChange
 }: SprintNameSelectorProps) => {
-  const { user } = useUserStore();
   const { sprints, addSprint, removeSprint, setSprints } =
     useRetrospectiveStore();
   const [isAdding, setIsAdding] = useState(false);
@@ -57,8 +55,7 @@ const SprintNameSelector = ({
       const result = await createSprintMutation.mutateAsync({
         name: sprintName,
         start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-        created_by: user?._id || ''
+        end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
       });
 
       if (result?.data) {
