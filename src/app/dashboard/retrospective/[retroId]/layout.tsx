@@ -29,7 +29,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   });
 
   // Initialize socket connection for this retrospective session
-  const { connectionError, isDev } = useRetroSocket({ retroID: retroId });
+  const { connectionError, isDev } = useRetroSocket();
 
   useEffect(() => {
     if (retro && retro.code === 200) {
