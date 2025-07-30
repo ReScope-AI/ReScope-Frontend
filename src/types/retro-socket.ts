@@ -30,6 +30,11 @@ export interface RetroEmitEvents {
     changePlan: string;
     category_id: string;
   };
+  're-scope': {
+    event: string;
+    room: string;
+    data: any;
+  };
 }
 
 export interface RetroListenEvents {

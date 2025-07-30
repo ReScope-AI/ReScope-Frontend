@@ -1,24 +1,64 @@
 'use client';
-import { KanbanBoard } from './kanban-board';
-import NewTaskDialog from './new-task-dialog';
+import { Button } from '@/components/ui/button';
+import { emit, on } from '@/lib/retro-socket';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import {
-  MessageSquareMore,
-  ThumbsUp,
+  CreditCard,
   Filter,
+  MessageCircle,
+  MessageSquareMore,
+  RotateCcw,
   Search,
   SortAsc,
-  RotateCcw,
   SquarePen,
-  MessageCircle,
-  CreditCard
+  ThumbsUp
 } from 'lucide-react';
-import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { useEffect } from 'react';
+import { Status, useTaskStore } from '../utils/store';
+import { KanbanBoard } from './kanban-board';
+import NewTaskDialog from './new-task-dialog';
 import PollModal from './polls';
-import { Button } from '@/components/ui/button';
+import { v4 as uuidv4 } from 'uuid';
 
-export default function KanbanViewPage() {
+export default function KanbanViewPage({ retroId }: { retroId: string }) {
+  const setPlanItemAction = useTaskStore((state) => state.setPlanItemAction);
+  const planItemAction = useTaskStore((state) => state.planItemAction);
+  const setTasks = useTaskStore((state) => state.setTasks);
+
+  useEffect(() => {
+    on('generate-plan-items', (data) => {
+      setPlanItemAction(data.data);
+    });
+  }, []);
+
+  const handleTestMessage = () => {
+    emit('re-scope', {
+      event: 'generate-plan-items',
+      room: retroId,
+      data: {
+        message: 'Hello from client!'
+      }
+    });
+  };
+
+  console.log('planItemAction', planItemAction);
+
+  useEffect(() => {
+    if (planItemAction.length > 0) {
+      setTasks(
+        planItemAction.map((item) => ({
+          _id: uuidv4(),
+          title: item.description,
+          status: item.action_type as Status,
+          votes: 0
+        }))
+      );
+    }
+  }, [planItemAction]);
+
   return (
     <div className='flex h-full flex-col'>
+      <Button onClick={handleTestMessage}>Test Message</Button>
       {/* Header Section */}
       <HeaderBar />
 

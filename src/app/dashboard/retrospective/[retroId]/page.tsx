@@ -6,11 +6,17 @@ export const metadata = {
   title: 'Dashboard : Retrospective View'
 };
 
-export default async function Page() {
+export default async function Page({
+  params
+}: {
+  params: { retroId: string };
+}) {
+  const { retroId } = await params;
+
   return (
     <div className='flex-1 space-y-4'>
       <Suspense fallback={<FormCardSkeleton />}>
-        <KanbanViewPage />
+        <KanbanViewPage retroId={retroId} />
       </Suspense>
     </div>
   );
