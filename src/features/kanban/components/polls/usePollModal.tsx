@@ -68,7 +68,19 @@ export function usePollModal() {
       }))
     );
     if (poll.criterion) {
-      setCriterion(poll.criterion.toLowerCase());
+      // Map the criterion to match the select options
+      const criterionMap: Record<string, string> = {
+        communication: 'communication',
+        quality: 'quality',
+        process: 'process',
+        estimate: 'estimate',
+        timebound: 'timebound',
+        time_bound: 'timebound',
+        'time bound': 'timebound'
+      };
+      const mappedCriterion =
+        criterionMap[poll.criterion.toLowerCase()] || 'communication';
+      setCriterion(mappedCriterion);
     }
   };
 
@@ -92,6 +104,7 @@ export function usePollModal() {
         .filter((text) => text.trim() !== '')
     };
     createPollMutation.mutate(pollData);
+    setIsOpen(false);
   };
 
   return {
