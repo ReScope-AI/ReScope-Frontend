@@ -1,7 +1,6 @@
 'use client';
 
 import { showNotification } from '@/components/common';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,7 +21,11 @@ interface AIGeneratedPoll {
 interface AIGeneratorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onGenerate: (poll: { question: string; options: string[] }) => void;
+  onGenerate: (poll: {
+    question: string;
+    options: string[];
+    criterion?: string;
+  }) => void;
 }
 
 const AIGeneratorModal = ({
@@ -33,10 +36,6 @@ const AIGeneratorModal = ({
   const [aiPrompt, setAiPrompt] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedPolls, setGeneratedPolls] = useState<AIGeneratedPoll[]>([]);
-  const [selectedPoll, setSelectedPoll] = useState<AIGeneratedPoll | null>(
-    null
-  );
 
   const handleTemplateSelect = (template: (typeof promptTemplates)[0]) => {
     setSelectedTemplate(template.id);
@@ -46,19 +45,32 @@ const AIGeneratorModal = ({
   const generateAIPollsMutation = useMutation({
     mutationFn: (prompt: string) => generateAIPolls(prompt),
     onSuccess: (response) => {
-      if (response.code === 201 && response.data) {
-        setGeneratedPolls(response.data);
-        if (response.data.length > 0) {
-          setSelectedPoll(response.data[0]);
-        }
+      if (response.code === 201 && response.data && response.data.length > 0) {
+        const firstPoll = response.data[0];
+        onGenerate({
+          question: firstPoll.text,
+          options: firstPoll.options.map((opt: { text: string }) => opt.text),
+          criterion: firstPoll.criterion
+        });
+        onClose();
+        resetForm();
+        showNotification(
+          'success',
+          'AI poll generated and applied successfully!'
+        );
+      } else {
+        showNotification('error', 'No polls were generated. Please try again.');
       }
+    },
+    onError: (error) => {
+      console.error('Error generating polls:', error);
+      showNotification('error', 'Failed to generate polls. Please try again.');
     }
   });
+
   const handleGenerate = async () => {
     if (!aiPrompt.trim()) return;
     setIsGenerating(true);
-    setGeneratedPolls([]);
-    setSelectedPoll(null);
     try {
       await generateAIPollsMutation.mutateAsync(aiPrompt);
     } catch (error) {
@@ -69,22 +81,9 @@ const AIGeneratorModal = ({
     }
   };
 
-  const handleUseGenerated = () => {
-    if (selectedPoll) {
-      onGenerate({
-        question: selectedPoll.text,
-        options: selectedPoll.options.map((opt) => opt.text)
-      });
-      onClose();
-      resetForm();
-    }
-  };
-
   const resetForm = () => {
     setAiPrompt('');
     setSelectedTemplate(null);
-    setGeneratedPolls([]);
-    setSelectedPoll(null);
     setIsGenerating(false);
   };
 
@@ -95,8 +94,8 @@ const AIGeneratorModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className='max-w-6xl bg-white p-0 dark:bg-gray-900'>
-        <div className='flex h-[600px] flex-col'>
+      <DialogContent className='max-w-4xl bg-white p-0 dark:bg-gray-900'>
+        <div className='flex h-[500px] flex-col'>
           {/* Fixed Header */}
           <div className='flex-shrink-0 border-b border-gray-200 p-6 dark:border-gray-700'>
             <div className='flex items-center gap-3'>
@@ -176,57 +175,11 @@ const AIGeneratorModal = ({
                 </div>
               </div>
 
-              {/* Generated Polls Section */}
-              {generatedPolls.length > 0 && (
-                <div>
-                  <h4 className='mb-3 text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400'>
-                    Generated Polls
-                  </h4>
-                  <div className='space-y-3'>
-                    {generatedPolls.map((poll, index) => (
-                      <div
-                        key={index}
-                        className={`cursor-pointer rounded-lg border p-3 transition-all duration-200 ${
-                          selectedPoll === poll
-                            ? 'border-purple-500 bg-purple-50 dark:border-purple-400 dark:bg-purple-900/20'
-                            : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
-                        }`}
-                        onClick={() => setSelectedPoll(poll)}
-                      >
-                        <div className='mb-2 flex items-start justify-between'>
-                          <h5 className='text-sm font-medium text-gray-900 dark:text-white'>
-                            {poll.text}
-                          </h5>
-                          <Badge variant='outline' className='text-xs'>
-                            {poll.criterion}
-                          </Badge>
-                        </div>
-                        <div className='space-y-1'>
-                          {poll.options.slice(0, 3).map((option, optIndex) => (
-                            <div
-                              key={optIndex}
-                              className='text-xs text-gray-600 dark:text-gray-300'
-                            >
-                              • {option.text}
-                            </div>
-                          ))}
-                          {poll.options.length > 3 && (
-                            <div className='text-xs text-gray-500 dark:text-gray-400'>
-                              +{poll.options.length - 3} more options
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Loading State */}
               {isGenerating && (
                 <div className='py-8 text-center text-gray-500 dark:text-gray-400'>
                   <div className='mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-purple-500 border-t-transparent' />
-                  <p>Generating polls...</p>
+                  <p>Generating poll...</p>
                 </div>
               )}
             </div>
@@ -235,14 +188,6 @@ const AIGeneratorModal = ({
           {/* Fixed Footer */}
           <div className='flex-shrink-0 border-t border-gray-200 p-6 dark:border-gray-700'>
             <div className='flex gap-3'>
-              {selectedPoll && (
-                <Button
-                  onClick={handleUseGenerated}
-                  className='flex-1 bg-purple-600 hover:bg-purple-700'
-                >
-                  Use Selected Poll
-                </Button>
-              )}
               <Button
                 onClick={handleGenerate}
                 disabled={!aiPrompt.trim() || isGenerating}
@@ -256,7 +201,7 @@ const AIGeneratorModal = ({
                 ) : (
                   <>
                     <Wand2 className='mr-2 h-4 w-4' />
-                    Generate Polls
+                    Generate Poll
                   </>
                 )}
               </Button>
