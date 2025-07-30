@@ -15,34 +15,8 @@ import {
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import PollModal from './polls';
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
-import { useRetroSocket } from '@/lib/use-retro-socket';
 
 export default function KanbanViewPage() {
-  const { on, off, isConnected } = useRetroSocket();
-
-  useEffect(() => {
-    if (!isConnected) return;
-
-    on('retro-updated', (data) => {
-      console.log('Received updated plan item:', data);
-    });
-
-    on('retro-updated', (data) => {
-      console.log('Received new plan item:', data);
-    });
-
-    return () => {
-      off('retro-updated', (data) => {
-        console.log('Received updated plan item:', data);
-      });
-
-      off('retro-updated', (data) => {
-        console.log('Received new plan item:', data);
-      });
-    };
-  }, [isConnected, on, off]);
-
   return (
     <div className='flex h-full flex-col'>
       {/* Header Section */}

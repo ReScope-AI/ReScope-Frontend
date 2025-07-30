@@ -1,9 +1,6 @@
 import { Socket } from 'socket.io-client';
 import { getSocketIo } from './socket-manager';
-import {
-  SocketConnectionOptions,
-  RetroSocketEvents
-} from '@/types/retro-socket';
+import { SocketConnectionOptions, RetroEmitEvents } from '@/types/retro-socket';
 import { isDev } from './env';
 
 let socket: Socket | null = null;
@@ -11,12 +8,29 @@ let connectionAttempts = 0;
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY = 1000;
 
+// Event handler callbacks
+type EventCallbacks = {
+  onConnect?: () => void;
+  onDisconnect?: (reason: string) => void;
+  onConnectError?: (error: Error) => void;
+  onReconnect?: (attemptNumber: number) => void;
+  onReconnectError?: (error: Error) => void;
+};
+
+let eventCallbacks: EventCallbacks = {};
+
 export function connect(
   socketUrl: string,
-  options: SocketConnectionOptions
+  options: SocketConnectionOptions,
+  callbacks?: EventCallbacks
 ): Socket {
   if (socket?.connected) {
     return socket;
+  }
+
+  // Store callbacks for later use
+  if (callbacks) {
+    eventCallbacks = callbacks;
   }
 
   socket = getSocketIo(socketUrl, {
@@ -54,6 +68,14 @@ function setupEventHandlers(): void {
   socket.on('connect_error', onConnectError);
   socket.on('reconnect', onReconnect);
   socket.on('reconnect_error', onReconnectError);
+
+  // Debug logging for development
+  if (isDev) {
+    socket.onAny((event, ...args) => {
+      // eslint-disable-next-line no-console
+      console.log('[Socket Event]', event, args);
+    });
+  }
 }
 
 function onConnect(): void {
@@ -62,6 +84,7 @@ function onConnect(): void {
     // eslint-disable-next-line no-console
     console.info('Socket connected:', socket?.id);
   }
+  eventCallbacks.onConnect?.();
 }
 
 function onDisconnect(reason: string): void {
@@ -69,6 +92,7 @@ function onDisconnect(reason: string): void {
     // eslint-disable-next-line no-console
     console.info('Socket disconnected:', reason);
   }
+  eventCallbacks.onDisconnect?.(reason);
 }
 
 function onConnectError(error: Error): void {
@@ -82,6 +106,8 @@ function onConnectError(error: Error): void {
     // eslint-disable-next-line no-console
     console.error('Max connection attempts reached. Socket connection failed.');
   }
+
+  eventCallbacks.onConnectError?.(error);
 }
 
 function onReconnect(attemptNumber: number): void {
@@ -89,6 +115,7 @@ function onReconnect(attemptNumber: number): void {
     // eslint-disable-next-line no-console
     console.info('Socket reconnected after', attemptNumber, 'attempts');
   }
+  eventCallbacks.onReconnect?.(attemptNumber);
 }
 
 function onReconnectError(error: Error): void {
@@ -96,14 +123,20 @@ function onReconnectError(error: Error): void {
     // eslint-disable-next-line no-console
     console.error('Socket reconnection error:', error.message);
   }
+  eventCallbacks.onReconnectError?.(error);
 }
 
-export function emit<K extends keyof RetroSocketEvents>(
+export function emit<K extends keyof RetroEmitEvents>(
   event: K,
-  data: RetroSocketEvents[K]
+  data: RetroEmitEvents[K]
 ): void {
   if (socket?.connected) {
     socket.emit(event, data);
+  } else if (socket && !socket.connected) {
+    // If socket is not connected, queue the emit for when it connects
+    socket.once('connect', () => {
+      socket?.emit(event, data);
+    });
   }
 }
 
@@ -116,8 +149,16 @@ export function off(event: string, callback?: (...args: any[]) => void): void {
 }
 
 export function disconnect(): void {
-  socket?.disconnect();
-  socket = null;
+  if (socket) {
+    // Clear event callbacks
+    eventCallbacks = {};
+
+    // Remove all listeners to prevent memory leaks
+    socket.removeAllListeners();
+
+    socket.disconnect();
+    socket = null;
+  }
 }
 
 export function getSocket(): Socket | null {
@@ -126,4 +167,36 @@ export function getSocket(): Socket | null {
 
 export function isConnected(): boolean {
   return socket?.connected || false;
+}
+
+// Utility function to update event callbacks
+export function updateEventCallbacks(callbacks: EventCallbacks): void {
+  eventCallbacks = { ...eventCallbacks, ...callbacks };
+}
+
+// Convenience emit functions for specific events
+export function emitJoinRoom(data: RetroEmitEvents['join-room']): void {
+  emit('join-room', data);
+}
+
+export function emitLeaveRoom(data: RetroEmitEvents['leave-room']): void {
+  emit('leave-room', data);
+}
+
+export function emitAddPlan(data: RetroEmitEvents['add-plan']): void {
+  emit('add-plan', data);
+}
+
+export function emitEditPlan(data: RetroEmitEvents['edit-plan']): void {
+  emit('edit-plan', data);
+}
+
+export function emitDeletePlan(data: RetroEmitEvents['delete-plan']): void {
+  emit('delete-plan', data);
+}
+
+export function emitChangePositionPlan(
+  data: RetroEmitEvents['change-position-plan']
+): void {
+  emit('change-position-plan', data);
 }

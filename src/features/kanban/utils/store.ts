@@ -54,68 +54,7 @@ export type State = {
   openDialog: boolean;
 };
 
-const initialTasks: Task[] = [
-  {
-    _id: 'task1',
-    status: 'DROP',
-    title: 'The excessive documentation...',
-    votes: 1
-  },
-  {
-    _id: 'task2',
-    status: 'DROP',
-    title: 'The daily scrum call feels...',
-    votes: 1
-  },
-  {
-    _id: 'task3',
-    status: 'ADD',
-    title: 'We should start celebrating...',
-    votes: 2
-  },
-  {
-    _id: 'task4',
-    status: 'ADD',
-    title: 'Adding code reviews would...',
-    votes: 1
-  },
-  {
-    _id: 'task5',
-    status: 'KEEP',
-    title: 'The pair programming...',
-    votes: 2
-  },
-  {
-    _id: 'task6',
-    status: 'KEEP',
-    title: 'Celebrating project...',
-    votes: 1
-  },
-  {
-    _id: 'task7',
-    status: 'IMPROVE',
-    title: 'Our code review process...',
-    votes: 2
-  },
-  {
-    _id: 'task8',
-    status: 'IMPROVE',
-    title: 'Our deployment process has...',
-    votes: 1
-  },
-  {
-    _id: 'task9',
-    status: 'IMPROVE',
-    title: 'I think we need to improve...',
-    votes: 1
-  },
-  {
-    _id: 'task10',
-    status: 'IMPROVE',
-    title: 'The onboarding process for...',
-    votes: 1
-  }
-];
+const initialTasks: Task[] = [];
 
 export type Actions = {
   addTask: (title: string, description?: string, status?: Status) => void;
