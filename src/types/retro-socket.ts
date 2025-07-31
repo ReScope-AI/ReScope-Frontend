@@ -45,6 +45,7 @@ export interface RetroListenEvents {
   'edit-plan': any;
   'delete-plan': any;
   'change-position-plan': any;
+  'generate-plan-items': any;
 }
 
 export interface SocketConnectionOptions {

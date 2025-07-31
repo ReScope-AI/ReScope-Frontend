@@ -1,6 +1,7 @@
+import { Suspense } from 'react';
+
 import FormCardSkeleton from '@/components/form-card-skeleton';
 import KanbanViewPage from '@/features/kanban/components/kanban-view-page';
-import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Dashboard : Retrospective View'
@@ -9,7 +10,7 @@ export const metadata = {
 export default async function Page({
   params
 }: {
-  params: { retroId: string };
+  params: Promise<{ retroId: string }>;
 }) {
   const { retroId } = await params;
 
