@@ -1,7 +1,23 @@
 import { Socket } from 'socket.io-client';
-import { getSocketIo } from './socket-manager';
-import { SocketConnectionOptions, RetroEmitEvents } from '@/types/retro-socket';
+
+import {
+  SocketConnectionOptions,
+  RetroEmitEvents,
+  RetroListenEvents,
+  SocketResponse
+} from '@/types/retro-socket';
+
 import { isDev } from './env';
+import { getSocketIo } from './socket-manager';
+
+// Helper HOC to create typed on functions
+function createOnFunction<T extends keyof RetroListenEvents>(event: T) {
+  return (
+    callback: (response: SocketResponse<RetroListenEvents[T]>) => void
+  ): void => {
+    on(event, callback);
+  };
+}
 
 let socket: Socket | null = null;
 let connectionAttempts = 0;
@@ -140,12 +156,18 @@ export function emit<K extends keyof RetroEmitEvents>(
   }
 }
 
-export function on(event: string, callback: (...args: any[]) => void): void {
-  socket?.on(event, callback);
+export function on<K extends keyof RetroListenEvents>(
+  event: K,
+  callback: (response: SocketResponse<RetroListenEvents[K]>) => void
+): void {
+  socket?.on(event as string, callback);
 }
 
-export function off(event: string, callback?: (...args: any[]) => void): void {
-  socket?.off(event, callback);
+export function off<K extends keyof RetroListenEvents>(
+  event: K,
+  callback?: (response: SocketResponse<RetroListenEvents[K]>) => void
+): void {
+  socket?.off(event, callback as any);
 }
 
 export function disconnect(): void {
@@ -200,3 +222,12 @@ export function emitChangePositionPlan(
 ): void {
   emit('change-position-plan', data);
 }
+
+// Convenience on functions for listening to events
+export const onJoinRoom = createOnFunction('join-room');
+export const onJoinFailed = createOnFunction('join-failed');
+export const onLeaveRoom = createOnFunction('leave-room');
+export const onAddPlan = createOnFunction('add-plan');
+export const onEditPlan = createOnFunction('edit-plan');
+export const onDeletePlan = createOnFunction('delete-plan');
+export const onChangePositionPlan = createOnFunction('change-position-plan');

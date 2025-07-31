@@ -1,16 +1,25 @@
 'use client';
+import { useQuery } from '@tanstack/react-query';
+import { notFound, useParams, useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getRetroSessionById } from '@/config/api/retro-session';
 import { QUERY_CONSTANTS } from '@/constants/query';
-import { usePollStore } from '@/stores/pollStore';
 import { useRetroSocket } from '@/hooks/use-retro-socket';
+import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
-import { useQuery } from '@tanstack/react-query';
-import { notFound, useParams } from 'next/navigation';
-import React, { useEffect } from 'react';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
+  const router = useRouter();
   const { setRetroSession } = useRetroSessionStore();
   const {
     addPollsColumn,
@@ -29,7 +38,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   });
 
   // Initialize socket connection for this retrospective session
-  const { connectionError, isDev } = useRetroSocket();
+  const { hasError, error } = useRetroSocket();
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+
+  useEffect(() => {
+    if (hasError) {
+      setShowErrorDialog(true);
+    }
+  }, [hasError]);
+
+  const handleDialogClose = () => {
+    setShowErrorDialog(false);
+    router.push('/dashboard/retrospective');
+  };
 
   useEffect(() => {
     if (retro && retro.code === 200) {
@@ -62,12 +83,21 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className='flex-1 space-y-4'>
-      {connectionError && isDev && (
-        <div className='rounded bg-yellow-50 p-2 text-sm text-yellow-600'>
-          Socket connection issue: {connectionError}
-        </div>
+      {/* Error Dialog */}
+      {showErrorDialog && (
+        <div className='fixed inset-0 z-50 backdrop-blur-xs' />
       )}
-      {children}
+      <Dialog open={showErrorDialog} onOpenChange={handleDialogClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{error?.title}</DialogTitle>
+            <DialogDescription>{error?.message}</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* Only show children if no error */}
+      {!hasError && children}
     </div>
   );
 };

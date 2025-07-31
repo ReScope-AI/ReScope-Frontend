@@ -1,8 +1,9 @@
-export interface SocketEventData {
-  room: string;
-  event: string;
-  data: any;
-}
+// Helper type for standard response pattern
+export type SocketResponse<T> = {
+  code: number;
+  data: T;
+  msg: string;
+};
 
 export interface RetroEmitEvents {
   'join-room': {
@@ -33,6 +34,7 @@ export interface RetroEmitEvents {
 
 export interface RetroListenEvents {
   'join-room': any;
+  'join-failed': never;
   'leave-room': any;
   'add-plan': any;
   'edit-plan': any;

@@ -1,11 +1,31 @@
 {
   "extends": "next/core-web-vitals",
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "prettier", "import"],
   "rules": {
+    "prettier/prettier": [
+      "warn",
+      {
+        "tabWidth": 2,
+        "semi": true,
+        "endOfLine": "lf",
+        "singleQuote": true,
+        "trailingComma": "none"
+      }
+    ],
     "@typescript-eslint/no-unused-vars": "warn",
     "import/no-unresolved": "off",
     "import/named": "off",
     "no-console": "warn",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "import/order": [
+      "warn",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+        "pathGroups": [],
+        "newlines-between": "always",
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
+      }
+    ]
   }
 }
