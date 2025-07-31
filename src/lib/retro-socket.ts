@@ -4,7 +4,8 @@ import {
   SocketConnectionOptions,
   RetroEmitEvents,
   RetroListenEvents,
-  SocketResponse
+  SocketResponse,
+  RetroSocketMessage
 } from '@/types/retro-socket';
 
 import { isDev } from './env';
@@ -23,6 +24,7 @@ let socket: Socket | null = null;
 let connectionAttempts = 0;
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY = 1000;
+const BASE_EVENT = 'retro-session';
 
 // Event handler callbacks
 type EventCallbacks = {
@@ -44,7 +46,6 @@ export function connect(
     return socket;
   }
 
-  // Store callbacks for later use
   if (callbacks) {
     eventCallbacks = callbacks;
   }
@@ -71,24 +72,20 @@ export function connect(
 function setupEventHandlers(): void {
   if (!socket) return;
 
-  // Remove existing listeners to prevent duplicates
   socket.off('connect', onConnect);
   socket.off('disconnect', onDisconnect);
   socket.off('connect_error', onConnectError);
   socket.off('reconnect', onReconnect);
   socket.off('reconnect_error', onReconnectError);
 
-  // Add fresh listeners
   socket.on('connect', onConnect);
   socket.on('disconnect', onDisconnect);
   socket.on('connect_error', onConnectError);
   socket.on('reconnect', onReconnect);
   socket.on('reconnect_error', onReconnectError);
 
-  // Debug logging for development
   if (isDev) {
     socket.onAny((event, ...args) => {
-      // eslint-disable-next-line no-console
       console.log('[Socket Event]', event, args);
     });
   }
@@ -97,7 +94,6 @@ function setupEventHandlers(): void {
 function onConnect(): void {
   connectionAttempts = 0;
   if (isDev) {
-    // eslint-disable-next-line no-console
     console.info('Socket connected:', socket?.id);
   }
   eventCallbacks.onConnect?.();
@@ -105,7 +101,6 @@ function onConnect(): void {
 
 function onDisconnect(reason: string): void {
   if (isDev) {
-    // eslint-disable-next-line no-console
     console.info('Socket disconnected:', reason);
   }
   eventCallbacks.onDisconnect?.(reason);
@@ -114,12 +109,10 @@ function onDisconnect(reason: string): void {
 function onConnectError(error: Error): void {
   connectionAttempts++;
   if (isDev) {
-    // eslint-disable-next-line no-console
     console.error('Socket connection error:', error.message);
   }
 
   if (connectionAttempts >= MAX_RETRY_ATTEMPTS) {
-    // eslint-disable-next-line no-console
     console.error('Max connection attempts reached. Socket connection failed.');
   }
 
@@ -128,7 +121,6 @@ function onConnectError(error: Error): void {
 
 function onReconnect(attemptNumber: number): void {
   if (isDev) {
-    // eslint-disable-next-line no-console
     console.info('Socket reconnected after', attemptNumber, 'attempts');
   }
   eventCallbacks.onReconnect?.(attemptNumber);
@@ -136,22 +128,20 @@ function onReconnect(attemptNumber: number): void {
 
 function onReconnectError(error: Error): void {
   if (isDev) {
-    // eslint-disable-next-line no-console
     console.error('Socket reconnection error:', error.message);
   }
   eventCallbacks.onReconnectError?.(error);
 }
 
-export function emit<K extends keyof RetroEmitEvents>(
-  event: K,
-  data: RetroEmitEvents[K]
+export function emit<T extends keyof RetroEmitEvents>(
+  baseEvent: string,
+  message: RetroSocketMessage<T>
 ): void {
   if (socket?.connected) {
-    socket.emit(event, data);
+    socket.emit(baseEvent, message);
   } else if (socket && !socket.connected) {
-    // If socket is not connected, queue the emit for when it connects
     socket.once('connect', () => {
-      socket?.emit(event, data);
+      socket?.emit(baseEvent, message);
     });
   }
 }
@@ -172,12 +162,8 @@ export function off<K extends keyof RetroListenEvents>(
 
 export function disconnect(): void {
   if (socket) {
-    // Clear event callbacks
     eventCallbacks = {};
-
-    // Remove all listeners to prevent memory leaks
     socket.removeAllListeners();
-
     socket.disconnect();
     socket = null;
   }
@@ -191,39 +177,53 @@ export function isConnected(): boolean {
   return socket?.connected || false;
 }
 
-// Utility function to update event callbacks
 export function updateEventCallbacks(callbacks: EventCallbacks): void {
   eventCallbacks = { ...eventCallbacks, ...callbacks };
 }
 
-// Convenience emit functions for specific events
-export function emitJoinRoom(data: RetroEmitEvents['join-room']): void {
-  emit('join-room', data);
+export function emitJoinRoom(sessionId: string, room?: string): void {
+  emit(BASE_EVENT, { room, event: 'join-room', data: { sessionId } });
 }
 
-export function emitLeaveRoom(data: RetroEmitEvents['leave-room']): void {
-  emit('leave-room', data);
+export function emitLeaveRoom(sessionId: string, room?: string): void {
+  emit(BASE_EVENT, { room, event: 'leave-room', data: { sessionId } });
 }
 
-export function emitAddPlan(data: RetroEmitEvents['add-plan']): void {
-  emit('add-plan', data);
+export function emitAddPlan(
+  data: RetroEmitEvents['add-plan'],
+  room?: string
+): void {
+  emit(BASE_EVENT, { room, event: 'add-plan', data });
 }
 
-export function emitEditPlan(data: RetroEmitEvents['edit-plan']): void {
-  emit('edit-plan', data);
+export function emitEditPlan(
+  data: RetroEmitEvents['edit-plan'],
+  room?: string
+): void {
+  emit(BASE_EVENT, { room, event: 'edit-plan', data });
 }
 
-export function emitDeletePlan(data: RetroEmitEvents['delete-plan']): void {
-  emit('delete-plan', data);
+export function emitDeletePlan(
+  data: RetroEmitEvents['delete-plan'],
+  room?: string
+): void {
+  emit(BASE_EVENT, { room, event: 'delete-plan', data });
 }
 
 export function emitChangePositionPlan(
-  data: RetroEmitEvents['change-position-plan']
+  data: RetroEmitEvents['change-position-plan'],
+  room?: string
 ): void {
-  emit('change-position-plan', data);
+  emit(BASE_EVENT, { room, event: 'change-position-plan', data });
 }
 
-// Convenience on functions for listening to events
+export function emitEditPollQuestion(
+  data: RetroEmitEvents['edit-poll-question'],
+  room?: string
+): void {
+  emit(BASE_EVENT, { room, event: 'edit-poll-question', data });
+}
+
 export const onJoinRoom = createOnFunction('join-room');
 export const onJoinFailed = createOnFunction('join-failed');
 export const onLeaveRoom = createOnFunction('leave-room');
@@ -231,3 +231,4 @@ export const onAddPlan = createOnFunction('add-plan');
 export const onEditPlan = createOnFunction('edit-plan');
 export const onDeletePlan = createOnFunction('delete-plan');
 export const onChangePositionPlan = createOnFunction('change-position-plan');
+export const onEditPollQuestion = createOnFunction('edit-poll-question');

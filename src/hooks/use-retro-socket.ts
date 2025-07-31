@@ -11,6 +11,7 @@ import {
   onChangePositionPlan,
   onDeletePlan,
   onEditPlan,
+  onEditPollQuestion,
   onJoinFailed,
   onJoinRoom,
   onLeaveRoom
@@ -40,7 +41,10 @@ export const useRetroSocket = () => {
             if (!retroId) {
               return;
             }
-            emitJoinRoom({ sessionId: retroId });
+            emitJoinRoom({
+              room: retroId,
+              data: { sessionId: retroId }
+            });
           }
         }
       );
@@ -71,6 +75,7 @@ export const useRetroSocket = () => {
     const editPlanListener = () => {};
     const deletePlanListener = () => {};
     const changePositionPlanListener = () => {};
+    const editPollQuestionListener = () => {};
 
     onJoinRoom((res) => {
       if (res.code === 200) {
@@ -88,6 +93,7 @@ export const useRetroSocket = () => {
     onEditPlan(editPlanListener);
     onDeletePlan(deletePlanListener);
     onChangePositionPlan(changePositionPlanListener);
+    onEditPollQuestion(editPollQuestionListener);
 
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);

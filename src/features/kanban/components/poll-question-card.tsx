@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
   IconEdit,
   IconTrash,
@@ -9,17 +9,10 @@ import {
   IconDots,
   IconEye
 } from '@tabler/icons-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { IQuestion, IOption } from '@/types/IRetroSession';
 import { useState } from 'react';
-import { PollQuestionEditDialog } from './poll-question-edit-dialog';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +20,18 @@ import {
   DialogTitle,
   DialogFooter
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { emitEditPollQuestion } from '@/lib/retro-socket';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+
+import { PollQuestionEditDialog } from './poll-question-edit-dialog';
+
+import type { IQuestion, IOption } from '@/types/IRetroSession';
 
 interface PollQuestionCardProps {
   question: IQuestion;
@@ -43,6 +48,7 @@ export function PollQuestionCard({
   onDelete,
   onVote
 }: PollQuestionCardProps) {
+  const retroId = useRetroSessionStore((state) => state.retroSession?._id);
   const {
     setNodeRef,
     attributes,
@@ -144,7 +150,22 @@ export function PollQuestionCard({
         question={question}
         onClose={() => setEditOpen(false)}
         onSave={(updated) => {
+          console.log(updated);
           setEditOpen(false);
+
+          // Emit socket event to update poll question
+          emitEditPollQuestion(
+            {
+              questionId: updated._id,
+              text: updated.text,
+              option: updated.options.map((option) => ({
+                optionId: option._id,
+                text: option.text
+              }))
+            },
+            retroId
+          );
+
           onEdit?.(updated);
         }}
       />

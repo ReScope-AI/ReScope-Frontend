@@ -5,9 +5,25 @@ export type SocketResponse<T> = {
   msg: string;
 };
 
+// Base message structure for all socket events
+export interface RetroSocketMessage<T extends keyof RetroEmitEvents> {
+  room?: string;
+  event: T;
+  data: RetroEmitEvents[T];
+}
+
+// Event data types for each specific event
 export interface RetroEmitEvents {
   'join-room': {
     sessionId: string;
+  };
+  'edit-poll-question': {
+    questionId: string;
+    text: string;
+    option?: {
+      optionId: string;
+      text: string;
+    }[];
   };
   'leave-room': {
     sessionId: string;
@@ -40,6 +56,7 @@ export interface RetroListenEvents {
   'edit-plan': any;
   'delete-plan': any;
   'change-position-plan': any;
+  'edit-poll-question': any;
 }
 
 export interface SocketConnectionOptions {
