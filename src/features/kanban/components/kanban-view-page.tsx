@@ -1,26 +1,235 @@
 'use client';
-import { KanbanBoard } from './kanban-board';
-import NewTaskDialog from './new-task-dialog';
 import {
-  MessageSquareMore,
-  ThumbsUp,
+  CreditCard,
   Filter,
+  Loader2,
+  MessageCircle,
+  MessageSquareMore,
+  RotateCcw,
   Search,
   SortAsc,
-  RotateCcw,
   SquarePen,
-  MessageCircle,
-  CreditCard
+  ThumbsUp
 } from 'lucide-react';
-import { useRetroSessionStore } from '@/stores/retroSessionStore';
-import PollModal from './polls';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
-export default function KanbanViewPage() {
+import { Button } from '@/components/ui/button';
+import { emit, on } from '@/lib/retro-socket';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+
+import { Status, useTaskStore } from '../utils/store';
+
+import { KanbanBoard } from './kanban-board';
+import NewTaskDialog from './new-task-dialog';
+import PollModal from './polls';
+
+const exampleRequestData = [
+  {
+    question_text:
+      'How effectively did our daily stand-ups contribute to sprint progress?',
+    criterion: 'PROCESS',
+    options: [
+      {
+        text: 'Very Ineffective',
+        percentage: 15
+      },
+      {
+        text: 'Ineffective',
+        percentage: 25
+      },
+      {
+        text: 'Neutral',
+        percentage: 20
+      },
+      {
+        text: 'Effective',
+        percentage: 30
+      },
+      {
+        text: 'Very Effective',
+        percentage: 10
+      }
+    ]
+  },
+  {
+    question_text: 'How clear was the sprint goal for everyone?',
+    criterion: 'GOAL',
+    options: [
+      {
+        text: 'Not at all',
+        percentage: 5
+      },
+      {
+        text: 'Slightly',
+        percentage: 15
+      },
+      {
+        text: 'Moderately',
+        percentage: 30
+      },
+      {
+        text: 'Very',
+        percentage: 40
+      },
+      {
+        text: 'Extremely',
+        percentage: 10
+      }
+    ]
+  },
+  {
+    question_text:
+      'Which of the following best describes how we should handle our sprint retrospective format?',
+    criterion: 'DAKI_ACTION',
+    options: [
+      {
+        text: 'Drop the current whiteboard tool for retros',
+        percentage: 10
+      },
+      {
+        text: "Add a dedicated 'Definition of Done' review in sprint planning",
+        percentage: 25
+      },
+      {
+        text: 'Keep our current daily stand-up time',
+        percentage: 15
+      },
+      {
+        text: 'Improve cross-functional communication during feature development',
+        percentage: 50
+      }
+    ]
+  },
+  {
+    question_text:
+      'Rate the overall team collaboration during the last sprint.',
+    criterion: 'TEAMWORK',
+    options: [
+      {
+        text: 'Very Poor',
+        percentage: 5
+      },
+      {
+        text: 'Poor',
+        percentage: 5
+      },
+      {
+        text: 'Neutral',
+        percentage: 20
+      },
+      {
+        text: 'Good',
+        percentage: 40
+      },
+      {
+        text: 'Excellent',
+        percentage: 30
+      }
+    ]
+  },
+  {
+    question_text:
+      'How satisfied are you with the support received from other team members?',
+    criterion: 'COMMUNICATION',
+    options: [
+      {
+        text: 'Very Unclear',
+        percentage: 2
+      },
+      {
+        text: 'Unclear',
+        percentage: 8
+      },
+      {
+        text: 'Neutral',
+        percentage: 15
+      },
+      {
+        text: 'Clear',
+        percentage: 45
+      },
+      {
+        text: 'Very Clear',
+        percentage: 30
+      }
+    ]
+  }
+];
+
+export default function KanbanViewPage({ retroId }: { retroId: string }) {
+  const setPlanItemAction = useTaskStore((state) => state.setPlanItemAction);
+  const planItemAction = useTaskStore((state) => state.planItemAction);
+  const setTasks = useTaskStore((state) => state.setTasks);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    on('generate-plan-items', (data) => {
+      setPlanItemAction(data.data);
+      setIsGenerating(false);
+    });
+  }, []);
+
+  const handleTestMessage = () => {
+    setIsGenerating(true);
+    emit('re-scope', {
+      event: 'generate-plan-items',
+      room: retroId,
+      data: exampleRequestData
+    });
+  };
+
+  useEffect(() => {
+    if (planItemAction.length > 0) {
+      setTasks(
+        planItemAction.map((item) => ({
+          _id: uuidv4(),
+          title: item.description,
+          status: item.action_type as Status,
+          votes: 0
+        }))
+      );
+    }
+  }, [planItemAction]);
+
   return (
-    <div className='flex h-full flex-col'>
+    <div className='relative flex h-full flex-col'>
+      {/* Loading Overlay */}
+      {isGenerating && (
+        <div className='absolute inset-0 z-50 flex items-center justify-center bg-black/50'>
+          <div className='rounded-lg bg-white p-8 shadow-xl dark:bg-gray-800'>
+            <div className='flex flex-col items-center space-y-4'>
+              <Loader2 className='h-12 w-12 animate-spin' />
+              <div className='text-center'>
+                <h3 className='mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>
+                  Generating Plan Items
+                </h3>
+                <p className='text-sm text-gray-600 dark:text-gray-400'>
+                  AI is analyzing your retrospective data...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <HeaderBar />
+
+      <Button
+        className='mx-4 mt-4 w-48'
+        onClick={handleTestMessage}
+        disabled={isGenerating}
+      >
+        {isGenerating ? (
+          <>
+            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+            Generating...
+          </>
+        ) : (
+          'Generate Plan Items'
+        )}
+      </Button>
 
       <div className='flex-shrink-0'>
         <NewTaskDialog />

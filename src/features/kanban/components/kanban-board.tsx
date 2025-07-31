@@ -39,18 +39,13 @@ export function KanbanBoard() {
   const setTasks = useTaskStore((state) => state.setTasks);
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
   const [isMounted, setIsMounted] = useState<Boolean>(false);
-
   const [activeTask, setActiveTask] = useState<Task | null>(null);
-
   const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
 
   useEffect(() => {
     setIsMounted(true);
   }, [isMounted]);
 
-  useEffect(() => {
-    useTaskStore.persist.rehydrate();
-  }, []);
   if (!isMounted) return;
 
   function getDraggingTaskData(taskId: UniqueIdentifier, columnId: Status) {

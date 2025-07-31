@@ -1,12 +1,13 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
 import { IconBrandGithub } from '@tabler/icons-react';
+import React from 'react';
+
+import { Button } from '@/components/ui/button';
 
 export default function CtaGithub() {
   return (
     <Button variant='ghost' asChild size='sm' className='hidden sm:flex'>
       <a
-        href='https://github.com/Kiranism/next-shadcn-dashboard-starter'
+        href='https://github.com/ReScope-AI/ReScope-Frontend'
         rel='noopener noreferrer'
         target='_blank'
         className='dark:text-foreground'

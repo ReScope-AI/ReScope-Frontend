@@ -1,12 +1,14 @@
+import { cookies } from 'next/headers';
+import NextTopLoader from 'nextjs-toploader';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
+
 import Providers from '@/components/layout/providers';
 import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { fontVariables } from '@/lib/font';
 import { cn } from '@/lib/utils';
+
 import type { Metadata, Viewport } from 'next';
-import { cookies } from 'next/headers';
-import NextTopLoader from 'nextjs-toploader';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
 import './theme.css';
 
@@ -16,8 +18,8 @@ const META_THEME_COLORS = {
 };
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'ReScope - Dashboard',
+  description: 'ReScope - Dashboard'
 };
 
 export const viewport: Viewport = {
@@ -36,6 +38,7 @@ export default async function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <head>
+        <link rel='icon' href='/assets/logo-header.png' />
         <script
           dangerouslySetInnerHTML={{
             __html: `
