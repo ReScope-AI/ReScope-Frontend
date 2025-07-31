@@ -1,18 +1,28 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
 import { isDev } from '@/lib/env';
 import {
   connect,
   disconnect,
   emitJoinRoom,
-  isConnected
+  isConnected,
+  onAddPlan,
+  onChangePositionPlan,
+  onDeletePlan,
+  onEditPlan,
+  onJoinFailed,
+  onJoinRoom,
+  onLeaveRoom
 } from '@/lib/retro-socket';
 import { useAuthStore } from '@/stores/authStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
-import { useCallback, useEffect, useState } from 'react';
+
+type ErrorInfo = { title: string; message: string } | null;
 
 export const useRetroSocket = () => {
   const accessToken = useAuthStore((state) => state.accessToken);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorInfo>(null);
   const session = useRetroSessionStore((state) => state.retroSession);
   const retroId = session?._id;
 
@@ -34,11 +44,13 @@ export const useRetroSocket = () => {
           }
         }
       );
-      setConnectionError(null);
+      setError(null);
     } catch (error) {
-      setConnectionError(
-        error instanceof Error ? error.message : 'Failed to connect to socket'
-      );
+      setError({
+        title: 'Connection Failed',
+        message:
+          error instanceof Error ? error.message : 'Failed to connect to socket'
+      });
     }
   }, [accessToken, retroId]);
 
@@ -53,11 +65,38 @@ export const useRetroSocket = () => {
       initializeSocket();
     }
 
+    // Listen to all events and log the data (temporary debug)
+    const leaveRoomListener = () => {};
+    const addPlanListener = () => {};
+    const editPlanListener = () => {};
+    const deletePlanListener = () => {};
+    const changePositionPlanListener = () => {};
+
+    onJoinRoom((res) => {
+      if (res.code === 200) {
+        setError(null);
+      }
+    });
+    onJoinFailed((res) => {
+      setError({
+        title: 'Join Room Failed',
+        message: res.msg || 'Failed to join the retrospective room.'
+      });
+    });
+    onLeaveRoom(leaveRoomListener);
+    onAddPlan(addPlanListener);
+    onEditPlan(editPlanListener);
+    onDeletePlan(deletePlanListener);
+    onChangePositionPlan(changePositionPlanListener);
+
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);
 
+  const hasError = useMemo(() => error !== null, [error]);
+
   return {
-    connectionError,
+    error,
+    hasError,
     isDev
   };
 };

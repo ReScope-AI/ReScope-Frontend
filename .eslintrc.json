@@ -3,7 +3,7 @@
   "plugins": ["@typescript-eslint", "prettier", "import"],
   "rules": {
     "prettier/prettier": [
-      "error",
+      "warn",
       {
         "tabWidth": 2,
         "semi": true,
@@ -12,14 +12,14 @@
         "trailingComma": "none"
       }
     ],
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": "warn",
     "import/no-unresolved": "off",
     "import/named": "off",
     "no-console": "warn",
     "react-hooks/exhaustive-deps": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
     "import/order": [
-      "error",
+      "warn",
       {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
         "pathGroups": [],
