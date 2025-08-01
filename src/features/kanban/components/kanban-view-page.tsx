@@ -1,5 +1,6 @@
 'use client';
 import {
+  BarChart3,
   CreditCard,
   Filter,
   Loader2,
@@ -9,8 +10,7 @@ import {
   Search,
   SortAsc,
   SquarePen,
-  ThumbsUp,
-  BarChart3
+  ThumbsUp
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,7 +24,6 @@ import { Status, useTaskStore } from '../utils/store';
 import { KanbanBoard } from './kanban-board';
 import NewTaskDialog from './new-task-dialog';
 import PollModal from './polls';
-import RadarChartComponent from './radar-chart';
 import RadarChartDialog from './radar-chart-dialog';
 
 const exampleRequestData = [
@@ -169,7 +168,9 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
 
   useEffect(() => {
     on('generate-plan-items', (data) => {
-      setPlanItemAction(data.data);
+      if (data && data.data) {
+        setPlanItemAction(data.data);
+      }
       setIsGenerating(false);
     });
   }, []);
@@ -184,7 +185,7 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   };
 
   useEffect(() => {
-    if (planItemAction.length > 0) {
+    if (planItemAction && planItemAction.length > 0) {
       setTasks(
         planItemAction.map((item) => ({
           _id: uuidv4(),

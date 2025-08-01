@@ -1,4 +1,14 @@
 'use client';
+import {
+  Calendar,
+  CircleGauge,
+  EllipsisVertical,
+  FileText,
+  Zap
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,11 +33,9 @@ import {
   useDeleteRetroSession,
   useGetRetroSessions
 } from '@/hooks/use-retro-session-api';
-import { Calendar, EllipsisVertical, FileText, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
+
 import DialogSelectBoard from './components/dialog-select-board';
 import { RetroSession, Sprint, Team, useRetrospectiveStore } from './stores';
-import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -158,11 +166,11 @@ export default function DashboardPage() {
               <CardHeader className='pb-3'>
                 <div className='flex items-center justify-between'>
                   <div className='flex items-center gap-2'>
-                    <Avatar className='h-6 w-6'>
-                      <AvatarImage
-                        src={meeting?.team?.name || '/placeholder.svg'}
-                      />
-                      <AvatarFallback>U</AvatarFallback>
+                    <Avatar className='h-8 w-8'>
+                      <AvatarImage src={'/assets/logo.png'} />
+                      <AvatarFallback>
+                        {meeting?.team?.name?.charAt(0)}
+                      </AvatarFallback>
                     </Avatar>
                     <span className='text-sm font-medium'>{meeting.name}</span>
                   </div>
@@ -188,12 +196,18 @@ export default function DashboardPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <p className='text-xs text-gray-500'>{meeting.end_date}</p>
+                <p className='text-xs text-gray-500'>
+                  {new Date(meeting.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
               </CardHeader>
               <CardContent className='flex flex-1 flex-col justify-between pt-0'>
                 <div className='mb-3 flex items-center justify-between'>
                   <Badge variant='secondary' className='text-xs'>
-                    <FileText className='mr-1 h-3 w-3' />
+                    <CircleGauge className='mr-1 h-4 w-4 text-green-500' />
                     {meeting.sprint.name}
                   </Badge>
                   <span className='text-xs text-gray-500'>
@@ -201,11 +215,13 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 <div className='mt-auto flex items-center gap-1'>
-                  <Avatar className='h-6 w-6'>
+                  <Avatar className='h-8 w-8'>
                     <AvatarImage
                       src={meeting?.team?.name || '/placeholder.svg'}
                     />
-                    <AvatarFallback>{meeting?.team?.name[0]}</AvatarFallback>
+                    <AvatarFallback>
+                      {meeting?.team?.name?.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                 </div>
               </CardContent>
@@ -218,8 +234,14 @@ export default function DashboardPage() {
               <div className='mb-2 text-gray-400'>
                 <Calendar className='mx-auto h-8 w-8' />
               </div>
-              <p className='mb-2 text-sm text-gray-500'>Kollabe</p>
-              <p className='text-xs text-gray-400'>Wed Jul 09 2025</p>
+              <p className='mb-2 text-sm text-gray-500'>Re-Scope</p>
+              <p className='text-xs text-gray-400'>
+                {new Date().toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
             </CardContent>
           </Card>
         </div>

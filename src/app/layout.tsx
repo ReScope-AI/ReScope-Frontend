@@ -19,7 +19,12 @@ const META_THEME_COLORS = {
 
 export const metadata: Metadata = {
   title: 'ReScope - Dashboard',
-  description: 'ReScope - Dashboard'
+  description: 'ReScope - Dashboard',
+  icons: {
+    icon: '/assets/logo.png',
+    shortcut: '/assets/logo.png',
+    apple: '/assets/logo.png'
+  }
 };
 
 export const viewport: Viewport = {
@@ -38,7 +43,6 @@ export default async function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <head>
-        <link rel='icon' href='/assets/logo-header.png' />
         <script
           dangerouslySetInnerHTML={{
             __html: `

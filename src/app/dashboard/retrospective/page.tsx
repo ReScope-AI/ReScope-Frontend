@@ -1,12 +1,14 @@
+import { SearchParams } from 'nuqs/server';
+
 import PageContainer from '@/components/layout/page-container';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import Retrospective from '@/features/retrospectives/retrospective-page';
 import { searchParamsCache } from '@/lib/searchparams';
-import { SearchParams } from 'nuqs/server';
 
 export const metadata = {
-  title: 'Dashboard: Retrospective'
+  title: 'Re-Scope: Retrospective',
+  description: 'Manage retrospective'
 };
 
 type pageProps = {

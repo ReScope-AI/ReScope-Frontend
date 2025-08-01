@@ -11,7 +11,12 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'ReScope - Dashboard',
-  description: 'Manage your retrospectives and generate AI-powered insights'
+  description: 'Manage your retrospectives and generate AI-powered insights',
+  icons: {
+    icon: '/assets/logo.png',
+    shortcut: '/assets/logo.png',
+    apple: '/assets/logo.png'
+  }
 };
 
 export default async function DashboardLayout({
@@ -19,7 +24,6 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Persisting the sidebar state in the cookie.
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
   const activeThemeValue = cookieStore.get('active_theme')?.value;
@@ -31,9 +35,7 @@ export default async function DashboardLayout({
             <AppSidebar />
             <SidebarInset>
               <Header />
-              {/* page main content */}
               {children}
-              {/* page main content ends */}
             </SidebarInset>
           </SidebarProvider>
         </KBar>
