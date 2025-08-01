@@ -20,7 +20,7 @@ import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
 type ErrorInfo = { title: string; message: string } | null;
 
-export const useRetroSocket = ({ roomId }: { roomId?: string } = {}) => {
+export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const [error, setError] = useState<ErrorInfo>(null);
   const session = useRetroSessionStore((state) => state.retroSession);
