@@ -1,13 +1,13 @@
 'use client';
 import {
   BarChart3,
-  CreditCard,
   Filter,
   Loader2,
   MessageCircle,
   MessageSquareMore,
   RotateCcw,
   Search,
+  Share2,
   SortAsc,
   SquarePen,
   ThumbsUp
@@ -15,6 +15,7 @@ import {
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
+import { ShareRetroDialog } from '@/components/modal/share-retro-dialog';
 import { Button } from '@/components/ui/button';
 import { emit, on } from '@/lib/retro-socket';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
@@ -166,6 +167,8 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRadarChartOpen, setIsRadarChartOpen] = useState(false);
   const retroSession = useRetroSessionStore((state) => state.retroSession);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+
   useEffect(() => {
     on('generate-plan-items', (data) => {
       if (data && data.data) {
@@ -232,7 +235,10 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
       )}
 
       {/* Header Section */}
-      <HeaderBar onOpenRadarChart={() => setIsRadarChartOpen(true)} />
+      <HeaderBar
+        onOpenRadarChart={() => setIsRadarChartOpen(true)}
+        onShareClick={setIsShareDialogOpen}
+      />
 
       <Button
         className='mx-4 mt-4 w-48'
@@ -251,6 +257,11 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
 
       <div className='flex-shrink-0'>
         <NewTaskDialog />
+        <ShareRetroDialog
+          retroId={retroId}
+          isOpen={isShareDialogOpen}
+          onClose={() => setIsShareDialogOpen(false)}
+        />
       </div>
 
       <div className='flex-1 overflow-hidden'>
@@ -267,9 +278,11 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
 }
 
 export function HeaderBar({
-  onOpenRadarChart
+  onOpenRadarChart,
+  onShareClick
 }: {
   onOpenRadarChart: () => void;
+  onShareClick: (isOpen: boolean) => void;
 }) {
   const retroSession = useRetroSessionStore((state) => state.retroSession);
   return (
@@ -302,8 +315,11 @@ export function HeaderBar({
           />
         </div>
 
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <CreditCard className='h-4 w-4' />
+        <Button
+          className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+          onClick={() => onShareClick(true)}
+        >
+          <Share2 className='h-4 w-4' />
         </Button>
 
         <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>

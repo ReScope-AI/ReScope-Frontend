@@ -14,6 +14,11 @@ export interface ICreateRetroSession {
   end_date: string;
 }
 
+export interface IInviteToRetro {
+  session_id: string;
+  email: string[];
+}
+
 export interface IRetroSession {
   _id: string;
   retro_name: string;

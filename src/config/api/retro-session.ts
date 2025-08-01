@@ -1,12 +1,18 @@
 import { API_KEYS } from '@/config/proxy';
 import request from '@/config/request';
-import { ICreateRetroSession, IRetroSession, Response } from '@/types';
+import {
+  ICreateRetroSession,
+  IInviteToRetro,
+  IRetroSession,
+  Response
+} from '@/types';
 
 const SESSION_API_URL = {
   CREATE: '/retro-session',
   LIST: '/retro-session/list-retro-sessions',
   DELETE: '/retro-session',
-  GET: '/retro-session'
+  GET: '/retro-session',
+  ADD_PARTICIPANT: '/retro-session-participant'
 };
 
 export const createRetroSession = async (
@@ -52,6 +58,20 @@ export const getRetroSessionById = async (
     `${SESSION_API_URL.GET}/${id}`,
     {
       method: 'GET'
+    },
+    API_KEYS.BASE_API
+  );
+  return response;
+};
+
+export const addRetroSessionParticipant = async (
+  data: IInviteToRetro
+): Promise<Response<any>> => {
+  const response = await request(
+    SESSION_API_URL.ADD_PARTICIPANT,
+    {
+      method: 'POST',
+      data
     },
     API_KEYS.BASE_API
   );
