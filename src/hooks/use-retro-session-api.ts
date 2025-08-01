@@ -1,11 +1,13 @@
-/* eslint-disable no-console */
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
+  addRetroSessionParticipant,
   createRetroSession,
   deleteRetroSession,
   getRetroSessions
 } from '@/config/api/retro-session';
-import { ICreateRetroSession } from '@/types';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { isDev } from '@/lib/env';
+import { ICreateRetroSession, IInviteToRetro } from '@/types';
 
 type GetRetroSessionResponse = {
   data: {
@@ -42,12 +44,19 @@ export const useCreateRetroSession = () => {
   return useMutation({
     mutationFn: (data: ICreateRetroSession) => createRetroSession(data),
     onSuccess: (data) => {
-      console.log('Retro session created successfully:', data);
+      if (isDev) {
+        // eslint-disable-next-line no-console
+        console.log('Retro session created successfully:', data);
+      }
+
       // Invalidate and refetch retro sessions
       queryClient.invalidateQueries({ queryKey: ['retro-sessions'] });
     },
     onError: (error) => {
-      console.error('Failed to create retro session:', error);
+      if (isDev) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to create retro session:', error);
+      }
     }
   });
 };
@@ -69,11 +78,25 @@ export const useDeleteRetroSession = () => {
   return useMutation({
     mutationFn: (id: string) => deleteRetroSession(id),
     onSuccess: (data) => {
-      console.log('Retro session deleted successfully:', data);
+      if (isDev) {
+        // eslint-disable-next-line no-console
+        console.log('Retro session deleted successfully:', data);
+      }
       queryClient.invalidateQueries({ queryKey: ['retro-sessions'] });
     },
     onError: (error) => {
-      console.error('Failed to delete retro session:', error);
+      if (isDev) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to delete retro session:', error);
+      }
+    }
+  });
+};
+
+export const useInviteToRetro = () => {
+  return useMutation({
+    mutationFn: (data: IInviteToRetro) => {
+      return addRetroSessionParticipant(data);
     }
   });
 };
