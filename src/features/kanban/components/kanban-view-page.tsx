@@ -187,12 +187,12 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   useEffect(() => {
     if (retroSession) {
       setTasks(
-        retroSession.plans.map((plan) => ({
+        retroSession?.plans?.map((plan) => ({
           _id: plan._id,
           title: plan.text,
-          status: plan.category.name as Status,
+          status: plan?.category?.name as Status,
           votes: 0
-        }))
+        })) || []
       );
     }
   }, [retroSession]);
@@ -200,12 +200,12 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   useEffect(() => {
     if (planItemAction && planItemAction.length > 0) {
       setTasks(
-        planItemAction.map((item) => ({
+        planItemAction?.map((item) => ({
           _id: uuidv4(),
           title: item.description,
           status: item.action_type as Status,
           votes: 0
-        }))
+        })) || []
       );
     }
   }, [planItemAction]);

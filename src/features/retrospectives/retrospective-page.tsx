@@ -64,27 +64,26 @@ export default function DashboardPage() {
   useEffect(() => {
     if (retroSessionData) {
       setRetroSessions(
-        retroSessionData.retroSessions.map((retroSession) => ({
+        retroSessionData.retroSessions?.map((retroSession) => ({
           ...retroSession,
           team: retroSession.team_id as Team,
           sprint: retroSession.sprint_id as Sprint,
           id: retroSession._id,
           created_at: retroSession.created_at,
           updated_at: retroSession.updated_at
-        }))
+        })) || []
       );
       setRetroSessionParticipants(
-        retroSessionData.retroSessionParticipants.map(
+        retroSessionData.retroSessionParticipants?.map(
           (retroSessionParticipant) => ({
             ...retroSessionParticipant,
-            participants: retroSessionParticipant.participants.map(
-              (participant) => ({
+            participants:
+              retroSessionParticipant?.participants?.map((participant) => ({
                 ...participant,
                 id: participant._id
-              })
-            )
+              })) || []
           })
-        )
+        ) || []
       );
     }
   }, [retroSessionData, setRetroSessions]);
@@ -234,7 +233,7 @@ export default function DashboardPage() {
                   </Badge>
                   <Badge variant='secondary' className='text-xs'>
                     <CircleGauge className='mr-1 h-4 w-4 text-green-500' />
-                    {meeting.sprint.name}
+                    {meeting?.sprint?.name}
                   </Badge>
                 </div>
                 <div className='mt-auto flex items-center gap-1'>
@@ -242,14 +241,19 @@ export default function DashboardPage() {
                     <AvatarImage src={user?.avatar} />
                     <AvatarFallback>{user?.email?.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  {retroSessionParticipants.map((participant) => (
-                    <Avatar key={participant._id}>
-                      <AvatarImage src={participant.participants[0]?.email} />
-                      <AvatarFallback className='text-green-600'>
-                        {participant.participants[0]?.email?.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                  ))}
+                  {retroSessionParticipants?.map((participant) => {
+                    const firstParticipant = participant?.participants?.[0];
+                    if (!firstParticipant) return null;
+
+                    return (
+                      <Avatar key={participant._id}>
+                        <AvatarImage src={firstParticipant.email} />
+                        <AvatarFallback className='text-green-600'>
+                          {firstParticipant.email?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

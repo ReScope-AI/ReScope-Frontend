@@ -3,113 +3,187 @@
   <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/9113740/201498152-b171abb8-9225-487a-821c-6ff49ee48579.png">
 </picture>
 
-<div align="center"><strong>Next.js Admin Dashboard Starter Template With Shadcn-ui</strong></div>
-<div align="center">Built with the Next.js 15 App Router</div>
+<div align="center"><strong>ReScope - Retrospective Management Platform</strong></div>
+<div align="center">Built with Next.js 15 App Router & Modern Tech Stack</div>
 <br />
 <div align="center">
-<a href="https://dub.sh/shadcn-dashboard">View Demo</a>
+<a href="#">View Demo</a>
 <span>
 </div>
 
 ## Overview
 
-This is a starter template using the following stack:
+ReScope is a comprehensive retrospective management platform designed to help teams conduct effective retrospectives and improve their development processes. Built with modern web technologies, it provides a collaborative environment for sprint retrospectives, team feedback, and continuous improvement.
 
-- Framework - [Next.js 15](https://nextjs.org/13)
-- Language - [TypeScript](https://www.typescriptlang.org)
-- Auth - [Clerk](https://go.clerk.com/ILdYhn7)
-- Error tracking - [<picture><img alt="Sentry" src="public/assets/sentry.svg">
-        </picture>](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree)
-- Styling - [Tailwind CSS v4](https://tailwindcss.com)
-- Components - [Shadcn-ui](https://ui.shadcn.com)
-- Schema Validations - [Zod](https://zod.dev)
-- State Management - [Zustand](https://zustand-demo.pmnd.rs)
-- Search params state manager - [Nuqs](https://nuqs.47ng.com/)
-- Tables - [Tanstack Data Tables](https://ui.shadcn.com/docs/components/data-table) • [Dice table](https://www.diceui.com/docs/components/data-table)
-- Forms - [React Hook Form](https://ui.shadcn.com/docs/components/form)
-- Command+k interface - [kbar](https://kbar.vercel.app/)
-- Linting - [ESLint](https://eslint.org)
-- Pre-commit Hooks - [Husky](https://typicode.github.io/husky/)
-- Formatting - [Prettier](https://prettier.io)
+### Tech Stack
 
-_If you are looking for a Tanstack start dashboard template, here is the [repo](https://git.new/tanstack-start-dashboard)._
+- **Framework** - [Next.js 15](https://nextjs.org/15) with App Router
+- **Language** - [TypeScript](https://www.typescriptlang.org)
+- **Error Tracking** - [Sentry](https://sentry.io/for/nextjs/)
+- **Styling** - [Tailwind CSS v4](https://tailwindcss.com)
+- **UI Components** - [Shadcn-ui](https://ui.shadcn.com)
+- **State Management** - [Zustand](https://zustand-demo.pmnd.rs)
+- **Real-time Communication** - [Socket.io](https://socket.io/)
+- **Charts & Analytics** - [Recharts](https://recharts.org/)
+- **Forms** - [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev)
+- **Data Fetching** - [TanStack Query](https://tanstack.com/query)
+- **Drag & Drop** - [@dnd-kit](https://dndkit.com/)
+- **Command Interface** - [kbar](https://kbar.vercel.app/)
+- **Development Tools** - ESLint, Prettier, Husky
 
-## Pages
+## Features
 
-| Pages                                                                                 | Specifications                                                                                                                                                                                                                                                          |
-| :------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Signup / Signin](https://go.clerk.com/ILdYhn7)      | Authentication with **Clerk** provides secure authentication and user management with multiple sign-in options including passwordless authentication, social logins, and enterprise SSO - all designed to enhance security while delivering a seamless user experience. |
-| [Dashboard (Overview)](https://shadcn-dashboard.kiranism.dev/dashboard)    | Cards with Recharts graphs for analytics. Parallel routes in the overview sections feature independent loading, error handling, and isolated component rendering. |
-| [Product](https://shadcn-dashboard.kiranism.dev/dashboard/product)         | Tanstack tables with server side searching, filter, pagination by Nuqs which is a Type-safe search params state manager in nextjs                                                                                                                                       |
-| [Product/new](https://shadcn-dashboard.kiranism.dev/dashboard/product/new) | A Product Form with shadcn form (react-hook-form + zod).                                                                                                                                                                                                                |
-| [Profile](https://shadcn-dashboard.kiranism.dev/dashboard/profile)         | Clerk's full-featured account management UI that allows users to manage their profile and security settings                                                                                                                                                             |
-| [Kanban Board](https://shadcn-dashboard.kiranism.dev/dashboard/kanban)     | A Drag n Drop task management board with dnd-kit and zustand to persist state locally.                                                                                                                                                                                  |
-| [Not Found](https://shadcn-dashboard.kiranism.dev/dashboard/notfound)      | Not Found Page Added in the root level                                                                                                                                                                                                                                  |
-| [Global Error](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree)           | A centralized error page that captures and displays errors across the application. Integrated with **Sentry** to log errors, provide detailed reports, and enable replay functionality for better debugging. |
+### Core Functionality
 
-## Feature based organization
+| Feature                     | Description                                                                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Authentication**          | Secure user authentication with Clerk, supporting multiple sign-in methods and user management          |
+| **Dashboard Overview**      | Analytics dashboard with interactive charts showing team performance metrics and retrospective insights |
+| **Retrospective Sessions**  | Real-time collaborative retrospective sessions with live updates via WebSocket                          |
+| **Kanban Board**            | Interactive task management board with drag-and-drop functionality for organizing retrospective items   |
+| **Poll System**             | AI-powered poll generation and voting system for gathering team feedback                                |
+| **Team Management**         | User profile management and team organization features                                                  |
+| **Real-time Collaboration** | Live updates and real-time communication during retrospective sessions                                  |
+
+### Key Components
+
+- **Parallel Routes**: Independent loading states and error handling for dashboard sections
+- **Real-time Updates**: WebSocket integration for live collaboration
+- **AI Integration**: Smart poll generation and retrospective assistance
+- **Responsive Design**: Mobile-first approach with adaptive layouts
+- **Theme Support**: Dark/light mode with system preference detection
+
+## Project Structure
 
 ```plaintext
 src/
-├── app/ # Next.js App Router directory
-│ ├── (auth)/ # Auth route group
-│ │ ├── (signin)/
-│ ├── (dashboard)/ # Dashboard route group
-│ │ ├── layout.tsx
-│ │ ├── loading.tsx
-│ │ └── page.tsx
-│ └── api/ # API routes
+├── app/                    # Next.js App Router
+│   ├── auth/              # Authentication routes
+│   │   ├── sign-in/       # Sign in pages
+│   │   └── sign-up/       # Sign up pages
+│   ├── dashboard/         # Main dashboard
+│   │   ├── overview/      # Analytics dashboard
+│   │   ├── retrospective/ # Retrospective sessions
+│   │   └── profile/       # User profile management
+│   └── layout.tsx         # Root layout
 │
-├── components/ # Shared components
-│ ├── ui/ # UI components (buttons, inputs, etc.)
-│ └── layout/ # Layout components (header, sidebar, etc.)
+├── components/            # Shared components
+│   ├── ui/               # Shadcn UI components
+│   ├── layout/           # Layout components
+│   └── common/           # Common utilities
 │
-├── features/ # Feature-based modules
-│ ├── feature/
-│ │ ├── components/ # Feature-specific components
-│ │ ├── actions/ # Server actions
-│ │ ├── schemas/ # Form validation schemas
-│ │ └── utils/ # Feature-specific utilities
-│ │
-├── lib/ # Core utilities and configurations
-│ ├── auth/ # Auth configuration
-│ ├── db/ # Database utilities
-│ └── utils/ # Shared utilities
+├── features/             # Feature-based modules
+│   ├── auth/            # Authentication features
+│   ├── overview/        # Dashboard analytics
+│   ├── retrospectives/  # Retrospective functionality
+│   ├── kanban/          # Kanban board features
+│   └── profile/         # Profile management
 │
-├── hooks/ # Custom hooks
-│ └── use-debounce.ts
-│
-├── stores/ # Zustand stores
-│ └── dashboard-store.ts
-│
-└── types/ # TypeScript types
-└── index.ts
+├── hooks/               # Custom React hooks
+├── stores/              # Zustand state management
+├── types/               # TypeScript type definitions
+├── lib/                 # Utility functions
+└── config/              # Configuration files
 ```
 
 ## Getting Started
 
-> [!NOTE]  
-> We are using **Next 15** with **React 19**, follow these steps:
+### Prerequisites
 
-Clone the repo:
+- Node.js 18+
+- pnpm (recommended) or npm
+- Git
 
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd ReScope-Frontend
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Environment Setup**
+
+   ```bash
+   cp env.example.txt .env.local
+   ```
+
+   Configure your environment variables in `.env.local`:
+
+   - **Clerk Authentication**: Set up Clerk for authentication (supports keyless mode)
+   - **Sentry Error Tracking**: Configure Sentry for error monitoring
+   - **Real-time Features**: Configure WebSocket connections
+
+4. **Start Development Server**
+
+   ```bash
+   pnpm dev
+   ```
+
+   The application will be available at `http://localhost:3001`
+
+### Environment Configuration
+
+The project uses the following environment variables:
+
+#### Authentication (Clerk)
+
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+NEXT_PUBLIC_CLERK_SIGN_IN_URL="/auth/sign-in"
+NEXT_PUBLIC_CLERK_SIGN_UP_URL="/auth/sign-up"
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL="/dashboard/overview"
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL="/dashboard/overview"
 ```
-git clone https://github.com/Kiranism/next-shadcn-dashboard-starter.git
+
+#### Error Tracking (Sentry)
+
+```env
+NEXT_PUBLIC_SENTRY_DSN=
+NEXT_PUBLIC_SENTRY_ORG=
+NEXT_PUBLIC_SENTRY_PROJECT=
+SENTRY_AUTH_TOKEN=
+NEXT_PUBLIC_SENTRY_DISABLED="false"
 ```
 
-- `pnpm install` ( we have legacy-peer-deps=true added in the .npmrc)
-- Create a `.env.local` file by copying the example environment file:
-  `cp env.example.txt .env.local`
-- Add the required environment variables to the `.env.local` file.
-- `pnpm run dev`
+## Development
 
-##### Environment Configuration Setup
+### Available Scripts
 
-To configure the environment for this project, refer to the `env.example.txt` file. This file contains the necessary environment variables required for authentication and error tracking.
+- `pnpm dev` - Start development server with Turbopack
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run ESLint
+- `pnpm lint:fix` - Fix linting issues
+- `pnpm format` - Format code with Prettier
 
-You should now be able to access the application at http://localhost:3000.
+### Code Quality
 
-> [!WARNING]
-> After cloning or forking the repository, be cautious when pulling or syncing with the latest changes, as this may result in breaking conflicts.
+- **ESLint**: Code linting with strict rules
+- **Prettier**: Code formatting
+- **Husky**: Git hooks for pre-commit checks
+- **TypeScript**: Type safety throughout the application
 
-Cheers! 🥂
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Built with ❤️ for better team retrospectives and continuous improvement.
