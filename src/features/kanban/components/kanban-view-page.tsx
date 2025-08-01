@@ -1,5 +1,6 @@
 'use client';
 import {
+  BarChart3,
   CreditCard,
   Filter,
   Loader2,
@@ -23,6 +24,7 @@ import { Status, useTaskStore } from '../utils/store';
 import { KanbanBoard } from './kanban-board';
 import NewTaskDialog from './new-task-dialog';
 import PollModal from './polls';
+import RadarChartDialog from './radar-chart-dialog';
 
 const exampleRequestData = [
   {
@@ -162,10 +164,13 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const planItemAction = useTaskStore((state) => state.planItemAction);
   const setTasks = useTaskStore((state) => state.setTasks);
   const [isGenerating, setIsGenerating] = useState(false);
-
+  const [isRadarChartOpen, setIsRadarChartOpen] = useState(false);
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
   useEffect(() => {
     on('generate-plan-items', (data) => {
-      setPlanItemAction(data.data);
+      if (data && data.data) {
+        setPlanItemAction(data.data);
+      }
       setIsGenerating(false);
     });
   }, []);
@@ -180,7 +185,20 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   };
 
   useEffect(() => {
-    if (planItemAction.length > 0) {
+    if (retroSession) {
+      setTasks(
+        retroSession.plans.map((plan) => ({
+          _id: plan._id,
+          title: plan.text,
+          status: plan.category.name as Status,
+          votes: 0
+        }))
+      );
+    }
+  }, [retroSession]);
+
+  useEffect(() => {
+    if (planItemAction && planItemAction.length > 0) {
       setTasks(
         planItemAction.map((item) => ({
           _id: uuidv4(),
@@ -214,7 +232,7 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
       )}
 
       {/* Header Section */}
-      <HeaderBar />
+      <HeaderBar onOpenRadarChart={() => setIsRadarChartOpen(true)} />
 
       <Button
         className='mx-4 mt-4 w-48'
@@ -238,14 +256,24 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
       <div className='flex-1 overflow-hidden'>
         <KanbanBoard />
       </div>
+
+      {/* Radar Chart Dialog */}
+      <RadarChartDialog
+        open={isRadarChartOpen}
+        onOpenChange={setIsRadarChartOpen}
+      />
     </div>
   );
 }
 
-export function HeaderBar() {
+export function HeaderBar({
+  onOpenRadarChart
+}: {
+  onOpenRadarChart: () => void;
+}) {
   const retroSession = useRetroSessionStore((state) => state.retroSession);
   return (
-    <div className='mt-4 flex w-full items-center justify-between space-x-2 border-b border-gray-200 bg-white px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-900'>
+    <div className='text-md flex w-full items-center justify-between space-x-2 border-b px-4 py-2'>
       {/* Left section */}
       <div className='flex items-center gap-2'>
         <h2 className='text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100'>
@@ -284,6 +312,14 @@ export function HeaderBar() {
 
         <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
           <Filter className='h-4 w-4' />
+        </Button>
+
+        <Button
+          className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+          onClick={onOpenRadarChart}
+          title='View Performance Chart'
+        >
+          <BarChart3 className='h-4 w-4' />
         </Button>
 
         <PollModal />

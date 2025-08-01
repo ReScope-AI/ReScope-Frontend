@@ -1,32 +1,35 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
-  IconEdit,
-  IconTrash,
   IconCheck,
   IconDots,
-  IconEye
+  IconEdit,
+  IconEye,
+  IconTrash
 } from '@tabler/icons-react';
+import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { IQuestion, IOption } from '@/types/IRetroSession';
-import { useState } from 'react';
+
 import { PollQuestionEditDialog } from './poll-question-edit-dialog';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from '@/components/ui/dialog';
+
+import type { IOption, IQuestion } from '@/types/IRetroSession';
 
 interface PollQuestionCardProps {
   question: IQuestion;
@@ -43,14 +46,7 @@ export function PollQuestionCard({
   onDelete,
   onVote
 }: PollQuestionCardProps) {
-  const {
-    setNodeRef,
-    attributes,
-    listeners,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({
+  const { setNodeRef, transform, transition } = useSortable({
     id: question._id,
     data: { type: 'PollQuestion', question },
     attributes: { roleDescription: 'Poll Question' },

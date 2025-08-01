@@ -1,4 +1,15 @@
 'use client';
+import {
+  AlignHorizontalDistributeEnd,
+  Calendar,
+  CircleGauge,
+  EllipsisVertical,
+  FileText,
+  Zap
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,11 +34,10 @@ import {
   useDeleteRetroSession,
   useGetRetroSessions
 } from '@/hooks/use-retro-session-api';
-import { Calendar, EllipsisVertical, FileText, Zap } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useUserStore } from '@/stores/userStore';
+
 import DialogSelectBoard from './components/dialog-select-board';
 import { RetroSession, Sprint, Team, useRetrospectiveStore } from './stores';
-import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -37,8 +47,15 @@ export default function DashboardPage() {
     useState<RetroSession | null>(null);
   const getAllRetroSessions = useGetRetroSessions();
   const deleteRetroSession = useDeleteRetroSession();
-  const { setRetroSessions, retroSessions } = useRetrospectiveStore();
+  const {
+    setRetroSessions,
+    retroSessions,
+    setRetroSessionParticipants,
+    retroSessionParticipants
+  } = useRetrospectiveStore();
   const retroSessionData = getAllRetroSessions.data?.data;
+
+  const { user } = useUserStore();
 
   const handleOpenDialogSelectBoard = () => {
     setOpenDialogSelectBoard(true);
@@ -47,7 +64,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (retroSessionData) {
       setRetroSessions(
-        retroSessionData.map((retroSession) => ({
+        retroSessionData.retroSessions.map((retroSession) => ({
           ...retroSession,
           team: retroSession.team_id as Team,
           sprint: retroSession.sprint_id as Sprint,
@@ -55,6 +72,19 @@ export default function DashboardPage() {
           created_at: retroSession.created_at,
           updated_at: retroSession.updated_at
         }))
+      );
+      setRetroSessionParticipants(
+        retroSessionData.retroSessionParticipants.map(
+          (retroSessionParticipant) => ({
+            ...retroSessionParticipant,
+            participants: retroSessionParticipant.participants.map(
+              (participant) => ({
+                ...participant,
+                id: participant._id
+              })
+            )
+          })
+        )
       );
     }
   }, [retroSessionData, setRetroSessions]);
@@ -155,14 +185,14 @@ export default function DashboardPage() {
               key={meeting._id}
               className='flex h-full cursor-pointer flex-col transition-shadow hover:shadow-md'
             >
-              <CardHeader className='pb-3'>
+              <CardHeader>
                 <div className='flex items-center justify-between'>
                   <div className='flex items-center gap-2'>
-                    <Avatar className='h-6 w-6'>
-                      <AvatarImage
-                        src={meeting?.team?.name || '/placeholder.svg'}
-                      />
-                      <AvatarFallback>U</AvatarFallback>
+                    <Avatar className='h-8 w-8'>
+                      <AvatarImage src={'/assets/logo.png'} />
+                      <AvatarFallback>
+                        {meeting?.team?.name?.charAt(0)}
+                      </AvatarFallback>
                     </Avatar>
                     <span className='text-sm font-medium'>{meeting.name}</span>
                   </div>
@@ -188,25 +218,38 @@ export default function DashboardPage() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <p className='text-xs text-gray-500'>{meeting.end_date}</p>
+                <p className='text-xs text-gray-500'>
+                  {new Date(meeting.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
               </CardHeader>
               <CardContent className='flex flex-1 flex-col justify-between pt-0'>
                 <div className='mb-3 flex items-center justify-between'>
+                  <Badge variant='secondary' className='text-xs text-green-600'>
+                    <AlignHorizontalDistributeEnd className='mr-1 h-6 w-6 text-green-600' />
+                    Retrospectives
+                  </Badge>
                   <Badge variant='secondary' className='text-xs'>
-                    <FileText className='mr-1 h-3 w-3' />
+                    <CircleGauge className='mr-1 h-4 w-4 text-green-500' />
                     {meeting.sprint.name}
                   </Badge>
-                  <span className='text-xs text-gray-500'>
-                    {meeting.sprint.name}
-                  </span>
                 </div>
                 <div className='mt-auto flex items-center gap-1'>
-                  <Avatar className='h-6 w-6'>
-                    <AvatarImage
-                      src={meeting?.team?.name || '/placeholder.svg'}
-                    />
-                    <AvatarFallback>{meeting?.team?.name[0]}</AvatarFallback>
+                  <Avatar key={user?._id}>
+                    <AvatarImage src={user?.avatar} />
+                    <AvatarFallback>{user?.email?.charAt(0)}</AvatarFallback>
                   </Avatar>
+                  {retroSessionParticipants.map((participant) => (
+                    <Avatar key={participant._id}>
+                      <AvatarImage src={participant.participants[0]?.email} />
+                      <AvatarFallback className='text-green-600'>
+                        {participant.participants[0]?.email?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -218,8 +261,14 @@ export default function DashboardPage() {
               <div className='mb-2 text-gray-400'>
                 <Calendar className='mx-auto h-8 w-8' />
               </div>
-              <p className='mb-2 text-sm text-gray-500'>Kollabe</p>
-              <p className='text-xs text-gray-400'>Wed Jul 09 2025</p>
+              <p className='mb-2 text-sm text-gray-500'>Re-Scope</p>
+              <p className='text-xs text-gray-400'>
+                {new Date().toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
             </CardContent>
           </Card>
         </div>

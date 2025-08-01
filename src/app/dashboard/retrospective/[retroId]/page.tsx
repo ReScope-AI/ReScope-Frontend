@@ -4,7 +4,8 @@ import FormCardSkeleton from '@/components/form-card-skeleton';
 import KanbanViewPage from '@/features/kanban/components/kanban-view-page';
 
 export const metadata = {
-  title: 'Dashboard : Retrospective View'
+  title: 'Re-Scope: Retrospective View',
+  description: 'Retrospective View'
 };
 
 export default async function Page({
