@@ -20,11 +20,11 @@ import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
 type ErrorInfo = { title: string; message: string } | null;
 
-export const useRetroSocket = () => {
+export const useRetroSocket = ({ roomId }: { roomId?: string } = {}) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const [error, setError] = useState<ErrorInfo>(null);
   const session = useRetroSessionStore((state) => state.retroSession);
-  const retroId = session?._id;
+  const retroId = roomId || session?._id;
 
   const initializeSocket = useCallback(() => {
     if (!SOCKET_URL || !accessToken || isConnected()) {

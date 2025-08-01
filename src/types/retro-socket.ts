@@ -12,6 +12,20 @@ export interface RetroEmitEvents {
   'leave-room': {
     sessionId: string;
   };
+  're-scope': ReScopeEmitEvent<keyof ReScopeEmitEventsInternal>;
+}
+
+type ReScopeEmitEvent<T extends keyof ReScopeEmitEventsInternal> = {
+  event: T;
+  room: string;
+  data: ReScopeEmitEventsInternal[T];
+};
+
+type WithRoomIds<T extends object> = {
+  [K in keyof T]: T[K] & { roomId: string };
+};
+
+interface ReScopeEmitEventsInternal {
   'add-plan': {
     session_id: string;
     category_id: string;
@@ -30,12 +44,10 @@ export interface RetroEmitEvents {
     changePlan: string;
     category_id: string;
   };
-  're-scope': {
-    event: string;
-    room: string;
-    data: any;
-  };
+  'generate-plan-items': any;
 }
+
+export type ReScopeEmitEvents = WithRoomIds<ReScopeEmitEventsInternal>;
 
 export interface RetroListenEvents {
   'join-room': any;

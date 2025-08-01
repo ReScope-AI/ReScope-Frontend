@@ -1,9 +1,10 @@
 import { Socket } from 'socket.io-client';
 
 import {
-  SocketConnectionOptions,
+  ReScopeEmitEvents,
   RetroEmitEvents,
   RetroListenEvents,
+  SocketConnectionOptions,
   SocketResponse
 } from '@/types/retro-socket';
 
@@ -167,6 +168,7 @@ export function off<K extends keyof RetroListenEvents>(
   event: K,
   callback?: (response: SocketResponse<RetroListenEvents[K]>) => void
 ): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   socket?.off(event, callback as any);
 }
 
@@ -205,22 +207,36 @@ export function emitLeaveRoom(data: RetroEmitEvents['leave-room']): void {
   emit('leave-room', data);
 }
 
-export function emitAddPlan(data: RetroEmitEvents['add-plan']): void {
-  emit('add-plan', data);
+export function emitAddPlan({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['add-plan']): void {
+  emit('re-scope', { event: 'add-plan', room: roomId, data });
 }
 
-export function emitEditPlan(data: RetroEmitEvents['edit-plan']): void {
-  emit('edit-plan', data);
+export function emitEditPlan({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['edit-plan']): void {
+  emit('re-scope', { event: 'edit-plan', room: roomId, data });
 }
 
-export function emitDeletePlan(data: RetroEmitEvents['delete-plan']): void {
-  emit('delete-plan', data);
+export function emitDeletePlan({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['delete-plan']): void {
+  emit('re-scope', { event: 'delete-plan', room: roomId, data });
 }
 
-export function emitChangePositionPlan(
-  data: RetroEmitEvents['change-position-plan']
-): void {
-  emit('change-position-plan', data);
+export function emitChangePositionPlan({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['change-position-plan']): void {
+  emit('re-scope', {
+    event: 'change-position-plan',
+    room: roomId,
+    data
+  });
 }
 
 // Convenience on functions for listening to events
