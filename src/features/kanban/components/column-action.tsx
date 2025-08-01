@@ -1,6 +1,8 @@
 'use client';
+import { UniqueIdentifier } from '@dnd-kit/core';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
 import * as React from 'react';
+import { toast } from 'sonner';
 
 import {
   AlertDialog,
@@ -16,13 +18,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { useTaskStore } from '../utils/store';
-import { UniqueIdentifier } from '@dnd-kit/core';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
+
+import { useTaskStore } from '../utils/store';
 
 export function ColumnActions({
   title,

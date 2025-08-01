@@ -145,31 +145,30 @@ export function PollQuestionCard({
         </CardContent>
       </Card>
 
-      <PollQuestionEditDialog
-        open={editOpen}
-        question={question}
-        onClose={() => setEditOpen(false)}
-        onSave={(updated) => {
-          console.log(updated);
-          setEditOpen(false);
+      {retroId && (
+        <PollQuestionEditDialog
+          open={editOpen}
+          question={question}
+          onClose={() => setEditOpen(false)}
+          onSave={(updated) => {
+            console.log(updated);
+            setEditOpen(false);
 
-          // Emit socket event to update poll question
-          emitEditPollQuestion(
-            {
+            // Emit socket event to update poll question
+            emitEditPollQuestion({
+              roomId: retroId,
               questionId: updated._id,
               text: updated.text,
               option: updated.options.map((option) => ({
                 optionId: option._id,
                 text: option.text
               }))
-            },
-            retroId
-          );
+            });
 
-          onEdit?.(updated);
-        }}
-      />
-
+            onEdit?.(updated);
+          }}
+        />
+      )}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent className='sm:max-w-md'>
           <DialogHeader>

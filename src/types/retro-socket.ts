@@ -5,29 +5,27 @@ export type SocketResponse<T> = {
   msg: string;
 };
 
-// Base message structure for all socket events
-export interface RetroSocketMessage<T extends keyof RetroEmitEvents> {
-  room?: string;
-  event: T;
-  data: RetroEmitEvents[T];
-}
-
-// Event data types for each specific event
 export interface RetroEmitEvents {
   'join-room': {
     sessionId: string;
   };
-  'edit-poll-question': {
-    questionId: string;
-    text: string;
-    option?: {
-      optionId: string;
-      text: string;
-    }[];
-  };
   'leave-room': {
     sessionId: string;
   };
+  're-scope': ReScopeEmitEvent<keyof ReScopeEmitEventsInternal>;
+}
+
+type ReScopeEmitEvent<T extends keyof ReScopeEmitEventsInternal> = {
+  event: T;
+  room: string;
+  data: ReScopeEmitEventsInternal[T];
+};
+
+type WithRoomIds<T extends object> = {
+  [K in keyof T]: T[K] & { roomId: string };
+};
+
+interface ReScopeEmitEventsInternal {
   'add-plan': {
     session_id: string;
     category_id: string;
@@ -46,7 +44,18 @@ export interface RetroEmitEvents {
     changePlan: string;
     category_id: string;
   };
+  'generate-plan-items': any;
+  'edit-poll-question': {
+    questionId: string;
+    text: string;
+    option?: {
+      optionId: string;
+      text: string;
+    }[];
+  };
 }
+
+export type ReScopeEmitEvents = WithRoomIds<ReScopeEmitEventsInternal>;
 
 export interface RetroListenEvents {
   'join-room': any;
@@ -56,6 +65,7 @@ export interface RetroListenEvents {
   'edit-plan': any;
   'delete-plan': any;
   'change-position-plan': any;
+  'generate-plan-items': any;
   'edit-poll-question': any;
 }
 
