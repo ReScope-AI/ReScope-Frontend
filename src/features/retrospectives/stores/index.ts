@@ -37,16 +37,29 @@ export interface RetroSession {
   updated_at: string;
 }
 
+export interface RetroSessionParticipant {
+  _id: string;
+  session_id: string;
+  participants: {
+    _id: string;
+    name: string;
+    email: string;
+    created_at: string;
+    updated_at: string;
+  }[];
+}
+
 export type RetroSpectiveState = {
   teams: TeamName[];
   retroSessions: RetroSession[];
   sprints: SprintName[];
+  retroSessionParticipants: RetroSessionParticipant[];
 };
 
 const initialTeams: TeamName[] = [];
 const initialRetroSessions: RetroSession[] = [];
 const initialSprints: SprintName[] = [];
-
+const initialRetroSessionParticipants: RetroSessionParticipant[] = [];
 export type Actions = {
   addTeam: (name: string) => void;
   removeTeam: (id: string) => void;
@@ -56,6 +69,9 @@ export type Actions = {
   removeSprint: (id: string) => void;
   setSprints: (updatedSprints: SprintName[]) => void;
   clearStorage: () => void;
+  setRetroSessionParticipants: (
+    updatedRetroSessionParticipants: RetroSessionParticipant[]
+  ) => void;
 };
 
 export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
@@ -64,6 +80,7 @@ export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
       teams: initialTeams,
       retroSessions: initialRetroSessions,
       sprints: initialSprints,
+      retroSessionParticipants: initialRetroSessionParticipants,
       addTeam: (name: string) =>
         set((state) => ({
           teams: [...state.teams, { id: uuid(), name }]
@@ -85,11 +102,15 @@ export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
         })),
       setSprints: (updatedSprints: SprintName[]) =>
         set({ sprints: updatedSprints }),
+      setRetroSessionParticipants: (
+        updatedRetroSessionParticipants: RetroSessionParticipant[]
+      ) => set({ retroSessionParticipants: updatedRetroSessionParticipants }),
       clearStorage: () => {
         set({
           teams: [],
           retroSessions: [],
-          sprints: []
+          sprints: [],
+          retroSessionParticipants: []
         });
       }
     }),

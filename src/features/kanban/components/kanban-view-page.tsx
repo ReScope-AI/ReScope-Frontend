@@ -165,7 +165,7 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const setTasks = useTaskStore((state) => state.setTasks);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRadarChartOpen, setIsRadarChartOpen] = useState(false);
-
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
   useEffect(() => {
     on('generate-plan-items', (data) => {
       if (data && data.data) {
@@ -183,6 +183,19 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
       data: exampleRequestData
     });
   };
+
+  useEffect(() => {
+    if (retroSession) {
+      setTasks(
+        retroSession.plans.map((plan) => ({
+          _id: plan._id,
+          title: plan.text,
+          status: plan.category.name as Status,
+          votes: 0
+        }))
+      );
+    }
+  }, [retroSession]);
 
   useEffect(() => {
     if (planItemAction && planItemAction.length > 0) {
@@ -260,7 +273,7 @@ export function HeaderBar({
 }) {
   const retroSession = useRetroSessionStore((state) => state.retroSession);
   return (
-    <div className='mt-4 flex w-full items-center justify-between space-x-2 border-b border-gray-200 bg-white px-4 py-2 text-sm dark:border-gray-700 dark:bg-gray-900'>
+    <div className='text-md flex w-full items-center justify-between space-x-2 border-b px-4 py-2'>
       {/* Left section */}
       <div className='flex items-center gap-2'>
         <h2 className='text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100'>

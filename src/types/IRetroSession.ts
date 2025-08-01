@@ -29,6 +29,7 @@ export interface IRetroSession {
   questions: IQuestion[];
   actionItems: string[];
   sprint: ISprint;
+  plans: IPlan[];
 }
 
 export interface IQuestion {
@@ -49,6 +50,23 @@ export interface IOption {
   text: string;
   order: number;
   question_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IPlan {
+  _id: string;
+  category_id: string;
+  position: number;
+  text: string;
+  category: ICategory;
+}
+
+export interface ICategory {
+  _id: string;
+  name: string;
+  description: string;
+  created_by: string;
   created_at: string;
   updated_at: string;
 }

@@ -1,16 +1,15 @@
 'use client';
 
 import {
-  RadarChart,
-  PolarGrid,
   PolarAngleAxis,
-  PolarRadiusAxis,
+  PolarGrid,
   Radar,
-  Tooltip,
-  ResponsiveContainer
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip
 } from 'recharts';
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const data = [
   {
