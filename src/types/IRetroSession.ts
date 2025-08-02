@@ -26,6 +26,7 @@ export interface IRetroSession {
   team_id: string;
   sprint_id: string;
   name: string;
+  step: number;
   created_by: string;
   isDelete: boolean;
   updated_by: string;

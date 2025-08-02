@@ -1,6 +1,7 @@
 import { UniqueIdentifier } from '@dnd-kit/core';
 import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
+
 import { Column } from '../components/board-column';
 
 export type Status = 'DROP' | 'ADD' | 'KEEP' | 'IMPROVE' | 'POLL';
@@ -52,6 +53,7 @@ export type State = {
   draggedTask: string | null;
   openDialog: boolean;
   planItemAction: PlanItemAction[];
+  step: number;
 };
 
 export type PlanItemAction = {
@@ -79,6 +81,7 @@ export type Actions = {
   updateTasks: (tasksList: Task[]) => void;
   clearStorage: () => void;
   setPlanItemAction: (action: PlanItemAction[]) => void;
+  setStep: (step: number) => void;
 };
 
 export const useTaskStore = create<State & Actions>((set) => ({
@@ -87,6 +90,7 @@ export const useTaskStore = create<State & Actions>((set) => ({
   draggedTask: null,
   openDialog: false,
   planItemAction: [],
+  step: 1,
   addTask: (title: string, description?: string, status: Status = 'DROP') =>
     set((state) => ({
       tasks: [
@@ -166,5 +170,6 @@ export const useTaskStore = create<State & Actions>((set) => ({
     });
   },
   setPlanItemAction: (action: PlanItemAction[]) =>
-    set({ planItemAction: action })
+    set({ planItemAction: action }),
+  setStep: (step: number) => set({ step })
 }));

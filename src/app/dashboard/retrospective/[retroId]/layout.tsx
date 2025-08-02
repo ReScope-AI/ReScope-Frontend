@@ -13,6 +13,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { getRetroSessionById } from '@/config/api/retro-session';
 import { QUERY_CONSTANTS } from '@/constants/query';
+import { useTaskStore } from '@/features/kanban/utils/store';
 import { useRetroSocket } from '@/hooks/use-retro-socket';
 import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
@@ -27,6 +28,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     setPollQuestions,
     clearPollQuestions
   } = usePollStore((state) => state);
+  const setStep = useTaskStore((state) => state.setStep);
   const retroId = params.retroId as string;
 
   const { data: retro, isLoading } = useQuery({
@@ -55,7 +57,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (retro && retro.code === 200) {
       setRetroSession(retro.data);
-
+      setStep(retro.data.step || 1);
       // Clear existing poll options when session changes
       clearPollQuestions();
 
