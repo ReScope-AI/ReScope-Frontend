@@ -1,4 +1,6 @@
+import { isArray } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
@@ -16,15 +18,19 @@ import {
   onAddPlan,
   onChangePositionPlan,
   onDeletePlan,
+  onDeletePollQuestion,
   onEditPlan,
+  onEditPollQuestion,
   onGeneratePlanItems,
   onJoinFailed,
   onJoinRoom,
   onLeaveRoom,
   onSetStep,
-  onSetStepSuccess
+  onSetStepSuccess,
+  onVotePollQuestion
 } from '@/lib/retro-socket';
 import { useAuthStore } from '@/stores/authStore';
+import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
 type ErrorInfo = { title: string; message: string } | null;
@@ -33,6 +39,8 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const [error, setError] = useState<ErrorInfo>(null);
   const session = useRetroSessionStore((state) => state.retroSession);
+  const { updatePollQuestion, setPollQuestions, removePollQuestion } =
+    usePollStore((state) => state);
   const retroId = roomId || session?._id;
   const setTasks = useTaskStore((state) => state.setTasks);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
@@ -106,6 +114,22 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     const setStepSuccessListener = (data: any) => {
       console.log('setStepSuccessListener', data);
     };
+    // Polls Questions
+    const editPollQuestionListener = (res: any) => {
+      if (res.code === 200 && res.data && res.data.questions) {
+        setPollQuestions(res.data.questions);
+      }
+    };
+    const votePollQuestionListener = (res: any) => {
+      if (
+        res.code === 200 &&
+        res.data &&
+        isArray(res.data) &&
+        res.data.length > 0
+      ) {
+        updatePollQuestion(res.data[0]._id, res.data[0]);
+      }
+    };
     onJoinRoom((res) => {
       if (res.code === 200) {
         setError(null);
@@ -117,11 +141,20 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
         message: res.msg || 'Failed to join the retrospective room.'
       });
     });
+    const deletePollQuestionListener = (res: any) => {
+      console.log('deletePollQuestionListener ', res);
+      if (res.code === 200) {
+        removePollQuestion(res.data.id);
+      }
+    };
     onLeaveRoom(leaveRoomListener);
     onAddPlan(addPlanListener);
     onEditPlan(editPlanListener);
     onDeletePlan(deletePlanListener);
     onChangePositionPlan(changePositionPlanListener);
+    onEditPollQuestion(editPollQuestionListener);
+    onVotePollQuestion(votePollQuestionListener);
+    onDeletePollQuestion(deletePollQuestionListener);
     onGeneratePlanItems(generatePlanItemsListener);
     onSetStep(setStepListener);
     onSetStepSuccess(setStepSuccessListener);

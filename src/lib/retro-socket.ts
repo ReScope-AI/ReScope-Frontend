@@ -239,6 +239,27 @@ export function emitChangePositionPlan({
   });
 }
 
+export function emitEditPollQuestion({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['edit-poll-question']): void {
+  emit('re-scope', { event: 'edit-poll-question', room: roomId, data });
+}
+
+export function emitVotePollQuestion({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['vote-question']): void {
+  emit('re-scope', { event: 'vote-question', room: roomId, data });
+}
+
+export function emitDeletePollQuestion({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['delete-question']): void {
+  emit('re-scope', { event: 'delete-question', room: roomId, data });
+}
+
 export function emitGeneratePlanItems(
   roomId: string,
   data: ReScopeEmitEvents['generate-plan-items']
@@ -258,10 +279,12 @@ export const onAddPlan = createOnFunction('add-plan');
 export const onEditPlan = createOnFunction('edit-plan');
 export const onDeletePlan = createOnFunction('delete-plan');
 export const onChangePositionPlan = createOnFunction('change-position-plan');
+export const onEditPollQuestion = createOnFunction('edit-poll-question');
+export const onVotePollQuestion = createOnFunction('vote-question');
+export const onDeletePollQuestion = createOnFunction('delete-question');
 export const onGeneratePlanItems = createOnFunction('generate-plan-items');
 export const onActiveGeneratePlanItems = createOnFunction(
   'active-generate-plan-items'
 );
-
 export const onSetStep = createOnFunction('set-step');
 export const onSetStepSuccess = createOnFunction('set-step-success');

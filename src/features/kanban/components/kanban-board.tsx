@@ -1,5 +1,4 @@
 'use client';
-import { usePollStore } from '@/stores/pollStore';
 import {
   Announcements,
   DndContext,
@@ -16,18 +15,22 @@ import {
 import { arrayMove, SortableContext } from '@dnd-kit/sortable';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+
+import { usePollStore } from '@/stores/pollStore';
+
 import { hasDraggableData } from '../utils';
 import { defaultCols, Task, useTaskStore, type Status } from '../utils/store';
-import type { Column } from './board-column';
+
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
 import { PollsColumn } from './polls-column';
 import { TaskCard } from './task-card';
 
+import type { Column } from './board-column';
+
 export function KanbanBoard() {
   const columns = useTaskStore((state) => state.columns);
   const pollsCol = usePollStore((state) => state.getPollsColumn());
-  const pollQuestions = usePollStore((state) => state.pollQuestions);
   const setColumns = useTaskStore((state) => state.setCols);
   const pickedUpTaskColumn = useRef<Status>(defaultCols[0].id as Status);
   const columnsId = useMemo(
@@ -156,7 +159,7 @@ export function KanbanBoard() {
     <section className='flex flex-row'>
       {pollsCol && (
         <BoardContainer>
-          <PollsColumn column={pollsCol} questions={pollQuestions} />
+          <PollsColumn column={pollsCol} />
         </BoardContainer>
       )}
       <DndContext

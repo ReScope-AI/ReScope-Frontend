@@ -1,18 +1,22 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { cn } from '@/lib/utils';
-import { IQuestion } from '@/types';
 import { useDndContext, type UniqueIdentifier } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { IconGripVertical, IconPlus } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
-import { useMemo, useState } from 'react';
-import { useTaskStore } from '../utils/store';
-import { ColumnActions } from './column-action';
-import { TaskCard } from './task-card';
+import { useMemo } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { usePollStore } from '@/stores/pollStore';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { IQuestion } from '@/types';
+
 import { getColumnColorClasses, getColumnIcon } from '../utils';
+import { useTaskStore } from '../utils/store';
+
+import { ColumnActions } from './column-action';
 import { PollQuestionCard } from './poll-question-card';
 
 export interface Column {
@@ -34,25 +38,20 @@ export interface ColumnDragData {
 
 interface PollsColumnProps {
   column: Column;
-  questions: IQuestion[];
   isOverlay?: boolean;
   disableDragExternal?: boolean;
 }
 
 export function PollsColumn({
   column,
-  questions,
   isOverlay,
   disableDragExternal = false
 }: PollsColumnProps) {
+  const { pollQuestions } = usePollStore((state) => state);
   const questionsIds = useMemo(() => {
-    return questions.map((question) => question._id);
-  }, [questions]);
+    return pollQuestions.map((question) => question._id);
+  }, [pollQuestions]);
   const setOpenDialog = useTaskStore((state) => state.setOpenDialog);
-  const [editingQuestion, setEditingQuestion] = useState<IQuestion | null>(
-    null
-  );
-  const [questionsState, setQuestionsState] = useState<IQuestion[]>(questions);
 
   const {
     setNodeRef,
@@ -73,24 +72,6 @@ export function PollsColumn({
     disabled: disableDragExternal
   });
 
-  // Handle edit
-  const handleEdit = (updated: IQuestion) => {
-    setQuestionsState((prev) =>
-      prev.map((q) => (q._id === updated._id ? updated : q))
-    );
-    // TODO: Call API update if needed
-  };
-
-  // Handle delete
-  const handleDelete = (id: string) => {
-    setQuestionsState((prev) => prev.filter((q) => q._id !== id));
-    // TODO: Call API delete if needed
-  };
-
-  // Handle vote
-  const handleVote = (optionId: string) => {
-    // TODO: Call API vote, update vote count if needed
-  };
   const style = {
     transition,
     transform: CSS.Translate.toString(transform)
@@ -156,14 +137,11 @@ export function PollsColumn({
       <CardContent className='flex grow flex-col gap-4 overflow-x-hidden p-2'>
         <ScrollArea className='h-full'>
           <SortableContext items={questionsIds}>
-            {questions.map((question) => (
+            {pollQuestions.map((question) => (
               <PollQuestionCard
                 key={question._id}
                 question={question}
                 disableDragExternal={disableDragExternal}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onVote={handleVote}
               />
             ))}
             <Button

@@ -45,6 +45,21 @@ interface ReScopeEmitEventsInternal {
     category_id: string;
   };
   'generate-plan-items': any;
+  'edit-poll-question': {
+    questionId: string;
+    text: string;
+    option?: {
+      optionId: string | null;
+      text: string;
+    }[];
+  };
+  'vote-question': {
+    question_id: string;
+    option_id: string;
+  };
+  'delete-question': {
+    id: string;
+  };
   'set-step': {
     step: number;
   };
@@ -64,6 +79,9 @@ export interface RetroListenEvents {
   'delete-plan': any;
   'change-position-plan': any;
   'generate-plan-items': any;
+  'edit-poll-question': any;
+  'vote-question': any;
+  'delete-question': any;
   'active-generate-plan-items': any;
   'set-step': {
     step: number;

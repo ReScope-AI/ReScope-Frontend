@@ -3,8 +3,11 @@ import { useRouter } from 'next/navigation';
 
 import { showNotification } from '@/components/common';
 import { loginWithGoogle } from '@/config/api/auth';
+import { useTaskStore } from '@/features/kanban/utils/store';
+import { useRetrospectiveStore } from '@/features/retrospectives/stores';
 import { useAuthStore } from '@/stores/authStore';
 import { usePollStore } from '@/stores/pollStore';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { useUserStore } from '@/stores/userStore';
 
 // Sign In
@@ -38,9 +41,12 @@ export const useSignOut = () => {
   const router = useRouter();
   return useMutation({
     mutationFn: async () => {
-      useAuthStore.persist.clearStorage();
-      useUserStore.persist.clearStorage();
-      usePollStore.persist.clearStorage();
+      useAuthStore.getState().clearStorage();
+      useUserStore.getState().clearStorage();
+      useTaskStore.getState().clearStorage();
+      usePollStore.getState().clearStorage();
+      useRetroSessionStore.getState().clearStorage();
+      useRetrospectiveStore.getState().clearStorage();
     },
     onSuccess: () => {
       router.push('/auth/sign-in');
