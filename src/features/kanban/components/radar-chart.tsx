@@ -10,31 +10,16 @@ import {
 } from 'recharts';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-const data = [
-  {
-    criteria: 'TEAMWORK',
-    score: 6.6
-  },
-  {
-    criteria: 'COMMUNICATION',
-    score: 5.7
-  },
-  {
-    criteria: 'QUALITY',
-    score: 6.3
-  },
-  {
-    criteria: 'TIMEBOUND',
-    score: 4.7
-  },
-  {
-    criteria: 'ESTIMATION',
-    score: 5.1
-  }
-];
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
 export default function EvaluationRadarChart() {
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
+
+  const data = retroSession?.radar_criteria?.map((criteria) => ({
+    criteria: criteria.criteria,
+    score: criteria.score
+  }));
+
   return (
     <Card className='border-border mx-auto w-full max-w-xl border shadow-md'>
       <CardHeader>
@@ -56,7 +41,7 @@ export default function EvaluationRadarChart() {
                 backgroundColor: 'white',
                 borderColor: '#e5e7eb'
               }}
-              formatter={(value: number) => `${value}/5`}
+              formatter={(value: number) => `${value}/10`}
             />
             <Radar
               name='Score'

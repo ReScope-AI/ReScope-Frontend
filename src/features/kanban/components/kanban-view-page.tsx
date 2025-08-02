@@ -2,21 +2,24 @@
 import {
   BarChart3,
   Filter,
-  MessageCircle,
   MessageSquareMore,
-  RotateCcw,
   Search,
   Share2,
   SortAsc,
   SquarePen,
   ThumbsUp
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ShareRetroDialog } from '@/components/modal/share-retro-dialog';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 import {
   emitGeneratePlanItems,
   onActiveGeneratePlanItems
@@ -32,133 +35,59 @@ import RadarChartDialog from './radar-chart-dialog';
 
 const exampleRequestData = [
   {
-    question_text:
-      'How effectively did our daily stand-ups contribute to sprint progress?',
-    criterion: 'PROCESS',
-    options: [
-      {
-        text: 'Very Ineffective',
-        percentage: 15
-      },
-      {
-        text: 'Ineffective',
-        percentage: 25
-      },
-      {
-        text: 'Neutral',
-        percentage: 20
-      },
-      {
-        text: 'Effective',
-        percentage: 30
-      },
-      {
-        text: 'Very Effective',
-        percentage: 10
-      }
-    ]
-  },
-  {
-    question_text: 'How clear was the sprint goal for everyone?',
-    criterion: 'GOAL',
-    options: [
-      {
-        text: 'Not at all',
-        percentage: 5
-      },
-      {
-        text: 'Slightly',
-        percentage: 15
-      },
-      {
-        text: 'Moderately',
-        percentage: 30
-      },
-      {
-        text: 'Very',
-        percentage: 40
-      },
-      {
-        text: 'Extremely',
-        percentage: 10
-      }
-    ]
-  },
-  {
-    question_text:
-      'Which of the following best describes how we should handle our sprint retrospective format?',
-    criterion: 'DAKI_ACTION',
-    options: [
-      {
-        text: 'Drop the current whiteboard tool for retros',
-        percentage: 10
-      },
-      {
-        text: "Add a dedicated 'Definition of Done' review in sprint planning",
-        percentage: 25
-      },
-      {
-        text: 'Keep our current daily stand-up time',
-        percentage: 15
-      },
-      {
-        text: 'Improve cross-functional communication during feature development',
-        percentage: 50
-      }
-    ]
-  },
-  {
-    question_text:
-      'Rate the overall team collaboration during the last sprint.',
+    question_text: 'How well did team members collaborate during the sprint?',
     criterion: 'TEAMWORK',
     options: [
-      {
-        text: 'Very Poor',
-        percentage: 5
-      },
-      {
-        text: 'Poor',
-        percentage: 5
-      },
-      {
-        text: 'Neutral',
-        percentage: 20
-      },
-      {
-        text: 'Good',
-        percentage: 40
-      },
-      {
-        text: 'Excellent',
-        percentage: 30
-      }
+      { text: 'Very Poor', percentage: 5 },
+      { text: 'Poor', percentage: 10 },
+      { text: 'Neutral', percentage: 20 },
+      { text: 'Good', percentage: 40 },
+      { text: 'Excellent', percentage: 25 }
+    ]
+  },
+  {
+    question_text: 'How effective was communication among team members?',
+    criterion: 'COMMUNICATION',
+    options: [
+      { text: 'Very Unclear', percentage: 2 },
+      { text: 'Unclear', percentage: 10 },
+      { text: 'Neutral', percentage: 18 },
+      { text: 'Clear', percentage: 45 },
+      { text: 'Very Clear', percentage: 25 }
     ]
   },
   {
     question_text:
-      'How satisfied are you with the support received from other team members?',
-    criterion: 'COMMUNICATION',
+      'How would you rate the quality of work delivered in this sprint?',
+    criterion: 'QUALITY',
     options: [
-      {
-        text: 'Very Unclear',
-        percentage: 2
-      },
-      {
-        text: 'Unclear',
-        percentage: 8
-      },
-      {
-        text: 'Neutral',
-        percentage: 15
-      },
-      {
-        text: 'Clear',
-        percentage: 45
-      },
-      {
-        text: 'Very Clear',
-        percentage: 30
-      }
+      { text: 'Very Low', percentage: 5 },
+      { text: 'Low', percentage: 10 },
+      { text: 'Average', percentage: 25 },
+      { text: 'High', percentage: 40 },
+      { text: 'Very High', percentage: 20 }
+    ]
+  },
+  {
+    question_text: 'Was the sprint timeline effectively followed?',
+    criterion: 'TIMEBOUND',
+    options: [
+      { text: 'Not at all', percentage: 10 },
+      { text: 'Rarely', percentage: 15 },
+      { text: 'Sometimes', percentage: 25 },
+      { text: 'Mostly', percentage: 35 },
+      { text: 'Always', percentage: 15 }
+    ]
+  },
+  {
+    question_text: 'How accurate were the task estimations for this sprint?',
+    criterion: 'ESTIMATION',
+    options: [
+      { text: 'Very Inaccurate', percentage: 5 },
+      { text: 'Inaccurate', percentage: 15 },
+      { text: 'Neutral', percentage: 25 },
+      { text: 'Accurate', percentage: 35 },
+      { text: 'Very Accurate', percentage: 20 }
     ]
   }
 ];
@@ -242,6 +171,14 @@ export function HeaderBar({
   onShareClick: (isOpen: boolean) => void;
 }) {
   const retroSession = useRetroSessionStore((state) => state.retroSession);
+
+  const isActiveRadarChart = useMemo(() => {
+    return (
+      retroSession?.radar_criteria?.length &&
+      retroSession?.radar_criteria?.length > 0
+    );
+  }, [retroSession?.radar_criteria]);
+
   return (
     <div className='text-md flex w-full items-center justify-between space-x-2 border-b px-4 py-2'>
       {/* Left section */}
@@ -253,63 +190,113 @@ export function HeaderBar({
 
       {/* Right section */}
       <div className='flex items-center gap-3'>
-        <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-700 shadow-sm transition-all duration-200 hover:bg-green-100 hover:shadow-md dark:border-green-700 dark:bg-green-950/20 dark:text-green-300 dark:hover:bg-green-950/40'>
-          <ThumbsUp className='h-4 w-4' />
-          <span className='text-sm font-medium'>24</span>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-700 shadow-sm transition-all duration-200 hover:bg-green-100 hover:shadow-md dark:border-green-700 dark:bg-green-950/20 dark:text-green-300 dark:hover:bg-green-950/40'>
+              <ThumbsUp className='h-4 w-4' />
+              <span className='text-sm font-medium'>24</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total votes</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-700 shadow-sm transition-all duration-200 hover:bg-blue-100 hover:shadow-md dark:border-blue-700 dark:bg-blue-950/20 dark:text-blue-300 dark:hover:bg-blue-950/40'>
-          <MessageSquareMore className='h-4 w-4' />
-          <span className='text-sm font-medium'>6</span>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-700 shadow-sm transition-all duration-200 hover:bg-blue-100 hover:shadow-md dark:border-blue-700 dark:bg-blue-950/20 dark:text-blue-300 dark:hover:bg-blue-950/40'>
+              <MessageSquareMore className='h-4 w-4' />
+              <span className='text-sm font-medium'>6</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total comments</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <div className='relative'>
-          <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500' />
-          <input
-            type='text'
-            placeholder='Search items...'
-            className='h-10 w-64 rounded-lg border border-gray-200 bg-white py-2 pr-4 pl-10 text-sm shadow-sm transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400'
-          />
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className='relative'>
+              <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500' />
+              <input
+                type='text'
+                placeholder='Search items...'
+                className='h-10 w-64 rounded-lg border border-gray-200 bg-white py-2 pr-4 pl-10 text-sm shadow-sm transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400'
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Search items</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button
-          className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-          onClick={() => onShareClick(true)}
-        >
-          <Share2 className='h-4 w-4' />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+              onClick={() => onShareClick(true)}
+            >
+              <Share2 className='h-4 w-4' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Share retrospective</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <SortAsc className='h-4 w-4' />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
+              <SortAsc className='h-4 w-4' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Sort items</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <Filter className='h-4 w-4' />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
+              <Filter className='h-4 w-4' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Filter items</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button
-          className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-          onClick={onOpenRadarChart}
-          title='View Performance Chart'
-        >
-          <BarChart3 className='h-4 w-4' />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                onClick={onOpenRadarChart}
+                disabled={!isActiveRadarChart}
+              >
+                <BarChart3 className='h-4 w-4' />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View performance chart</p>
+          </TooltipContent>
+        </Tooltip>
 
         <PollModal />
 
         <div className='mx-2 h-8 w-px bg-gray-300 dark:bg-gray-600' />
 
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <RotateCcw className='h-4 w-4' />
-        </Button>
-
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <SquarePen className='h-4 w-4' />
-        </Button>
-
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <MessageCircle className='h-4 w-4' />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
+              <SquarePen className='h-4 w-4' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Edit retrospective</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

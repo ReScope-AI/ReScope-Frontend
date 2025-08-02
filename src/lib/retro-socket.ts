@@ -288,3 +288,5 @@ export const onActiveGeneratePlanItems = createOnFunction(
 );
 export const onSetStep = createOnFunction('set-step');
 export const onSetStepSuccess = createOnFunction('set-step-success');
+
+export const onRadarCriteriaCreated = createOnFunction('create-radar-criteria');
