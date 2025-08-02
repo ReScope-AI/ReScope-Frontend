@@ -2,21 +2,24 @@
 import {
   BarChart3,
   Filter,
-  MessageCircle,
   MessageSquareMore,
-  RotateCcw,
   Search,
   SortAsc,
   SquarePen,
   ThumbsUp,
   UserRoundPlus
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { InviteRetroDialog } from '@/components/modal/invite-retro-dialog';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 import {
   emitGeneratePlanItems,
   onActiveGeneratePlanItems
@@ -105,6 +108,14 @@ export function HeaderBar({
   const retroSession = useRetroSessionStore((state) => state.retroSession);
   const user = useUserStore((state) => state.user);
   const isOwner = user?._id === retroSession?.created_by;
+
+  const isActiveRadarChart = useMemo(() => {
+    return (
+      retroSession?.radar_criteria?.length &&
+      retroSession?.radar_criteria?.length > 0
+    );
+  }, [retroSession?.radar_criteria]);
+
   return (
     <div className='text-md flex w-full items-center justify-between space-x-2 border-b px-4 py-2'>
       {/* Left section */}
@@ -116,40 +127,77 @@ export function HeaderBar({
 
       {/* Right section */}
       <div className='flex items-center gap-3'>
-        <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-700 shadow-sm transition-all duration-200 hover:bg-green-100 hover:shadow-md dark:border-green-700 dark:bg-green-950/20 dark:text-green-300 dark:hover:bg-green-950/40'>
-          <ThumbsUp className='h-4 w-4' />
-          <span className='text-sm font-medium'>24</span>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-700 shadow-sm transition-all duration-200 hover:bg-green-100 hover:shadow-md dark:border-green-700 dark:bg-green-950/20 dark:text-green-300 dark:hover:bg-green-950/40'>
+              <ThumbsUp className='h-4 w-4' />
+              <span className='text-sm font-medium'>24</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total votes</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-700 shadow-sm transition-all duration-200 hover:bg-blue-100 hover:shadow-md dark:border-blue-700 dark:bg-blue-950/20 dark:text-blue-300 dark:hover:bg-blue-950/40'>
-          <MessageSquareMore className='h-4 w-4' />
-          <span className='text-sm font-medium'>6</span>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-700 shadow-sm transition-all duration-200 hover:bg-blue-100 hover:shadow-md dark:border-blue-700 dark:bg-blue-950/20 dark:text-blue-300 dark:hover:bg-blue-950/40'>
+              <MessageSquareMore className='h-4 w-4' />
+              <span className='text-sm font-medium'>6</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Total comments</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <div className='relative'>
-          <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500' />
-          <input
-            type='text'
-            placeholder='Search items...'
-            className='h-10 w-64 rounded-lg border border-gray-200 bg-white py-2 pr-4 pl-10 text-sm shadow-sm transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400'
-          />
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className='relative'>
+              <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500' />
+              <input
+                type='text'
+                placeholder='Search items...'
+                className='h-10 w-64 rounded-lg border border-gray-200 bg-white py-2 pr-4 pl-10 text-sm shadow-sm transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-blue-400'
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Search items</p>
+          </TooltipContent>
+        </Tooltip>
 
         <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
           <SortAsc className='h-4 w-4' />
         </Button>
 
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <Filter className='h-4 w-4' />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
+              <Filter className='h-4 w-4' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Filter items</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <Button
-          className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-          onClick={onOpenRadarChart}
-          title='View Performance Chart'
-        >
-          <BarChart3 className='h-4 w-4' />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                onClick={onOpenRadarChart}
+                disabled={!isActiveRadarChart}
+              >
+                <BarChart3 className='h-4 w-4' />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View performance chart</p>
+          </TooltipContent>
+        </Tooltip>
 
         {isOwner && (
           <>
@@ -160,17 +208,16 @@ export function HeaderBar({
 
         <div className='mx-2 h-8 w-px bg-gray-300 dark:bg-gray-600' />
 
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <RotateCcw className='h-4 w-4' />
-        </Button>
-
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <SquarePen className='h-4 w-4' />
-        </Button>
-
-        <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-          <MessageCircle className='h-4 w-4' />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
+              <SquarePen className='h-4 w-4' />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Edit retrospective</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );

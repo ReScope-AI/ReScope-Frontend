@@ -66,6 +66,7 @@ interface ReScopeEmitEventsInternal {
   'set-step-success': {
     step: number;
   };
+  'create-radar-criteria': any;
 }
 
 export type ReScopeEmitEvents = WithRoomIds<ReScopeEmitEventsInternal>;
@@ -87,6 +88,11 @@ export interface RetroListenEvents {
     step: number;
   };
   'set-step-success': any;
+  'create-radar-criteria': {
+    _id: string;
+    criteria: string;
+    score: number;
+  }[];
 }
 
 export interface SocketConnectionOptions {

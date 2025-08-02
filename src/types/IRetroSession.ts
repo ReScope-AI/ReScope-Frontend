@@ -36,6 +36,13 @@ export interface IRetroSession {
   actionItems: string[];
   sprint: ISprint;
   plans: IPlan[];
+  radar_criteria?: IRetroRadarCriteria[];
+}
+
+export interface IRetroRadarCriteria {
+  _id: string;
+  criteria: string;
+  score: number;
 }
 
 export interface IQuestion {

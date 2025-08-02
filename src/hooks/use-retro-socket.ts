@@ -25,6 +25,7 @@ import {
   onJoinFailed,
   onJoinRoom,
   onLeaveRoom,
+  onRadarCriteriaCreated,
   onSetStep,
   onSetStepSuccess,
   onVotePollQuestion
@@ -32,6 +33,7 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { RetroListenEvents, SocketResponse } from '@/types/retro-socket';
 
 import { useSignOut } from './use-auth';
 
@@ -46,9 +48,12 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const retroId = roomId || session?._id;
   const setTasks = useTaskStore((state) => state.setTasks);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
-  const resetState = useTaskStore((state) => state.resetState);
   const tasks = useTaskStore((state) => state.tasks);
   const setStep = useTaskStore((state) => state.setStep);
+  const setRetroSession = useRetroSessionStore(
+    (state) => state.setRetroSession
+  );
+
   const initializeSocket = useCallback(() => {
     if (!SOCKET_URL || !accessToken || isConnected()) {
       return;
@@ -102,9 +107,25 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     const editPlanListener = () => {};
     const deletePlanListener = () => {};
     const changePositionPlanListener = () => {};
+    const createRadarCriteriaListener = (
+      data: SocketResponse<RetroListenEvents['create-radar-criteria']>
+    ) => {
+      console.log('createRadarCriteriaListener', data);
+      if (data.code === 200) {
+        setRetroSession({
+          ...session!,
+          radar_criteria: data.data.map((item) => ({
+            _id: item._id,
+            criteria: item.criteria,
+            score: item.score
+          }))
+        });
+      } else {
+        toast.error(data.msg);
+      }
+    };
     const generatePlanItemsListener = (data: any) => {
       if (data.data && data.data?.length > 0) {
-        console.log('generatePlanItemsListener', data.data);
         setTasks([
           ...tasks,
           ...(data.data?.map((item: PlanItemAction) => ({
@@ -169,6 +190,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onSetStep(setStepListener);
     onSetStepSuccess(setStepSuccessListener);
     onJoinFailed(joinFailedListener);
+    onRadarCriteriaCreated(createRadarCriteriaListener);
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);
 
