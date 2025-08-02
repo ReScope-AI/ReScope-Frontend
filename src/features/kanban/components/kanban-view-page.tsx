@@ -6,23 +6,26 @@ import {
   MessageSquareMore,
   RotateCcw,
   Search,
-  Share2,
   SortAsc,
   SquarePen,
-  ThumbsUp
+  ThumbsUp,
+  UserRoundPlus
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ShareRetroDialog } from '@/components/modal/share-retro-dialog';
+import { InviteRetroDialog } from '@/components/modal/invite-retro-dialog';
 import { Button } from '@/components/ui/button';
 import {
   emitGeneratePlanItems,
   onActiveGeneratePlanItems
 } from '@/lib/retro-socket';
+import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { useUserStore } from '@/stores/userStore';
 
+import { convertData } from '../utils';
 import { Status, useTaskStore } from '../utils/store';
 
 import { KanbanBoard } from './kanban-board';
@@ -30,154 +33,22 @@ import NewTaskDialog from './new-task-dialog';
 import PollModal from './polls';
 import RadarChartDialog from './radar-chart-dialog';
 
-const exampleRequestData = [
-  {
-    question_text:
-      'How effectively did our daily stand-ups contribute to sprint progress?',
-    criterion: 'PROCESS',
-    options: [
-      {
-        text: 'Very Ineffective',
-        percentage: 15
-      },
-      {
-        text: 'Ineffective',
-        percentage: 25
-      },
-      {
-        text: 'Neutral',
-        percentage: 20
-      },
-      {
-        text: 'Effective',
-        percentage: 30
-      },
-      {
-        text: 'Very Effective',
-        percentage: 10
-      }
-    ]
-  },
-  {
-    question_text: 'How clear was the sprint goal for everyone?',
-    criterion: 'GOAL',
-    options: [
-      {
-        text: 'Not at all',
-        percentage: 5
-      },
-      {
-        text: 'Slightly',
-        percentage: 15
-      },
-      {
-        text: 'Moderately',
-        percentage: 30
-      },
-      {
-        text: 'Very',
-        percentage: 40
-      },
-      {
-        text: 'Extremely',
-        percentage: 10
-      }
-    ]
-  },
-  {
-    question_text:
-      'Which of the following best describes how we should handle our sprint retrospective format?',
-    criterion: 'DAKI_ACTION',
-    options: [
-      {
-        text: 'Drop the current whiteboard tool for retros',
-        percentage: 10
-      },
-      {
-        text: "Add a dedicated 'Definition of Done' review in sprint planning",
-        percentage: 25
-      },
-      {
-        text: 'Keep our current daily stand-up time',
-        percentage: 15
-      },
-      {
-        text: 'Improve cross-functional communication during feature development',
-        percentage: 50
-      }
-    ]
-  },
-  {
-    question_text:
-      'Rate the overall team collaboration during the last sprint.',
-    criterion: 'TEAMWORK',
-    options: [
-      {
-        text: 'Very Poor',
-        percentage: 5
-      },
-      {
-        text: 'Poor',
-        percentage: 5
-      },
-      {
-        text: 'Neutral',
-        percentage: 20
-      },
-      {
-        text: 'Good',
-        percentage: 40
-      },
-      {
-        text: 'Excellent',
-        percentage: 30
-      }
-    ]
-  },
-  {
-    question_text:
-      'How satisfied are you with the support received from other team members?',
-    criterion: 'COMMUNICATION',
-    options: [
-      {
-        text: 'Very Unclear',
-        percentage: 2
-      },
-      {
-        text: 'Unclear',
-        percentage: 8
-      },
-      {
-        text: 'Neutral',
-        percentage: 15
-      },
-      {
-        text: 'Clear',
-        percentage: 45
-      },
-      {
-        text: 'Very Clear',
-        percentage: 30
-      }
-    ]
-  }
-];
-
 export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const [isRadarChartOpen, setIsRadarChartOpen] = useState(false);
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   const step = useTaskStore((state) => state.step);
   const retroSession = useRetroSessionStore((state) => state.retroSession);
+  const pollQuestions = usePollStore((state) => state.pollQuestions);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
   const setTasks = useTaskStore((state) => state.setTasks);
   const tasks = useTaskStore((state) => state.tasks);
 
   useEffect(() => {
     if (step === 2 && retroSession?.plans?.length === 0 && tasks.length === 0) {
-      console.log('Emitting generate-plan-items');
+      const mappedQuestions = convertData(pollQuestions);
       setIsGenerating(true);
-      emitGeneratePlanItems(retroId || '', exampleRequestData);
+      console.log('Emitting generate-plan-items', mappedQuestions);
+      emitGeneratePlanItems(retroId || '', mappedQuestions);
     }
   }, [step]);
 
@@ -207,18 +78,10 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   return (
     <div className='relative flex h-full flex-col'>
       {/* Header Section */}
-      <HeaderBar
-        onOpenRadarChart={() => setIsRadarChartOpen(true)}
-        onShareClick={setIsShareDialogOpen}
-      />
+      <HeaderBar onOpenRadarChart={() => setIsRadarChartOpen(true)} />
 
       <div className='flex-shrink-0'>
         <NewTaskDialog />
-        <ShareRetroDialog
-          retroId={retroId}
-          isOpen={isShareDialogOpen}
-          onClose={() => setIsShareDialogOpen(false)}
-        />
       </div>
 
       <div className='flex-1 overflow-hidden'>
@@ -235,13 +98,13 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
 }
 
 export function HeaderBar({
-  onOpenRadarChart,
-  onShareClick
+  onOpenRadarChart
 }: {
   onOpenRadarChart: () => void;
-  onShareClick: (isOpen: boolean) => void;
 }) {
   const retroSession = useRetroSessionStore((state) => state.retroSession);
+  const user = useUserStore((state) => state.user);
+  const isOwner = user?._id === retroSession?.created_by;
   return (
     <div className='text-md flex w-full items-center justify-between space-x-2 border-b px-4 py-2'>
       {/* Left section */}
@@ -272,13 +135,6 @@ export function HeaderBar({
           />
         </div>
 
-        <Button
-          className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-          onClick={() => onShareClick(true)}
-        >
-          <Share2 className='h-4 w-4' />
-        </Button>
-
         <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
           <SortAsc className='h-4 w-4' />
         </Button>
@@ -295,7 +151,12 @@ export function HeaderBar({
           <BarChart3 className='h-4 w-4' />
         </Button>
 
-        <PollModal />
+        {isOwner && (
+          <>
+            <InviteRetroDialog retroId={retroSession?._id} />
+            <PollModal />
+          </>
+        )}
 
         <div className='mx-2 h-8 w-px bg-gray-300 dark:bg-gray-600' />
 

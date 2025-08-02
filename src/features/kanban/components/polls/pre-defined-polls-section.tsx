@@ -1,7 +1,9 @@
 'use client';
-import { Button } from '@/components/ui/button';
 import { Clipboard, Sparkles } from 'lucide-react';
 import React from 'react';
+
+import { showNotification } from '@/components/common';
+import { Button } from '@/components/ui/button';
 
 const PreDefinedPollsSection = ({
   showTemplateSelector,
@@ -22,7 +24,9 @@ const PreDefinedPollsSection = ({
       <div className='flex gap-3'>
         <Button
           variant='outline'
-          onClick={() => setShowTemplateSelector(true)}
+          onClick={() =>
+            showNotification('info', 'Feature will be available soon!')
+          }
           className='flex-1 border-purple-200 text-purple-600 hover:border-purple-300 hover:bg-purple-50'
         >
           <Clipboard className='mr-2 h-4 w-4' />

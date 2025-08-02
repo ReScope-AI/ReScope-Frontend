@@ -10,11 +10,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { usePollStore } from '@/stores/pollStore';
-import { useRetroSessionStore } from '@/stores/retroSessionStore';
-import { IQuestion } from '@/types';
 
 import { getColumnColorClasses, getColumnIcon } from '../utils';
-import { useTaskStore } from '../utils/store';
 
 import { ColumnActions } from './column-action';
 import { PollQuestionCard } from './poll-question-card';
@@ -51,7 +48,6 @@ export function PollsColumn({
   const questionsIds = useMemo(() => {
     return pollQuestions.map((question) => question._id);
   }, [pollQuestions]);
-  const setOpenDialog = useTaskStore((state) => state.setOpenDialog);
 
   const {
     setNodeRef,
@@ -144,14 +140,6 @@ export function PollsColumn({
                 disableDragExternal={disableDragExternal}
               />
             ))}
-            <Button
-              variant='outline'
-              className={`w-full cursor-pointer ${colorClasses.border} ${colorClasses.text} hover:${colorClasses.bg}`}
-              size='icon'
-              onClick={() => setOpenDialog(true)}
-            >
-              <IconPlus className={colorClasses.icon} />
-            </Button>
           </SortableContext>
         </ScrollArea>
       </CardContent>

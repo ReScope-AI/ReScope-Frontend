@@ -1,5 +1,8 @@
 'use client';
 
+import { TooltipTrigger } from '@radix-ui/react-tooltip';
+import { GanttChartIcon as ChartGantt, Sparkles } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -21,17 +24,17 @@ import {
   TooltipContent,
   TooltipProvider
 } from '@/components/ui/tooltip';
-import { TooltipTrigger } from '@radix-ui/react-tooltip';
-import { usePollStore } from '@/stores/pollStore';
+
+import { useTaskStore } from '../../utils/store';
+
 import AIGeneratorModal from './ai-generate';
-import TemplateSelector from './template-selector';
 import OptionsManager from './options-manageger';
 import PreDefinedPollsSection from './pre-defined-polls-section';
-import { GanttChartIcon as ChartGantt, Sparkles, X } from 'lucide-react';
+import TemplateSelector from './template-selector';
 import { usePollModal } from './usePollModal';
 
 const PollModal = () => {
-  const addPollsColumn = usePollStore((state) => state.addPollsColumn);
+  const step = useTaskStore((state) => state.step);
   const {
     isOpen,
     setIsOpen,
@@ -75,22 +78,33 @@ const PollModal = () => {
           <DialogTrigger asChild>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  onClick={() => setIsOpen(true)}
-                  className='group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-purple-300 hover:from-purple-50 hover:to-slate-100 hover:text-purple-600 hover:shadow-xl dark:border-slate-700/60 dark:from-slate-800 dark:to-slate-900 dark:text-slate-400 dark:hover:border-purple-600 dark:hover:from-purple-900/20 dark:hover:to-slate-800 dark:hover:text-purple-400'
-                >
-                  <ChartGantt className='h-5 w-5 transition-transform duration-300 group-hover:rotate-12' />
-                  <div className='absolute -inset-1 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20' />
-                </Button>
+                <div>
+                  <Button
+                    onClick={() => setIsOpen(true)}
+                    disabled={step !== 1}
+                    className='group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-purple-300 hover:from-purple-50 hover:to-slate-100 hover:text-purple-600 hover:shadow-xl dark:border-slate-700/60 dark:from-slate-800 dark:to-slate-900 dark:text-slate-400 dark:hover:border-purple-600 dark:hover:from-purple-900/20 dark:hover:to-slate-800 dark:hover:text-purple-400'
+                  >
+                    <ChartGantt className='h-5 w-5 transition-transform duration-300 group-hover:rotate-12' />
+                    <div className='absolute -inset-1 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20' />
+                  </Button>
+                </div>
               </TooltipTrigger>
               <TooltipContent
                 side='top'
                 className='bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
               >
-                <p className='font-medium'>Create Poll</p>
-                <p className='text-xs opacity-80'>
-                  Create short poll for everyone to answer
-                </p>
+                {step !== 1 ? (
+                  <p className='font-medium'>
+                    You can only create poll in step Reflect
+                  </p>
+                ) : (
+                  <>
+                    <p className='font-medium'>Create Poll</p>
+                    <p className='text-xs opacity-80'>
+                      Create short poll for everyone to answer
+                    </p>
+                  </>
+                )}
               </TooltipContent>
             </Tooltip>
           </DialogTrigger>

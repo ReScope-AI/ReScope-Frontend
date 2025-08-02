@@ -1,6 +1,4 @@
 import { Active, DataRef, Over } from '@dnd-kit/core';
-import { ColumnDragData } from '../components/board-column';
-import { TaskDragData } from '../components/task-card';
 import {
   IconPlus,
   IconMinus,
@@ -8,6 +6,11 @@ import {
   IconSettings,
   IconChartHistogram
 } from '@tabler/icons-react';
+
+import { IOption, IQuestion } from '@/types';
+
+import { ColumnDragData } from '../components/board-column';
+import { TaskDragData } from '../components/task-card';
 
 type DraggableData = ColumnDragData | TaskDragData;
 
@@ -77,4 +80,32 @@ export const getColumnColorClasses = (color: string) => {
         icon: 'text-gray-600 dark:text-gray-400'
       };
   }
+};
+
+export const convertData = (questions: IQuestion[]) => {
+  return questions.map((question: IQuestion) => {
+    // Calculate total votes
+    const totalVotes = question.options.reduce(
+      (sum: number, option: IOption) => sum + option.votes.length,
+      0
+    );
+
+    // Convert options to new format
+    const options = question.options.map((option) => {
+      const voteCount = option.votes.length;
+      const percentage =
+        totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+      return {
+        text: option.text,
+        percentage
+      };
+    });
+
+    // Return object with expected structure
+    return {
+      question_text: question.text,
+      criterion: question.criterion,
+      options
+    };
+  });
 };
