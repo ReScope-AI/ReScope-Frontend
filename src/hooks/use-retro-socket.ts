@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
+import {
+  PlanItemAction,
+  Status,
+  useTaskStore
+} from '@/features/kanban/utils/store';
 import { isDev } from '@/lib/env';
 import {
   connect,
@@ -11,6 +17,7 @@ import {
   onChangePositionPlan,
   onDeletePlan,
   onEditPlan,
+  onGeneratePlanItems,
   onJoinFailed,
   onJoinRoom,
   onLeaveRoom
@@ -25,7 +32,10 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const [error, setError] = useState<ErrorInfo>(null);
   const session = useRetroSessionStore((state) => state.retroSession);
   const retroId = roomId || session?._id;
-
+  const setTasks = useTaskStore((state) => state.setTasks);
+  const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
+  const resetState = useTaskStore((state) => state.resetState);
+  const tasks = useTaskStore((state) => state.tasks);
   const initializeSocket = useCallback(() => {
     if (!SOCKET_URL || !accessToken || isConnected()) {
       return;
@@ -58,6 +68,8 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     if (isConnected()) {
       disconnect();
     }
+    resetState();
+    setTasks([]);
   }, []);
 
   useEffect(() => {
@@ -71,7 +83,21 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     const editPlanListener = () => {};
     const deletePlanListener = () => {};
     const changePositionPlanListener = () => {};
-
+    const generatePlanItemsListener = (data: any) => {
+      if (data.data && data.data?.length > 0) {
+        console.log('generatePlanItemsListener', data.data);
+        setTasks([
+          ...tasks,
+          ...(data.data?.map((item: PlanItemAction) => ({
+            _id: uuidv4(),
+            title: item.description,
+            status: item.action_type as Status,
+            votes: 0
+          })) || [])
+        ]);
+      }
+      setIsGenerating(false);
+    };
     onJoinRoom((res) => {
       if (res.code === 200) {
         setError(null);
@@ -88,6 +114,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onEditPlan(editPlanListener);
     onDeletePlan(deletePlanListener);
     onChangePositionPlan(changePositionPlanListener);
+    onGeneratePlanItems(generatePlanItemsListener);
 
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);

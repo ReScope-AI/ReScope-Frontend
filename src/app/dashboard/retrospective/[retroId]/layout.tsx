@@ -35,7 +35,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     queryKey: [QUERY_CONSTANTS.RETRO_SESSION.GET_RETRO_SESSION_BY_ID, retroId],
     queryFn: () => getRetroSessionById(retroId),
     enabled: !!retroId,
-    gcTime: Infinity,
     staleTime: 0
   });
 

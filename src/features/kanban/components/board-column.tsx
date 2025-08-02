@@ -1,17 +1,22 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useDndContext, type UniqueIdentifier } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { IconGripVertical, IconPlus } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
+import { Loader2 } from 'lucide-react';
 import { useMemo } from 'react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+
+import { getColumnColorClasses, getColumnIcon } from '../utils';
 import { Task, useTaskStore } from '../utils/store';
+
 import { ColumnActions } from './column-action';
 import { TaskCard } from './task-card';
-import { cn } from '@/lib/utils';
-import { IconGripVertical, IconPlus } from '@tabler/icons-react';
-import { getColumnColorClasses, getColumnIcon } from '../utils';
 
 export interface Column {
   id: UniqueIdentifier;
@@ -66,6 +71,7 @@ export function BoardColumn({
     disabled: disableDragExternal
   });
 
+  const isGenerating = useTaskStore((state) => state.isGenerating);
   const setOpenDialog = useTaskStore((state) => state.setOpenDialog);
 
   const style = {
@@ -130,6 +136,27 @@ export function BoardColumn({
                 disableDragExternal={disableDragExternal}
               />
             ))}
+            <Card
+              className={`${colorClasses.bg} animate-pulse border-2`}
+              hidden={!isGenerating}
+            >
+              <CardContent className='p-4'>
+                <div className='mb-3 flex items-center justify-between'>
+                  <Badge
+                    variant='secondary'
+                    className={`${column.color} bg-opacity-20 text-xs`}
+                  >
+                    <Loader2 className='mr-1 h-3 w-3 animate-spin' />
+                    GENERATING...
+                  </Badge>
+                </div>
+                <div className='space-y-2'>
+                  <div className='h-3 animate-pulse rounded bg-gray-300'></div>
+                  <div className='h-3 w-4/5 animate-pulse rounded bg-gray-300'></div>
+                  <div className='h-3 w-3/5 animate-pulse rounded bg-gray-300'></div>
+                </div>
+              </CardContent>
+            </Card>
             <Button
               variant='outline'
               className={`w-full cursor-pointer ${colorClasses.border} ${colorClasses.text} hover:${colorClasses.bg}`}

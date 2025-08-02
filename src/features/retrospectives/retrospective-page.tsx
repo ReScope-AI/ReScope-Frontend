@@ -86,7 +86,7 @@ export default function DashboardPage() {
         ) || []
       );
     }
-  }, [retroSessionData, setRetroSessions]);
+  }, [retroSessionData, setRetroSessionParticipants, setRetroSessions]);
 
   const renderDialogConfirmDelete = () => {
     return (
@@ -197,10 +197,13 @@ export default function DashboardPage() {
                   </div>
 
                   <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Button variant='ghost' size='sm'>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type='button'
+                        className='ring-offset-background focus-visible:ring-ring ghost hover:bg-accent hover:text-accent-foreground inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50'
+                      >
                         <EllipsisVertical className='h-4 w-4' />
-                      </Button>
+                      </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
