@@ -33,6 +33,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
+import { useSignOut } from './use-auth';
+
 type ErrorInfo = { title: string; message: string } | null;
 
 export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
@@ -87,6 +89,14 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     }
 
     // Listen to all events and log the data (temporary debug)
+    const joinFailedListener = (data: any) => {
+      if (data.code === 409) {
+        setError({
+          title: 'Session Expired',
+          message: 'Login again to continue.'
+        });
+      }
+    };
     const leaveRoomListener = () => {};
     const addPlanListener = () => {};
     const editPlanListener = () => {};
@@ -158,6 +168,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onGeneratePlanItems(generatePlanItemsListener);
     onSetStep(setStepListener);
     onSetStepSuccess(setStepSuccessListener);
+    onJoinFailed(joinFailedListener);
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);
 

@@ -12,6 +12,7 @@ import {
 } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 
+import { showNotification } from '@/components/common';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -36,6 +37,8 @@ import {
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { useUserStore } from '@/stores/userStore';
 
+import { useTaskStore } from '../utils/store';
+
 import { PollQuestionEditDialog } from './poll-question-edit-dialog';
 
 import type { IOption, IQuestion } from '@/types/IRetroSession';
@@ -49,10 +52,9 @@ export function PollQuestionCard({
   question,
   disableDragExternal = false
 }: PollQuestionCardProps) {
-  // Get retro session ID from store
   const retroId = useRetroSessionStore((state) => state.retroSession?._id);
-  // Get current user from store
   const user = useUserStore((state) => state.user);
+  const step = useTaskStore((state) => state.step);
 
   // Dialog state management
   const [editOpen, setEditOpen] = useState(false);
@@ -197,7 +199,7 @@ export function PollQuestionCard({
                 <Button
                   size='icon'
                   variant='ghost'
-                  className='h-8 w-8 text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300'
+                  className='h-8 w-8 cursor-pointer text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300'
                 >
                   <IconDots size={16} />
                 </Button>
@@ -207,15 +209,33 @@ export function PollQuestionCard({
                 className='w-48 border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'
               >
                 <DropdownMenuItem
-                  onClick={() => setEditOpen(true)}
-                  className='flex items-center gap-2 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700'
+                  onClick={() => {
+                    if (step !== 1) {
+                      showNotification(
+                        'info',
+                        'You can only edit poll in step Reflect'
+                      );
+                      return;
+                    }
+                    setEditOpen(true);
+                  }}
+                  className={`flex items-center gap-2 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 ${step !== 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   <IconEdit size={16} />
                   Edit Poll
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => setDeleteOpen(true)}
-                  className='flex items-center gap-2 text-red-600 hover:bg-red-50 focus:text-red-600 dark:text-red-400 dark:hover:bg-red-900/20'
+                  onClick={() => {
+                    if (step !== 1) {
+                      showNotification(
+                        'info',
+                        'You can only delete poll in step Reflect'
+                      );
+                      return;
+                    }
+                    setDeleteOpen(true);
+                  }}
+                  className={`flex items-center gap-2 text-red-600 hover:bg-red-50 focus:text-red-600 dark:text-red-400 dark:hover:bg-red-900/20 ${step !== 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   <IconTrash size={16} />
                   Delete Poll
@@ -244,13 +264,20 @@ export function PollQuestionCard({
                     variant={isSelected ? 'default' : 'outline'}
                     onClick={() => {
                       if (isSelected) return;
+                      if (step !== 1) {
+                        showNotification(
+                          'info',
+                          'You can only vote in step Reflect'
+                        );
+                        return;
+                      }
                       handleVote(option._id, question._id, retroId);
                     }}
                     className={`relative h-auto min-h-[3rem] w-full cursor-pointer justify-between overflow-hidden px-4 py-3 text-left transition-all duration-200 ${
                       isSelected
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md hover:from-blue-700 hover:to-purple-700'
                         : 'cursor-pointer border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-gray-700'
-                    } `}
+                    } ${step !== 1 ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
                     {/* Progress bar background for voted options */}
                     {totalVotes > 0 && (
