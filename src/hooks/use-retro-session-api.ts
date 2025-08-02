@@ -1,39 +1,57 @@
-/* eslint-disable no-console */
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
+  addRetroSessionParticipant,
   createRetroSession,
   deleteRetroSession,
   getRetroSessions
 } from '@/config/api/retro-session';
-import { ICreateRetroSession } from '@/types';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { isDev } from '@/lib/env';
+import { ICreateRetroSession, IInviteToRetro } from '@/types';
 
 type GetRetroSessionResponse = {
   data: {
-    _id: string;
-    name: string;
-    team_id:
-      | {
-          _id: string;
-          name: string;
-          created_at: string;
-          updated_at: string;
-        }
-      | string;
-    sprint_id:
-      | {
-          _id: string;
-          name: string;
-          start_date: string;
-          end_date: string;
-          created_by: string;
-          created_at: string;
-          updated_at: string;
-        }
-      | string;
-    end_date: string;
-    created_at: string;
-    updated_at: string;
-  }[];
+    retroSessions: {
+      _id: string;
+      name: string;
+      team_id:
+        | {
+            _id: string;
+            name: string;
+            created_at: string;
+            updated_at: string;
+          }
+        | string;
+      sprint_id:
+        | {
+            _id: string;
+            name: string;
+            start_date: string;
+            end_date: string;
+            created_by: string;
+            created_at: string;
+            updated_at: string;
+          }
+        | string;
+      end_date: string;
+      created_at: string;
+      updated_at: string;
+    }[];
+
+    retroSessionParticipants: {
+      _id: string;
+      session_id: string;
+      participants: {
+        _id: string;
+        name: string;
+        email: string;
+        created_at: string;
+        updated_at: string;
+      }[];
+      created_at: string;
+      updated_at: string;
+    }[];
+  };
 };
 
 export const useCreateRetroSession = () => {
@@ -42,12 +60,19 @@ export const useCreateRetroSession = () => {
   return useMutation({
     mutationFn: (data: ICreateRetroSession) => createRetroSession(data),
     onSuccess: (data) => {
-      console.log('Retro session created successfully:', data);
+      if (isDev) {
+        // eslint-disable-next-line no-console
+        console.log('Retro session created successfully:', data);
+      }
+
       // Invalidate and refetch retro sessions
       queryClient.invalidateQueries({ queryKey: ['retro-sessions'] });
     },
     onError: (error) => {
-      console.error('Failed to create retro session:', error);
+      if (isDev) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to create retro session:', error);
+      }
     }
   });
 };
@@ -69,11 +94,25 @@ export const useDeleteRetroSession = () => {
   return useMutation({
     mutationFn: (id: string) => deleteRetroSession(id),
     onSuccess: (data) => {
-      console.log('Retro session deleted successfully:', data);
+      if (isDev) {
+        // eslint-disable-next-line no-console
+        console.log('Retro session deleted successfully:', data);
+      }
       queryClient.invalidateQueries({ queryKey: ['retro-sessions'] });
     },
     onError: (error) => {
-      console.error('Failed to delete retro session:', error);
+      if (isDev) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to delete retro session:', error);
+      }
+    }
+  });
+};
+
+export const useInviteToRetro = () => {
+  return useMutation({
+    mutationFn: (data: IInviteToRetro) => {
+      return addRetroSessionParticipant(data);
     }
   });
 };

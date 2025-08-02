@@ -3,11 +3,11 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  IconEdit,
-  IconTrash,
   IconCheck,
   IconDots,
-  IconEye
+  IconEdit,
+  IconEye,
+  IconTrash
 } from '@tabler/icons-react';
 import { useState } from 'react';
 
@@ -16,9 +16,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogFooter
+  DialogTitle
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -31,7 +31,7 @@ import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
 import { PollQuestionEditDialog } from './poll-question-edit-dialog';
 
-import type { IQuestion, IOption } from '@/types/IRetroSession';
+import type { IOption, IQuestion } from '@/types/IRetroSession';
 
 interface PollQuestionCardProps {
   question: IQuestion;
