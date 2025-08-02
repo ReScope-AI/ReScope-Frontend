@@ -57,6 +57,9 @@ interface ReScopeEmitEventsInternal {
     question_id: string;
     option_id: string;
   };
+  'delete-question': {
+    id: string;
+  };
 }
 
 export type ReScopeEmitEvents = WithRoomIds<ReScopeEmitEventsInternal>;
@@ -72,6 +75,7 @@ export interface RetroListenEvents {
   'generate-plan-items': any;
   'edit-poll-question': any;
   'vote-question': any;
+  'delete-question': any;
 }
 
 export interface SocketConnectionOptions {

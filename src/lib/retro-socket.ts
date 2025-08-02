@@ -253,6 +253,13 @@ export function emitVotePollQuestion({
   emit('re-scope', { event: 'vote-question', room: roomId, data });
 }
 
+export function emitDeletePollQuestion({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['delete-question']): void {
+  emit('re-scope', { event: 'delete-question', room: roomId, data });
+}
+
 // Convenience on functions for listening to events
 export const onJoinRoom = createOnFunction('join-room');
 export const onJoinFailed = createOnFunction('join-failed');
@@ -263,3 +270,4 @@ export const onDeletePlan = createOnFunction('delete-plan');
 export const onChangePositionPlan = createOnFunction('change-position-plan');
 export const onEditPollQuestion = createOnFunction('edit-poll-question');
 export const onVotePollQuestion = createOnFunction('vote-question');
+export const onDeletePollQuestion = createOnFunction('delete-question');

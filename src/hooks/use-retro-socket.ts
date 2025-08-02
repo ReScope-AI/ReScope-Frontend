@@ -12,6 +12,7 @@ import {
   onAddPlan,
   onChangePositionPlan,
   onDeletePlan,
+  onDeletePollQuestion,
   onEditPlan,
   onEditPollQuestion,
   onJoinFailed,
@@ -29,9 +30,8 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const [error, setError] = useState<ErrorInfo>(null);
   const session = useRetroSessionStore((state) => state.retroSession);
-  const { updatePollQuestion, setPollQuestions } = usePollStore(
-    (state) => state
-  );
+  const { updatePollQuestion, setPollQuestions, removePollQuestion } =
+    usePollStore((state) => state);
   const retroId = roomId || session?._id;
 
   const initializeSocket = useCallback(() => {
@@ -107,6 +107,12 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
         message: res.msg || 'Failed to join the retrospective room.'
       });
     });
+    const deletePollQuestionListener = (res: any) => {
+      console.log('deletePollQuestionListener ', res);
+      if (res.code === 200) {
+        removePollQuestion(res.data.id);
+      }
+    };
     onLeaveRoom(leaveRoomListener);
     onAddPlan(addPlanListener);
     onEditPlan(editPlanListener);
@@ -114,6 +120,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onChangePositionPlan(changePositionPlanListener);
     onEditPollQuestion(editPollQuestionListener);
     onVotePollQuestion(votePollQuestionListener);
+    onDeletePollQuestion(deletePollQuestionListener);
 
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);
