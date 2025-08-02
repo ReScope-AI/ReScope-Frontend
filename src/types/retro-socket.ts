@@ -45,6 +45,12 @@ interface ReScopeEmitEventsInternal {
     category_id: string;
   };
   'generate-plan-items': any;
+  'set-step': {
+    step: number;
+  };
+  'set-step-success': {
+    step: number;
+  };
 }
 
 export type ReScopeEmitEvents = WithRoomIds<ReScopeEmitEventsInternal>;
@@ -58,6 +64,11 @@ export interface RetroListenEvents {
   'delete-plan': any;
   'change-position-plan': any;
   'generate-plan-items': any;
+  'active-generate-plan-items': any;
+  'set-step': {
+    step: number;
+  };
+  'set-step-success': any;
 }
 
 export interface SocketConnectionOptions {

@@ -3,11 +3,8 @@ import { useRouter } from 'next/navigation';
 
 import { showNotification } from '@/components/common';
 import { loginWithGoogle } from '@/config/api/auth';
-import { useTaskStore } from '@/features/kanban/utils/store';
-import { useRetrospectiveStore } from '@/features/retrospectives/stores';
 import { useAuthStore } from '@/stores/authStore';
 import { usePollStore } from '@/stores/pollStore';
-import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { useUserStore } from '@/stores/userStore';
 
 // Sign In
@@ -44,8 +41,6 @@ export const useSignOut = () => {
       useAuthStore.persist.clearStorage();
       useUserStore.persist.clearStorage();
       usePollStore.persist.clearStorage();
-      useRetroSessionStore.persist.clearStorage();
-      useRetrospectiveStore.persist.clearStorage();
     },
     onSuccess: () => {
       router.push('/auth/sign-in');

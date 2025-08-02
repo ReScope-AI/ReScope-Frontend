@@ -52,12 +52,14 @@ export interface RetroSessionParticipant {
 export type RetroSpectiveState = {
   teams: TeamName[];
   retroSessions: RetroSession[];
+  invitedRetroSessions: RetroSession[];
   sprints: SprintName[];
   retroSessionParticipants: RetroSessionParticipant[];
 };
 
 const initialTeams: TeamName[] = [];
 const initialRetroSessions: RetroSession[] = [];
+const initialInvitedRetroSessions: RetroSession[] = [];
 const initialSprints: SprintName[] = [];
 const initialRetroSessionParticipants: RetroSessionParticipant[] = [];
 export type Actions = {
@@ -65,6 +67,9 @@ export type Actions = {
   removeTeam: (id: string) => void;
   setTeams: (updatedTeams: TeamName[]) => void;
   setRetroSessions: (updatedRetroSessions: RetroSession[]) => void;
+  setInvitedRetroSessions: (
+    updatedInvitedRetroSessions: RetroSession[]
+  ) => void;
   addSprint: (name: string) => void;
   removeSprint: (id: string) => void;
   setSprints: (updatedSprints: SprintName[]) => void;
@@ -79,6 +84,7 @@ export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
     (set) => ({
       teams: initialTeams,
       retroSessions: initialRetroSessions,
+      invitedRetroSessions: initialInvitedRetroSessions,
       sprints: initialSprints,
       retroSessionParticipants: initialRetroSessionParticipants,
       addTeam: (name: string) =>
@@ -92,6 +98,8 @@ export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
       setTeams: (updatedTeams: TeamName[]) => set({ teams: updatedTeams }),
       setRetroSessions: (updatedRetroSessions: RetroSession[]) =>
         set({ retroSessions: updatedRetroSessions }),
+      setInvitedRetroSessions: (updatedInvitedRetroSessions: RetroSession[]) =>
+        set({ invitedRetroSessions: updatedInvitedRetroSessions }),
       addSprint: (name: string) =>
         set((state) => ({
           sprints: [...state.sprints, { id: uuid(), name }]

@@ -1,6 +1,7 @@
 import { UniqueIdentifier } from '@dnd-kit/core';
 import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
+
 import { Column } from '../components/board-column';
 
 export type Status = 'DROP' | 'ADD' | 'KEEP' | 'IMPROVE' | 'POLL';
@@ -51,7 +52,8 @@ export type State = {
   columns: (Column & { question: string; color: string; icon: string })[];
   draggedTask: string | null;
   openDialog: boolean;
-  planItemAction: PlanItemAction[];
+  step: number;
+  isGenerating: boolean;
 };
 
 export type PlanItemAction = {
@@ -78,7 +80,9 @@ export type Actions = {
   updateTask: (taskId: string, updates: Partial<Omit<Task, '_id'>>) => void;
   updateTasks: (tasksList: Task[]) => void;
   clearStorage: () => void;
-  setPlanItemAction: (action: PlanItemAction[]) => void;
+  setStep: (step: number) => void;
+  setIsGenerating: (isGenerating: boolean) => void;
+  resetState: () => void;
 };
 
 export const useTaskStore = create<State & Actions>((set) => ({
@@ -86,7 +90,8 @@ export const useTaskStore = create<State & Actions>((set) => ({
   columns: defaultCols,
   draggedTask: null,
   openDialog: false,
-  planItemAction: [],
+  step: 1,
+  isGenerating: false,
   addTask: (title: string, description?: string, status: Status = 'DROP') =>
     set((state) => ({
       tasks: [
@@ -165,6 +170,17 @@ export const useTaskStore = create<State & Actions>((set) => ({
       openDialog: false
     });
   },
-  setPlanItemAction: (action: PlanItemAction[]) =>
-    set({ planItemAction: action })
+  setStep: (step: number) => {
+    set({ step });
+  },
+  setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
+  resetState: () =>
+    set({
+      tasks: initialTasks,
+      columns: defaultCols,
+      step: 1,
+      isGenerating: false,
+      draggedTask: null,
+      openDialog: false
+    })
 }));
