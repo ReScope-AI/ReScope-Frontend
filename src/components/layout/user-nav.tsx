@@ -1,4 +1,6 @@
 'use client';
+import { IconLogout } from '@tabler/icons-react';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -11,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useSignOut } from '@/hooks/use-auth';
 import { useUserStore } from '@/stores/userStore';
-import { IconLogout } from '@tabler/icons-react';
+
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 export function UserNav() {
   const signOutMutation = useSignOut();

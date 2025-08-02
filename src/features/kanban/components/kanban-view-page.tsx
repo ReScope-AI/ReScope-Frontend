@@ -12,11 +12,15 @@ import {
   ThumbsUp
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ShareRetroDialog } from '@/components/modal/share-retro-dialog';
 import { Button } from '@/components/ui/button';
-import { emitGeneratePlanItems } from '@/lib/retro-socket';
+import {
+  emitGeneratePlanItems,
+  onActiveGeneratePlanItems
+} from '@/lib/retro-socket';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
 import { Status, useTaskStore } from '../utils/store';
@@ -167,14 +171,25 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const retroSession = useRetroSessionStore((state) => state.retroSession);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
   const setTasks = useTaskStore((state) => state.setTasks);
+  const tasks = useTaskStore((state) => state.tasks);
 
   useEffect(() => {
-    if (step === 2 && retroSession?.plans?.length === 0) {
+    if (step === 2 && retroSession?.plans?.length === 0 && tasks.length === 0) {
       console.log('Emitting generate-plan-items');
       setIsGenerating(true);
       emitGeneratePlanItems(retroId || '', exampleRequestData);
     }
   }, [step]);
+
+  useEffect(() => {
+    onActiveGeneratePlanItems((data) => {
+      if (data.code === 200) {
+        setIsGenerating(true);
+      } else {
+        toast.error(data.msg);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (retroSession?.plans && retroSession?.plans?.length > 0) {

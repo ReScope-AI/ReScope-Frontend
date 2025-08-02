@@ -170,7 +170,9 @@ export const useTaskStore = create<State & Actions>((set) => ({
       openDialog: false
     });
   },
-  setStep: (step: number) => set({ step }),
+  setStep: (step: number) => {
+    set({ step });
+  },
   setIsGenerating: (isGenerating: boolean) => set({ isGenerating }),
   resetState: () =>
     set({

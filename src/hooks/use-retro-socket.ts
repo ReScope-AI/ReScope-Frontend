@@ -20,7 +20,9 @@ import {
   onGeneratePlanItems,
   onJoinFailed,
   onJoinRoom,
-  onLeaveRoom
+  onLeaveRoom,
+  onSetStep,
+  onSetStepSuccess
 } from '@/lib/retro-socket';
 import { useAuthStore } from '@/stores/authStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
@@ -36,6 +38,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
   const resetState = useTaskStore((state) => state.resetState);
   const tasks = useTaskStore((state) => state.tasks);
+  const setStep = useTaskStore((state) => state.setStep);
   const initializeSocket = useCallback(() => {
     if (!SOCKET_URL || !accessToken || isConnected()) {
       return;
@@ -68,8 +71,6 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     if (isConnected()) {
       disconnect();
     }
-    resetState();
-    setTasks([]);
   }, []);
 
   useEffect(() => {
@@ -98,6 +99,13 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
       }
       setIsGenerating(false);
     };
+    const setStepListener = (data: any) => {
+      const { step } = data.data;
+      setStep(step);
+    };
+    const setStepSuccessListener = (data: any) => {
+      console.log('setStepSuccessListener', data);
+    };
     onJoinRoom((res) => {
       if (res.code === 200) {
         setError(null);
@@ -115,7 +123,8 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onDeletePlan(deletePlanListener);
     onChangePositionPlan(changePositionPlanListener);
     onGeneratePlanItems(generatePlanItemsListener);
-
+    onSetStep(setStepListener);
+    onSetStepSuccess(setStepSuccessListener);
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);
 

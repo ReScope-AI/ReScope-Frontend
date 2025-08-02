@@ -246,6 +246,10 @@ export function emitGeneratePlanItems(
   emit('re-scope', { event: 'generate-plan-items', room: roomId, data });
 }
 
+export function emitSetStep(roomId: string, step: number): void {
+  emit('re-scope', { event: 'set-step', room: roomId, data: { step } });
+}
+
 // Convenience on functions for listening to events
 export const onJoinRoom = createOnFunction('join-room');
 export const onJoinFailed = createOnFunction('join-failed');
@@ -255,3 +259,9 @@ export const onEditPlan = createOnFunction('edit-plan');
 export const onDeletePlan = createOnFunction('delete-plan');
 export const onChangePositionPlan = createOnFunction('change-position-plan');
 export const onGeneratePlanItems = createOnFunction('generate-plan-items');
+export const onActiveGeneratePlanItems = createOnFunction(
+  'active-generate-plan-items'
+);
+
+export const onSetStep = createOnFunction('set-step');
+export const onSetStepSuccess = createOnFunction('set-step-success');

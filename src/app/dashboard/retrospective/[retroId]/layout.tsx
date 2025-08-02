@@ -41,11 +41,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   // Initialize socket connection for this retrospective session
   const { hasError, error } = useRetroSocket();
   const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const setTasks = useTaskStore((state) => state.setTasks);
+  const resetState = useTaskStore((state) => state.resetState);
 
   useEffect(() => {
     if (hasError) {
       setShowErrorDialog(true);
     }
+
+    return () => {
+      setTasks([]);
+      resetState();
+      setRetroSession(null);
+    };
   }, [hasError]);
 
   const handleDialogClose = () => {
