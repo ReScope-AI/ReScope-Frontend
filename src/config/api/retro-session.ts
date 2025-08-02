@@ -12,7 +12,8 @@ const SESSION_API_URL = {
   LIST: '/retro-session/list-retro-sessions',
   DELETE: '/retro-session',
   GET: '/retro-session',
-  ADD_PARTICIPANT: '/retro-session-participant'
+  ADD_PARTICIPANT: '/retro-session-participant',
+  LIST_INVITED: '/retro-session/list-retro-sessions/invite'
 };
 
 export const createRetroSession = async (
@@ -32,6 +33,17 @@ export const createRetroSession = async (
 export const getRetroSessions = async () => {
   const response = await request(
     SESSION_API_URL.LIST,
+    {
+      method: 'GET'
+    },
+    API_KEYS.BASE_API
+  );
+  return response;
+};
+
+export const getInvitedRetroSessions = async () => {
+  const response = await request(
+    SESSION_API_URL.LIST_INVITED,
     {
       method: 'GET'
     },

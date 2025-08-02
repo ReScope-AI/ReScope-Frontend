@@ -4,6 +4,7 @@ import {
   addRetroSessionParticipant,
   createRetroSession,
   deleteRetroSession,
+  getInvitedRetroSessions,
   getRetroSessions
 } from '@/config/api/retro-session';
 import { isDev } from '@/lib/env';
@@ -81,10 +82,21 @@ export const useGetRetroSessions = () => {
   return useQuery<GetRetroSessionResponse>({
     queryKey: ['retro-sessions'],
     queryFn: getRetroSessions,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: true, // Refetch when window regains focus
-    refetchOnMount: true // Refetch when component mounts
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
+  });
+};
+
+export const useGetInvitedRetroSessions = () => {
+  return useQuery<GetRetroSessionResponse>({
+    queryKey: ['invited-retro-sessions'],
+    queryFn: getInvitedRetroSessions,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
   });
 };
 

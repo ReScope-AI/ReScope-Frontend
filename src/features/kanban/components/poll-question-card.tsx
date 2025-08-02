@@ -125,10 +125,18 @@ export function PollQuestionCard({
       roomId,
       questionId: updated._id,
       text: updated.text,
-      option: updated.options.map((option) => ({
-        optionId: option._id,
-        text: option.text
-      }))
+      option: updated.options.map((option) => {
+        if (option.notCreated) {
+          return {
+            optionId: null,
+            text: option.text
+          };
+        }
+        return {
+          optionId: option._id,
+          text: option.text
+        };
+      })
     });
   };
 

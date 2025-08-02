@@ -49,7 +49,7 @@ interface ReScopeEmitEventsInternal {
     questionId: string;
     text: string;
     option?: {
-      optionId: string;
+      optionId: string | null;
       text: string;
     }[];
   };
@@ -59,6 +59,12 @@ interface ReScopeEmitEventsInternal {
   };
   'delete-question': {
     id: string;
+  };
+  'set-step': {
+    step: number;
+  };
+  'set-step-success': {
+    step: number;
   };
 }
 
@@ -76,6 +82,11 @@ export interface RetroListenEvents {
   'edit-poll-question': any;
   'vote-question': any;
   'delete-question': any;
+  'active-generate-plan-items': any;
+  'set-step': {
+    step: number;
+  };
+  'set-step-success': any;
 }
 
 export interface SocketConnectionOptions {

@@ -2,7 +2,6 @@
 import {
   BarChart3,
   Filter,
-  Loader2,
   MessageCircle,
   MessageSquareMore,
   RotateCcw,
@@ -13,11 +12,15 @@ import {
   ThumbsUp
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ShareRetroDialog } from '@/components/modal/share-retro-dialog';
 import { Button } from '@/components/ui/button';
-import { emit, on } from '@/lib/retro-socket';
+import {
+  emitGeneratePlanItems,
+  onActiveGeneratePlanItems
+} from '@/lib/retro-socket';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
 import { Status, useTaskStore } from '../utils/store';
@@ -161,99 +164,53 @@ const exampleRequestData = [
 ];
 
 export default function KanbanViewPage({ retroId }: { retroId: string }) {
-  const setPlanItemAction = useTaskStore((state) => state.setPlanItemAction);
-  const planItemAction = useTaskStore((state) => state.planItemAction);
-  const setTasks = useTaskStore((state) => state.setTasks);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isRadarChartOpen, setIsRadarChartOpen] = useState(false);
-  const retroSession = useRetroSessionStore((state) => state.retroSession);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
+  const step = useTaskStore((state) => state.step);
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
+  const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
+  const setTasks = useTaskStore((state) => state.setTasks);
+  const tasks = useTaskStore((state) => state.tasks);
+
   useEffect(() => {
-    on('generate-plan-items', (data) => {
-      if (data && data.data) {
-        setPlanItemAction(data.data);
+    if (step === 2 && retroSession?.plans?.length === 0 && tasks.length === 0) {
+      console.log('Emitting generate-plan-items');
+      setIsGenerating(true);
+      emitGeneratePlanItems(retroId || '', exampleRequestData);
+    }
+  }, [step]);
+
+  useEffect(() => {
+    onActiveGeneratePlanItems((data) => {
+      if (data.code === 200) {
+        setIsGenerating(true);
+      } else {
+        toast.error(data.msg);
       }
-      setIsGenerating(false);
     });
   }, []);
 
-  const handleTestMessage = () => {
-    setIsGenerating(true);
-    emit('re-scope', {
-      event: 'generate-plan-items',
-      room: retroId,
-      data: exampleRequestData
-    });
-  };
-
   useEffect(() => {
-    if (retroSession) {
+    if (retroSession?.plans && retroSession?.plans?.length > 0) {
       setTasks(
         retroSession?.plans?.map((plan) => ({
-          _id: plan._id,
+          _id: uuidv4(),
           title: plan.text,
           status: plan?.category?.name as Status,
           votes: 0
         })) || []
       );
     }
-  }, [retroSession]);
-
-  useEffect(() => {
-    if (planItemAction && planItemAction.length > 0) {
-      setTasks(
-        planItemAction?.map((item) => ({
-          _id: uuidv4(),
-          title: item.description,
-          status: item.action_type as Status,
-          votes: 0
-        })) || []
-      );
-    }
-  }, [planItemAction]);
+  }, [retroSession?.plans, setTasks]);
 
   return (
     <div className='relative flex h-full flex-col'>
-      {/* Loading Overlay */}
-      {isGenerating && (
-        <div className='absolute inset-0 z-50 flex items-center justify-center bg-black/50'>
-          <div className='rounded-lg bg-white p-8 shadow-xl dark:bg-gray-800'>
-            <div className='flex flex-col items-center space-y-4'>
-              <Loader2 className='h-12 w-12 animate-spin' />
-              <div className='text-center'>
-                <h3 className='mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100'>
-                  Generating Plan Items
-                </h3>
-                <p className='text-sm text-gray-600 dark:text-gray-400'>
-                  AI is analyzing your retrospective data...
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Header Section */}
       <HeaderBar
         onOpenRadarChart={() => setIsRadarChartOpen(true)}
         onShareClick={setIsShareDialogOpen}
       />
-
-      <Button
-        className='mx-4 mt-4 w-48'
-        onClick={handleTestMessage}
-        disabled={isGenerating}
-      >
-        {isGenerating ? (
-          <>
-            <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-            Generating...
-          </>
-        ) : (
-          'Generate Plan Items'
-        )}
-      </Button>
 
       <div className='flex-shrink-0'>
         <NewTaskDialog />

@@ -1,24 +1,27 @@
 'use client';
 
 import {
+  IconGripVertical,
+  IconTrash,
+  IconX,
+  IconPlus
+} from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  IconGripVertical,
-  IconTrash,
-  IconX,
-  IconPlus
-} from '@tabler/icons-react';
+
 import type { IQuestion, IOption } from '@/types/IRetroSession';
-import { useEffect, useState } from 'react';
 
 interface PollQuestionEditDialogProps {
   open: boolean;
@@ -51,12 +54,14 @@ export function PollQuestionEditDialog({
     setOptions((opts) => [
       ...opts,
       {
-        _id: Math.random().toString(),
+        _id: uuidv4(),
         text: '',
-        order: opts.length,
+        order: 0,
         question_id: question?._id || '',
         created_at: '',
-        updated_at: ''
+        updated_at: '',
+        votes: [],
+        notCreated: true
       }
     ]);
   };
@@ -119,7 +124,6 @@ export function PollQuestionEditDialog({
                     variant='ghost'
                     size='icon'
                     onClick={() => handleRemoveOption(idx)}
-                    disabled={options.length <= 2}
                     className='h-8 w-8 text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-600'
                   >
                     <IconTrash size={16} />

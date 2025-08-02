@@ -1,8 +1,14 @@
 import { isArray } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
+import {
+  PlanItemAction,
+  Status,
+  useTaskStore
+} from '@/features/kanban/utils/store';
 import { isDev } from '@/lib/env';
 import {
   connect,
@@ -15,9 +21,12 @@ import {
   onDeletePollQuestion,
   onEditPlan,
   onEditPollQuestion,
+  onGeneratePlanItems,
   onJoinFailed,
   onJoinRoom,
   onLeaveRoom,
+  onSetStep,
+  onSetStepSuccess,
   onVotePollQuestion
 } from '@/lib/retro-socket';
 import { useAuthStore } from '@/stores/authStore';
@@ -33,7 +42,11 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const { updatePollQuestion, setPollQuestions, removePollQuestion } =
     usePollStore((state) => state);
   const retroId = roomId || session?._id;
-
+  const setTasks = useTaskStore((state) => state.setTasks);
+  const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
+  const resetState = useTaskStore((state) => state.resetState);
+  const tasks = useTaskStore((state) => state.tasks);
+  const setStep = useTaskStore((state) => state.setStep);
   const initializeSocket = useCallback(() => {
     if (!SOCKET_URL || !accessToken || isConnected()) {
       return;
@@ -79,7 +92,28 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     const editPlanListener = () => {};
     const deletePlanListener = () => {};
     const changePositionPlanListener = () => {};
-
+    const generatePlanItemsListener = (data: any) => {
+      if (data.data && data.data?.length > 0) {
+        console.log('generatePlanItemsListener', data.data);
+        setTasks([
+          ...tasks,
+          ...(data.data?.map((item: PlanItemAction) => ({
+            _id: uuidv4(),
+            title: item.description,
+            status: item.action_type as Status,
+            votes: 0
+          })) || [])
+        ]);
+      }
+      setIsGenerating(false);
+    };
+    const setStepListener = (data: any) => {
+      const { step } = data.data;
+      setStep(step);
+    };
+    const setStepSuccessListener = (data: any) => {
+      console.log('setStepSuccessListener', data);
+    };
     // Polls Questions
     const editPollQuestionListener = (res: any) => {
       if (res.code === 200 && res.data && res.data.questions) {
@@ -121,7 +155,9 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onEditPollQuestion(editPollQuestionListener);
     onVotePollQuestion(votePollQuestionListener);
     onDeletePollQuestion(deletePollQuestionListener);
-
+    onGeneratePlanItems(generatePlanItemsListener);
+    onSetStep(setStepListener);
+    onSetStepSuccess(setStepSuccessListener);
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);
 

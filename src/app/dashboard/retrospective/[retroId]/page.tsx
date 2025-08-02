@@ -4,8 +4,13 @@ import FormCardSkeleton from '@/components/form-card-skeleton';
 import KanbanViewPage from '@/features/kanban/components/kanban-view-page';
 
 export const metadata = {
-  title: 'Re-Scope: Retrospective View',
-  description: 'Retrospective View'
+  title: 'ReScope | Retrospective View',
+  description: 'Retrospective View',
+  icons: {
+    icon: '/assets/logo.png',
+    shortcut: '/assets/logo.png',
+    apple: '/assets/logo.png'
+  }
 };
 
 export default async function Page({
