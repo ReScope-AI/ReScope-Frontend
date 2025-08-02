@@ -9,6 +9,7 @@ import {
   IconEye,
   IconTrash
 } from '@tabler/icons-react';
+import { isEmpty } from 'lodash';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -26,29 +27,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { emitEditPollQuestion } from '@/lib/retro-socket';
+import { emitEditPollQuestion, emitVotePollQuestion } from '@/lib/retro-socket';
+import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { useUserStore } from '@/stores/userStore';
 
 import { PollQuestionEditDialog } from './poll-question-edit-dialog';
 
-import type { IOption, IQuestion } from '@/types/IRetroSession';
+import type { IOption, IQuestion, IVote } from '@/types/IRetroSession';
 
 interface PollQuestionCardProps {
   question: IQuestion;
   disableDragExternal?: boolean;
-  onEdit?: (question: IQuestion) => void;
-  onDelete?: (questionId: string) => void;
-  onVote?: (optionId: string) => void;
 }
 
 export function PollQuestionCard({
   question,
-  disableDragExternal = false,
-  onEdit,
-  onDelete,
-  onVote
+  disableDragExternal = false
 }: PollQuestionCardProps) {
   const retroId = useRetroSessionStore((state) => state.retroSession?._id);
+  const user = useUserStore((state) => state.user);
   const {
     setNodeRef,
     attributes,
@@ -72,9 +70,40 @@ export function PollQuestionCard({
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const handleVote = (optionId: string) => {
+  const handleVote = (
+    optionId: string,
+    questionId: string,
+    roomId: string | undefined
+  ) => {
+    if (!roomId) return;
+    emitVotePollQuestion({
+      roomId,
+      question_id: questionId,
+      option_id: optionId
+    });
     setVotedOption(optionId);
-    onVote?.(optionId);
+  };
+
+  const handleEdit = (updated: IQuestion, roomId: string | undefined) => {
+    if (!roomId) return;
+    setEditOpen(false);
+
+    // Emit socket event to update poll question
+    emitEditPollQuestion({
+      roomId,
+      questionId: updated._id,
+      text: updated.text,
+      option: updated.options.map((option) => ({
+        optionId: option._id,
+        text: option.text
+      }))
+    });
+    ``;
+  };
+
+  const checkIsVoted = (votes: IVote[]) => {
+    if (isEmpty(votes)) return false;
+    return votes.some((vote) => vote.created_by === user?._id);
   };
 
   return (
@@ -126,17 +155,16 @@ export function PollQuestionCard({
               <Button
                 key={option._id}
                 size='sm'
-                variant={votedOption === option._id ? 'default' : 'outline'}
-                onClick={() => handleVote(option._id)}
-                disabled={!!votedOption}
+                variant={checkIsVoted(option.votes) ? 'outline' : 'default'}
+                onClick={() => handleVote(option._id, question._id, retroId)}
                 className={`h-10 w-full justify-start px-4 ${
-                  votedOption === option._id
+                  checkIsVoted(option.votes)
                     ? 'bg-purple-600 text-white hover:bg-purple-700'
                     : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <span className='flex-1 text-left'>{option.text}</span>
-                {votedOption === option._id && (
+                {checkIsVoted(option.votes) && (
                   <IconCheck size={16} className='ml-2' />
                 )}
               </Button>
@@ -150,23 +178,7 @@ export function PollQuestionCard({
           open={editOpen}
           question={question}
           onClose={() => setEditOpen(false)}
-          onSave={(updated) => {
-            console.log(updated);
-            setEditOpen(false);
-
-            // Emit socket event to update poll question
-            emitEditPollQuestion({
-              roomId: retroId,
-              questionId: updated._id,
-              text: updated.text,
-              option: updated.options.map((option) => ({
-                optionId: option._id,
-                text: option.text
-              }))
-            });
-
-            onEdit?.(updated);
-          }}
+          onSave={(updated) => handleEdit(updated, retroId)}
         />
       )}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
@@ -185,8 +197,8 @@ export function PollQuestionCard({
             <Button
               variant='destructive'
               onClick={() => {
-                setDeleteOpen(false);
-                onDelete?.(question._id);
+                // setDeleteOpen(false);
+                // onDelete?.(question._id);
               }}
             >
               Delete

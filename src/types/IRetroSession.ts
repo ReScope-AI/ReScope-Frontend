@@ -47,7 +47,6 @@ export interface IQuestion {
   created_at: string;
   updated_at: string;
   options: IOption[] | [];
-  votes: string[];
 }
 
 export interface IOption {
@@ -57,6 +56,12 @@ export interface IOption {
   question_id: string;
   created_at: string;
   updated_at: string;
+  votes: IVote[];
+}
+
+export interface IVote {
+  _id: string;
+  created_by: string;
 }
 
 export interface IPlan {

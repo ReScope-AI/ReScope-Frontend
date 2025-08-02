@@ -1,4 +1,6 @@
+import { isArray } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
 import { isDev } from '@/lib/env';
@@ -14,9 +16,11 @@ import {
   onEditPollQuestion,
   onJoinFailed,
   onJoinRoom,
-  onLeaveRoom
+  onLeaveRoom,
+  onVotePollQuestion
 } from '@/lib/retro-socket';
 import { useAuthStore } from '@/stores/authStore';
+import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 
 type ErrorInfo = { title: string; message: string } | null;
@@ -25,6 +29,9 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const [error, setError] = useState<ErrorInfo>(null);
   const session = useRetroSessionStore((state) => state.retroSession);
+  const { updatePollQuestion, setPollQuestions } = usePollStore(
+    (state) => state
+  );
   const retroId = roomId || session?._id;
 
   const initializeSocket = useCallback(() => {
@@ -72,8 +79,23 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     const editPlanListener = () => {};
     const deletePlanListener = () => {};
     const changePositionPlanListener = () => {};
-    const editPollQuestionListener = () => {};
 
+    // Polls Questions
+    const editPollQuestionListener = (res: any) => {
+      if (res.code === 200 && res.data && res.data.questions) {
+        setPollQuestions(res.data.questions);
+      }
+    };
+    const votePollQuestionListener = (res: any) => {
+      if (
+        res.code === 200 &&
+        res.data &&
+        isArray(res.data) &&
+        res.data.length > 0
+      ) {
+        updatePollQuestion(res.data[0]._id, res.data[0]);
+      }
+    };
     onJoinRoom((res) => {
       if (res.code === 200) {
         setError(null);
@@ -91,6 +113,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onDeletePlan(deletePlanListener);
     onChangePositionPlan(changePositionPlanListener);
     onEditPollQuestion(editPollQuestionListener);
+    onVotePollQuestion(votePollQuestionListener);
 
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);

@@ -1,7 +1,9 @@
-import { IOption, IPollState, IQuestion } from '@/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+
 import { Column } from '@/features/kanban/components/board-column';
+import { IOption, IPollState, IQuestion } from '@/types';
+
 export interface IPollStoreState extends IPollState {
   // POLLS column management
   pollsColumn:
@@ -29,7 +31,7 @@ export interface IPollStoreState extends IPollState {
   removePollQuestion: (id: string) => void;
   updatePollQuestion: (id: string, data: IQuestion) => void;
   setPollQuestions: (questions: IQuestion[]) => void;
-  // updatePollOptionVotes: (questionId: string, optionId: string, increment: boolean) => void;
+  setPollQuestionById: (id: string, data: IQuestion) => void;
   getPollOptionsByPollId: (pollId: string) => IOption[];
   clearPollQuestions: () => void;
   clearStorage: () => void;
@@ -63,7 +65,7 @@ export const usePollStore = create<IPollStoreState>()(
       removePollsColumn: () => set({ pollsColumn: null }),
       getPollsColumn: () => get().pollsColumn,
 
-      // Poll options management
+      // Poll questions management
       pollQuestions: [],
       addPollQuestion: (data: IQuestion) =>
         set((state) => ({
@@ -88,17 +90,12 @@ export const usePollStore = create<IPollStoreState>()(
         })),
       setPollQuestions: (questions: IQuestion[]) =>
         set({ pollQuestions: questions }),
-      // updatePollOptionVotes: (questionId: string, optionId: string, increment: boolean) =>
-      //   set((state) => ({
-      //     pollQuestions: state.pollQuestions.map((question) =>
-      //       question._id === questionId
-      //         ? {
-      //             ...question,
-      //             votes: Math.max(0, question.votes + (increment ? 1 : -1))
-      //           }
-      //         : option
-      //     )
-      //   })),
+      setPollQuestionById: (id: string, data: IQuestion) =>
+        set((state) => ({
+          pollQuestions: state.pollQuestions.map((question) =>
+            question._id === id ? { ...question, ...data } : question
+          )
+        })),
       getPollOptionsByPollId: (pollId: string) =>
         get().pollQuestions.find((question) => question._id === pollId)
           ?.options || [],
