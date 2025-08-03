@@ -18,6 +18,7 @@ import {
   onAddActionItem,
   onAddPlan,
   onChangePositionPlan,
+  onCreateKeyInsights,
   onDeleteActionItem,
   onDeletePlan,
   onDeletePollQuestion,
@@ -143,10 +144,21 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
       const { step } = data.data;
       setStep(step);
     };
-    const setStepSuccessListener = (data: any) => {
-      console.log('setStepSuccessListener', data);
+    const setStepSuccessListener = (data: any) => {};
+    const createKeyInsightsListener = (
+      data: SocketResponse<RetroListenEvents['create-key-insights']>
+    ) => {
+      if (data.code === 200) {
+        setRetroSession({
+          ...session!,
+          keyInsights: data.data.map((item) => ({
+            _id: item._id,
+            title: item.title,
+            description: item.description
+          }))
+        });
+      }
     };
-
     const addActionItemListener = (data: any) => {
       if (data.code === 200) {
         setRetroSession((currentSession: IRetroSession | null) => {
@@ -244,6 +256,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onSetStepSuccess(setStepSuccessListener);
     onJoinFailed(joinFailedListener);
     onRadarCriteriaCreated(createRadarCriteriaListener);
+    onCreateKeyInsights(createKeyInsightsListener);
 
     onAddActionItem(addActionItemListener);
     onEditActionItem(editActionItemListener);

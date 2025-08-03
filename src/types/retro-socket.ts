@@ -131,6 +131,12 @@ export interface RetroListenEvents {
   'delete-action-item': {
     _id: string;
   };
+  'create-key-insights': {
+    _id: string;
+    session_id: string;
+    title: string;
+    description?: string;
+  }[];
 }
 
 export interface SocketConnectionOptions {

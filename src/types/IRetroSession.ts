@@ -1,4 +1,5 @@
 import { IActionItem } from './IActionItem';
+import { IKeyInsight } from './IKeyInsight';
 
 export interface ISprint {
   _id: string;
@@ -39,6 +40,7 @@ export interface IRetroSession {
   sprint: ISprint;
   plans: IPlan[];
   radar_criteria?: IRetroRadarCriteria[];
+  keyInsights?: IKeyInsight[];
 }
 
 export interface IRetroRadarCriteria {

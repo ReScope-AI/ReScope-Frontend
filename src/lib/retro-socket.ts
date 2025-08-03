@@ -313,3 +313,5 @@ export const onRadarCriteriaCreated = createOnFunction('create-radar-criteria');
 export const onAddActionItem = createOnFunction('add-action-item');
 export const onEditActionItem = createOnFunction('edit-action-item');
 export const onDeleteActionItem = createOnFunction('delete-action-item');
+
+export const onCreateKeyInsights = createOnFunction('create-key-insights');

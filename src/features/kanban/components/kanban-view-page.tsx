@@ -3,6 +3,7 @@ import {
   BarChart3,
   Download,
   Filter,
+  Loader2,
   MessageSquareMore,
   Search,
   Share,
@@ -27,6 +28,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { useDownloadRetroSession } from '@/hooks/use-retro-session-api';
 import {
   emitGeneratePlanItems,
   onActiveGeneratePlanItems
@@ -127,6 +129,8 @@ export function HeaderBar({
   const user = useUserStore((state) => state.user);
   const isOwner = user?._id === retroSession?.created_by;
   const step = useTaskStore((state) => state.step);
+  const { mutate: downloadRetroSession, isPending: isDownloading } =
+    useDownloadRetroSession();
 
   let stepName = '';
   if (step === 1) {
@@ -249,10 +253,15 @@ export function HeaderBar({
           <TooltipTrigger asChild>
             <div>
               <Button
-                disabled
+                disabled={step !== 3}
+                onClick={() => downloadRetroSession(retroId)}
                 className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
               >
-                <Download className='h-4 w-4' />
+                {isDownloading ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  <Download className='h-4 w-4' />
+                )}
               </Button>
             </div>
           </TooltipTrigger>
