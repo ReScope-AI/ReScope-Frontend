@@ -1,3 +1,6 @@
+import { IActionItem } from './IActionItem';
+import { IKeyInsight } from './IKeyInsight';
+
 export interface ISprint {
   _id: string;
   name: string;
@@ -33,9 +36,17 @@ export interface IRetroSession {
   created_at: string;
   updated_at: string;
   questions: IQuestion[];
-  actionItems: string[];
+  actionItems: IActionItem[];
   sprint: ISprint;
   plans: IPlan[];
+  radar_criteria?: IRetroRadarCriteria[];
+  keyInsights?: IKeyInsight[];
+}
+
+export interface IRetroRadarCriteria {
+  _id: string;
+  criteria: string;
+  score: number;
 }
 
 export interface IQuestion {

@@ -1,10 +1,12 @@
-import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+
+import { showNotification } from '@/components/common';
 import { createPollQuestion } from '@/config/api/poll-question';
 import { QUERY_CONSTANTS } from '@/constants/query';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { ICreatePollQuestion } from '@/types';
-import { showNotification } from '@/components/common';
+
 import { PollOption } from './types';
 
 export function usePollModal() {
@@ -15,7 +17,7 @@ export function usePollModal() {
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [question, setQuestion] = useState('');
-  const [criterion, setCriterion] = useState('communication');
+  const [criterion, setCriterion] = useState('COMMUNICATION');
   const [options, setOptions] = useState<PollOption[]>([
     { id: '1', text: '' },
     { id: '2', text: '' }
@@ -70,23 +72,23 @@ export function usePollModal() {
     if (poll.criterion) {
       // Map the criterion to match the select options
       const criterionMap: Record<string, string> = {
-        communication: 'communication',
-        quality: 'quality',
-        process: 'process',
-        estimate: 'estimate',
-        timebound: 'timebound',
-        time_bound: 'timebound',
-        'time bound': 'timebound'
+        communication: 'COMMUNICATION',
+        quality: 'QUALITY',
+        process: 'PROCESS',
+        estimate: 'ESTIMATION',
+        timebound: 'TIMEBOUND',
+        time_bound: 'TIMEBOUND',
+        'time bound': 'TIMEBOUND'
       };
       const mappedCriterion =
-        criterionMap[poll.criterion.toLowerCase()] || 'communication';
+        criterionMap[poll.criterion.toLowerCase()] || 'COMMUNICATION';
       setCriterion(mappedCriterion);
     }
   };
 
   const resetForm = () => {
     setQuestion('');
-    setCriterion('communication');
+    setCriterion('COMMUNICATION');
     setOptions([
       { id: '1', text: '' },
       { id: '2', text: '' }

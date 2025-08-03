@@ -271,6 +271,27 @@ export function emitSetStep(roomId: string, step: number): void {
   emit('re-scope', { event: 'set-step', room: roomId, data: { step } });
 }
 
+export function emitAddActionItem({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['add-action-item']): void {
+  emit('re-scope', { event: 'add-action-item', room: roomId, data });
+}
+
+export function emitEditActionItem({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['edit-action-item']): void {
+  emit('re-scope', { event: 'edit-action-item', room: roomId, data });
+}
+
+export function emitDeleteActionItem({
+  roomId,
+  ...data
+}: ReScopeEmitEvents['delete-action-item']): void {
+  emit('re-scope', { event: 'delete-action-item', room: roomId, data });
+}
+
 // Convenience on functions for listening to events
 export const onJoinRoom = createOnFunction('join-room');
 export const onJoinFailed = createOnFunction('join-failed');
@@ -288,3 +309,10 @@ export const onActiveGeneratePlanItems = createOnFunction(
 );
 export const onSetStep = createOnFunction('set-step');
 export const onSetStepSuccess = createOnFunction('set-step-success');
+export const onRadarCriteriaCreated = createOnFunction('create-radar-criteria');
+export const onAddActionItem = createOnFunction('add-action-item');
+export const onEditActionItem = createOnFunction('edit-action-item');
+export const onDeleteActionItem = createOnFunction('delete-action-item');
+
+export const onCreateKeyInsights = createOnFunction('create-key-insights');
+export const onCreateQuestion = createOnFunction('create-question');

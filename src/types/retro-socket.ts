@@ -1,3 +1,5 @@
+import { IRetroSession } from './IRetroSession';
+
 // Helper type for standard response pattern
 export type SocketResponse<T> = {
   code: number;
@@ -66,6 +68,27 @@ interface ReScopeEmitEventsInternal {
   'set-step-success': {
     step: number;
   };
+  'create-radar-criteria': any;
+  'add-action-item': {
+    _id: string;
+    session_id: string;
+    title: string;
+    priority?: string;
+    description?: string;
+    assignee_to?: string | null;
+    status: string;
+  };
+  'edit-action-item': {
+    _id: string;
+    title: string;
+    description?: string;
+    assignee_to?: string | null;
+    status: string;
+    priority?: string;
+  };
+  'delete-action-item': {
+    _id: string;
+  };
 }
 
 export type ReScopeEmitEvents = WithRoomIds<ReScopeEmitEventsInternal>;
@@ -87,6 +110,36 @@ export interface RetroListenEvents {
     step: number;
   };
   'set-step-success': any;
+  'create-radar-criteria': {
+    _id: string;
+    criteria: string;
+    score: number;
+  }[];
+  'add-action-item': {
+    _id: string;
+    session_id: string;
+    title: string;
+    description?: string;
+    status: string;
+    priority?: string;
+  };
+  'edit-action-item': {
+    _id: string;
+    title: string;
+    description?: string;
+    assignee_to?: string | null;
+    status: string;
+  };
+  'delete-action-item': {
+    _id: string;
+  };
+  'create-key-insights': {
+    _id: string;
+    session_id: string;
+    title: string;
+    description?: string;
+  }[];
+  'create-question': IRetroSession;
 }
 
 export interface SocketConnectionOptions {

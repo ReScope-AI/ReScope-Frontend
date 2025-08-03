@@ -4,6 +4,7 @@ import {
   addRetroSessionParticipant,
   createRetroSession,
   deleteRetroSession,
+  downloadRetroSession,
   getInvitedRetroSessions,
   getRetroSessions
 } from '@/config/api/retro-session';
@@ -126,5 +127,11 @@ export const useInviteToRetro = () => {
     mutationFn: (data: IInviteToRetro) => {
       return addRetroSessionParticipant(data);
     }
+  });
+};
+
+export const useDownloadRetroSession = () => {
+  return useMutation({
+    mutationFn: (id: string) => downloadRetroSession(id)
   });
 };

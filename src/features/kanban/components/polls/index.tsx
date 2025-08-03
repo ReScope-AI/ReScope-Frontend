@@ -64,11 +64,11 @@ const PollModal = () => {
   };
 
   const criterionOptions = [
-    { value: 'communication', label: 'Communication', icon: '💬' },
-    { value: 'quality', label: 'Quality', icon: '⭐' },
-    { value: 'process', label: 'Process', icon: '⚙️' },
-    { value: 'estimate', label: 'Estimate', icon: '📊' },
-    { value: 'timebound', label: 'Time Bound', icon: '⏰' }
+    { value: 'COMMUNICATION', label: 'Communication', icon: '💬' },
+    { value: 'QUALITY', label: 'Quality', icon: '⭐' },
+    { value: 'PROCESS', label: 'Process', icon: '⚙️' },
+    { value: 'ESTIMATION', label: 'Estimate', icon: '📊' },
+    { value: 'TIMEBOUND', label: 'Time Bound', icon: '⏰' }
   ];
 
   return (

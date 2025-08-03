@@ -320,11 +320,8 @@ export default function DashboardPage() {
         <div className='grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {invitedRetroSessions?.map((meeting) => (
             <Card
-              onClick={() => {
-                router.push(`/dashboard/retrospective/${meeting._id}`);
-              }}
               key={meeting._id}
-              className='flex h-full cursor-pointer flex-col transition-shadow hover:shadow-md'
+              className='flex h-full flex-col transition-shadow hover:shadow-md'
             >
               <CardHeader>
                 <div className='flex items-center justify-between'>
@@ -335,7 +332,14 @@ export default function DashboardPage() {
                         {meeting?.team?.name?.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <span className='text-sm font-medium'>{meeting.name}</span>
+                    <span
+                      onClick={() => {
+                        router.push(`/dashboard/retrospective/${meeting._id}`);
+                      }}
+                      className='cursor-pointer text-sm font-medium hover:text-blue-600'
+                    >
+                      {meeting.name}
+                    </span>
                   </div>
 
                   <DropdownMenu>
