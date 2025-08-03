@@ -1,5 +1,9 @@
 'use client';
 
+import { Check, Plus, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -7,9 +11,7 @@ import {
   useDeleteSprint,
   useGetSprintsByUser
 } from '@/hooks/use-sprint-api';
-import { Check, Plus, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+
 import { useRetrospectiveStore } from '../stores';
 
 interface SprintNameSelectorProps {
@@ -21,8 +23,7 @@ const SprintNameSelector = ({
   value,
   onValueChange
 }: SprintNameSelectorProps) => {
-  const { sprints, addSprint, removeSprint, setSprints } =
-    useRetrospectiveStore();
+  const { sprints, removeSprint, setSprints } = useRetrospectiveStore();
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sprintName, setSprintName] = useState('');
@@ -63,7 +64,8 @@ const SprintNameSelector = ({
           id: result.data.id || result.data._id,
           name: result.data.name
         };
-        addSprint(newSprint.name);
+
+        setSprints([...sprints, newSprint]);
 
         setIsAdding(false);
 

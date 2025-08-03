@@ -1,5 +1,9 @@
 'use client';
 
+import { Check, Plus, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -7,9 +11,7 @@ import {
   useDeleteTeam,
   useGetTeams
 } from '@/hooks/use-team-api';
-import { Check, Plus, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+
 import { useRetrospectiveStore } from '../stores';
 
 interface TeamNameSelectorProps {
@@ -18,7 +20,7 @@ interface TeamNameSelectorProps {
 }
 
 const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
-  const { teams, addTeam, removeTeam, setTeams } = useRetrospectiveStore();
+  const { teams, removeTeam, setTeams } = useRetrospectiveStore();
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [teamName, setTeamName] = useState('');
@@ -57,7 +59,7 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
           id: result.data.id || result.data._id,
           name: result.data.name
         };
-        addTeam(newTeam.name);
+        setTeams([...teams, newTeam]);
 
         setIsAdding(false);
 
