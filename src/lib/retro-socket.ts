@@ -315,3 +315,4 @@ export const onEditActionItem = createOnFunction('edit-action-item');
 export const onDeleteActionItem = createOnFunction('delete-action-item');
 
 export const onCreateKeyInsights = createOnFunction('create-key-insights');
+export const onCreateQuestion = createOnFunction('create-question');

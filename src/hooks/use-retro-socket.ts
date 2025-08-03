@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
+import { showNotification } from '@/components/common';
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
 import {
   PlanItemAction,
@@ -19,6 +20,7 @@ import {
   onAddPlan,
   onChangePositionPlan,
   onCreateKeyInsights,
+  onCreateQuestion,
   onDeleteActionItem,
   onDeletePlan,
   onDeletePollQuestion,
@@ -39,6 +41,8 @@ import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { IRetroSession } from '@/types';
 import { RetroListenEvents, SocketResponse } from '@/types/retro-socket';
+
+import { useSignOut } from './use-auth';
 
 type ErrorInfo = { title: string; message: string } | null;
 
@@ -243,6 +247,11 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
         removePollQuestion(res.data.id);
       }
     };
+    const createQuestionListener = (res: any) => {
+      if (res?.questions && res?.questions?.length > 0) {
+        setPollQuestions(res?.questions || []);
+      }
+    };
     onLeaveRoom(leaveRoomListener);
     onAddPlan(addPlanListener);
     onEditPlan(editPlanListener);
@@ -261,6 +270,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onAddActionItem(addActionItemListener);
     onEditActionItem(editActionItemListener);
     onDeleteActionItem(deleteActionItemListener);
+    onCreateQuestion(createQuestionListener);
 
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);

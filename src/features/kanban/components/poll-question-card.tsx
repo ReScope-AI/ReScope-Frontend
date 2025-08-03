@@ -52,7 +52,7 @@ export function PollQuestionCard({
   question,
   disableDragExternal = false
 }: PollQuestionCardProps) {
-  const retroId = useRetroSessionStore((state) => state.retroSession?._id);
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
   const user = useUserStore((state) => state.user);
   const step = useTaskStore((state) => state.step);
 
@@ -194,54 +194,56 @@ export function PollQuestionCard({
               )}
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size='icon'
-                  variant='ghost'
-                  className='h-8 w-8 cursor-pointer text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300'
+            {user?._id === retroSession?.created_by && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size='icon'
+                    variant='ghost'
+                    className='h-8 w-8 cursor-pointer text-gray-400 opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300'
+                  >
+                    <IconDots size={16} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align='end'
+                  className='w-48 border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'
                 >
-                  <IconDots size={16} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align='end'
-                className='w-48 border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800'
-              >
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (step !== 1) {
-                      showNotification(
-                        'info',
-                        'You can only edit poll in step Reflect'
-                      );
-                      return;
-                    }
-                    setEditOpen(true);
-                  }}
-                  className={`flex items-center gap-2 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 ${step !== 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-                >
-                  <IconEdit size={16} />
-                  Edit Poll
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (step !== 1) {
-                      showNotification(
-                        'info',
-                        'You can only delete poll in step Reflect'
-                      );
-                      return;
-                    }
-                    setDeleteOpen(true);
-                  }}
-                  className={`flex items-center gap-2 text-red-600 hover:bg-red-50 focus:text-red-600 dark:text-red-400 dark:hover:bg-red-900/20 ${step !== 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-                >
-                  <IconTrash size={16} />
-                  Delete Poll
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (step !== 1) {
+                        showNotification(
+                          'info',
+                          'You can only edit poll in step Reflect'
+                        );
+                        return;
+                      }
+                      setEditOpen(true);
+                    }}
+                    className={`flex items-center gap-2 text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700 ${step !== 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  >
+                    <IconEdit size={16} />
+                    Edit Poll
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (step !== 1) {
+                        showNotification(
+                          'info',
+                          'You can only delete poll in step Reflect'
+                        );
+                        return;
+                      }
+                      setDeleteOpen(true);
+                    }}
+                    className={`flex items-center gap-2 text-red-600 hover:bg-red-50 focus:text-red-600 dark:text-red-400 dark:hover:bg-red-900/20 ${step !== 1 ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  >
+                    <IconTrash size={16} />
+                    Delete Poll
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {/* Poll question text */}
@@ -271,7 +273,7 @@ export function PollQuestionCard({
                         );
                         return;
                       }
-                      handleVote(option._id, question._id, retroId);
+                      handleVote(option._id, question._id, retroSession?._id);
                     }}
                     className={`relative h-auto min-h-[3rem] w-full cursor-pointer justify-between overflow-hidden px-4 py-3 text-left transition-all duration-200 ${
                       isSelected
@@ -315,12 +317,12 @@ export function PollQuestionCard({
       </Card>
 
       {/* Edit dialog */}
-      {retroId && (
+      {retroSession && (
         <PollQuestionEditDialog
           open={editOpen}
           question={question}
           onClose={() => setEditOpen(false)}
-          onSave={(updated) => handleEdit(updated, retroId)}
+          onSave={(updated) => handleEdit(updated, retroSession._id)}
         />
       )}
 
@@ -347,7 +349,7 @@ export function PollQuestionCard({
             <Button
               variant='destructive'
               onClick={() => {
-                handleDelete(question._id, retroId);
+                handleDelete(question._id, retroSession?._id);
               }}
               className='bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800'
             >

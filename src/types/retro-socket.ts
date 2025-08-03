@@ -1,3 +1,5 @@
+import { IRetroSession } from './IRetroSession';
+
 // Helper type for standard response pattern
 export type SocketResponse<T> = {
   code: number;
@@ -137,6 +139,7 @@ export interface RetroListenEvents {
     title: string;
     description?: string;
   }[];
+  'create-question': IRetroSession;
 }
 
 export interface SocketConnectionOptions {

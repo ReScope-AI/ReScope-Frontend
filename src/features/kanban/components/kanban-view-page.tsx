@@ -9,7 +9,8 @@ import {
   Share,
   SortAsc,
   SquarePen,
-  ThumbsUp
+  ThumbsUp,
+  UserRoundPlus
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
