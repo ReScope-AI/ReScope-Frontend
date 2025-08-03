@@ -1,13 +1,15 @@
 'use client';
 import {
   BarChart3,
+  Check,
+  ChevronRight,
   Filter,
   MessageSquareMore,
+  Plus,
   Search,
   SortAsc,
   SquarePen,
-  ThumbsUp,
-  UserRoundPlus
+  ThumbsUp
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -15,6 +17,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { InviteRetroDialog } from '@/components/modal/invite-retro-dialog';
 import { Button } from '@/components/ui/button';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger
+} from '@/components/ui/drawer';
 import {
   Tooltip,
   TooltipContent,
@@ -31,6 +39,7 @@ import { useUserStore } from '@/stores/userStore';
 import { convertData } from '../utils';
 import { Status, useTaskStore } from '../utils/store';
 
+import DrawerActionItemContent from './drawer-action-item-content';
 import { KanbanBoard } from './kanban-board';
 import NewTaskDialog from './new-task-dialog';
 import PollModal from './polls';
@@ -208,16 +217,32 @@ export function HeaderBar({
 
         <div className='mx-2 h-8 w-px bg-gray-300 dark:bg-gray-600' />
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
-              <SquarePen className='h-4 w-4' />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Edit retrospective</p>
-          </TooltipContent>
-        </Tooltip>
+        <Drawer direction='right'>
+          <DrawerTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
+                  <SquarePen className='h-4 w-4' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Edit retrospective</p>
+              </TooltipContent>
+            </Tooltip>
+          </DrawerTrigger>
+          <DrawerContent className='flex h-full flex-col'>
+            <DrawerTitle>
+              <div className='flex items-center justify-between border-b border-[#3c3c3c] p-4'>
+                <div className='flex items-center space-x-2'>
+                  <h3 className='text-xl font-semibold'>Action Items</h3>
+                </div>
+                <span className='text-sm text-gray-400'>0 Items</span>
+              </div>
+            </DrawerTitle>
+
+            <DrawerActionItemContent />
+          </DrawerContent>
+        </Drawer>
       </div>
     </div>
   );
