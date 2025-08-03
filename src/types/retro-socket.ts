@@ -67,6 +67,24 @@ interface ReScopeEmitEventsInternal {
     step: number;
   };
   'create-radar-criteria': any;
+  'add-action-item': {
+    _id: string;
+    session_id: string;
+    title: string;
+    description?: string;
+    assignee_to?: string | null;
+    status: string;
+  };
+  'edit-action-item': {
+    _id: string;
+    title: string;
+    description?: string;
+    assignee_to?: string | null;
+    status: string;
+  };
+  'delete-action-item': {
+    _id: string;
+  };
 }
 
 export type ReScopeEmitEvents = WithRoomIds<ReScopeEmitEventsInternal>;
@@ -93,6 +111,23 @@ export interface RetroListenEvents {
     criteria: string;
     score: number;
   }[];
+  'add-action-item': {
+    _id: string;
+    session_id: string;
+    title: string;
+    description?: string;
+    status: string;
+  };
+  'edit-action-item': {
+    _id: string;
+    title: string;
+    description?: string;
+    assignee_to?: string | null;
+    status: string;
+  };
+  'delete-action-item': {
+    _id: string;
+  };
 }
 
 export interface SocketConnectionOptions {

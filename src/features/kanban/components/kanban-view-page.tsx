@@ -1,11 +1,8 @@
 'use client';
 import {
   BarChart3,
-  Check,
-  ChevronRight,
   Filter,
   MessageSquareMore,
-  Plus,
   Search,
   SortAsc,
   SquarePen,
@@ -39,7 +36,7 @@ import { useUserStore } from '@/stores/userStore';
 import { convertData } from '../utils';
 import { Status, useTaskStore } from '../utils/store';
 
-import DrawerActionItemContent from './drawer-action-item-content';
+import DrawerActionItemContent from './action-items/drawer-action-item-content';
 import { KanbanBoard } from './kanban-board';
 import NewTaskDialog from './new-task-dialog';
 import PollModal from './polls';
@@ -64,6 +61,8 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
     }
   }, [step]);
 
+  console.log('retroSession', retroSession);
+
   useEffect(() => {
     onActiveGeneratePlanItems((data) => {
       if (data.code === 200) {
@@ -73,6 +72,8 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
       }
     });
   }, []);
+
+  console.log('retroSession', retroSession?.actionItems);
 
   useEffect(() => {
     if (retroSession?.plans && retroSession?.plans?.length > 0) {
@@ -90,7 +91,10 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   return (
     <div className='relative flex h-full flex-col'>
       {/* Header Section */}
-      <HeaderBar onOpenRadarChart={() => setIsRadarChartOpen(true)} />
+      <HeaderBar
+        onOpenRadarChart={() => setIsRadarChartOpen(true)}
+        retroId={retroId}
+      />
 
       <div className='flex-shrink-0'>
         <NewTaskDialog />
@@ -110,9 +114,11 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
 }
 
 export function HeaderBar({
-  onOpenRadarChart
+  onOpenRadarChart,
+  retroId
 }: {
   onOpenRadarChart: () => void;
+  retroId: string;
 }) {
   const retroSession = useRetroSessionStore((state) => state.retroSession);
   const user = useUserStore((state) => state.user);
@@ -236,11 +242,13 @@ export function HeaderBar({
                 <div className='flex items-center space-x-2'>
                   <h3 className='text-xl font-semibold'>Action Items</h3>
                 </div>
-                <span className='text-sm text-gray-400'>0 Items</span>
+                <span className='text-sm text-gray-400'>
+                  {retroSession?.actionItems?.length} Items
+                </span>
               </div>
             </DrawerTitle>
 
-            <DrawerActionItemContent />
+            <DrawerActionItemContent retroId={retroId} />
           </DrawerContent>
         </Drawer>
       </div>

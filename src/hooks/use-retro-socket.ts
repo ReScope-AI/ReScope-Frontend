@@ -15,10 +15,13 @@ import {
   disconnect,
   emitJoinRoom,
   isConnected,
+  onAddActionItem,
   onAddPlan,
   onChangePositionPlan,
+  onDeleteActionItem,
   onDeletePlan,
   onDeletePollQuestion,
+  onEditActionItem,
   onEditPlan,
   onEditPollQuestion,
   onGeneratePlanItems,
@@ -33,9 +36,8 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { IRetroSession } from '@/types';
 import { RetroListenEvents, SocketResponse } from '@/types/retro-socket';
-
-import { useSignOut } from './use-auth';
 
 type ErrorInfo = { title: string; message: string } | null;
 
@@ -53,7 +55,6 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const setRetroSession = useRetroSessionStore(
     (state) => state.setRetroSession
   );
-
   const initializeSocket = useCallback(() => {
     if (!SOCKET_URL || !accessToken || isConnected()) {
       return;
@@ -145,6 +146,58 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     const setStepSuccessListener = (data: any) => {
       console.log('setStepSuccessListener', data);
     };
+
+    const addActionItemListener = (data: any) => {
+      if (data.code === 200) {
+        setRetroSession((currentSession: IRetroSession | null) => {
+          if (!currentSession) return currentSession;
+
+          return {
+            ...currentSession,
+            actionItems: [
+              ...currentSession.actionItems,
+              {
+                _id: data.data._id,
+                title: data.data.title,
+                description: data.data.description,
+                status: data.data.status,
+                assignee_to: data.data.assignee_to
+              }
+            ]
+          };
+        });
+      } else {
+        toast.error(data.msg);
+      }
+    };
+
+    const editActionItemListener = (data: any) => {
+      if (data.code === 200) {
+        setRetroSession({
+          ...session!,
+          actionItems: session!.actionItems.map((item) =>
+            item._id === data.data._id ? data.data : item
+          )
+        });
+      } else {
+        toast.error(data.msg);
+      }
+    };
+
+    const deleteActionItemListener = (data: any) => {
+      console.log('deleteActionItemListener', data);
+      if (data.code === 200) {
+        setRetroSession({
+          ...session!,
+          actionItems: session!.actionItems.filter(
+            (item) => item._id !== data.data._id
+          )
+        });
+      } else {
+        toast.error(data.msg);
+      }
+    };
+
     // Polls Questions
     const editPollQuestionListener = (res: any) => {
       if (res.code === 200 && res.data && res.data.questions) {
@@ -191,6 +244,11 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onSetStepSuccess(setStepSuccessListener);
     onJoinFailed(joinFailedListener);
     onRadarCriteriaCreated(createRadarCriteriaListener);
+
+    onAddActionItem(addActionItemListener);
+    onEditActionItem(editActionItemListener);
+    onDeleteActionItem(deleteActionItemListener);
+
     return cleanup;
   }, [initializeSocket, cleanup, retroId, accessToken]);
 
