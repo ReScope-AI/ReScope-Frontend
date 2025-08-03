@@ -61,8 +61,6 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
     }
   }, [step]);
 
-  console.log('retroSession', retroSession);
-
   useEffect(() => {
     onActiveGeneratePlanItems((data) => {
       if (data.code === 200) {
@@ -72,8 +70,6 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
       }
     });
   }, []);
-
-  console.log('retroSession', retroSession?.actionItems);
 
   useEffect(() => {
     if (retroSession?.plans && retroSession?.plans?.length > 0) {
@@ -227,9 +223,9 @@ export function HeaderBar({
           <DrawerTrigger>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
+                <div className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
                   <SquarePen className='h-4 w-4' />
-                </Button>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Edit retrospective</p>

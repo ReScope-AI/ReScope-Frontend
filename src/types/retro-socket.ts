@@ -71,6 +71,7 @@ interface ReScopeEmitEventsInternal {
     _id: string;
     session_id: string;
     title: string;
+    priority?: string;
     description?: string;
     assignee_to?: string | null;
     status: string;
@@ -81,6 +82,7 @@ interface ReScopeEmitEventsInternal {
     description?: string;
     assignee_to?: string | null;
     status: string;
+    priority?: string;
   };
   'delete-action-item': {
     _id: string;
@@ -117,6 +119,7 @@ export interface RetroListenEvents {
     title: string;
     description?: string;
     status: string;
+    priority?: string;
   };
   'edit-action-item': {
     _id: string;

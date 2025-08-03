@@ -19,6 +19,7 @@ import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { IActionItem } from '@/types/IActionItem';
 
 import ActionItemCard from './action-item-card';
+import ActionItemDetailDialog from './action-item-detail-dialog';
 
 const actionItemSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -33,8 +34,9 @@ type DrawerActionItemContentProps = {
 
 const DrawerActionItemContent = ({ retroId }: DrawerActionItemContentProps) => {
   const [isAddingActionItem, setIsAddingActionItem] = useState(false);
-
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isOpenEditDialog, setIsOpenEditDialog] = useState(false);
+  const [actionItem, setActionItem] = useState<IActionItem | null>(null);
 
   const actionItems = useRetroSessionStore(
     (state) => state.retroSession?.actionItems
@@ -47,7 +49,8 @@ const DrawerActionItemContent = ({ retroId }: DrawerActionItemContentProps) => {
         session_id: retroId,
         title: data.title,
         description: data.description,
-        status: 'pending',
+        status: data.status,
+        priority: data.priority,
         roomId: retroId
       });
       setIsAddingActionItem(false);
@@ -100,13 +103,25 @@ const DrawerActionItemContent = ({ retroId }: DrawerActionItemContentProps) => {
       title: data.title,
       description: data.description,
       status: 'pending',
+      priority: 'medium',
       session_id: retroId
     });
   };
 
+  const handleEditActionItem = (actionItem: IActionItem) => {
+    setActionItem(actionItem);
+    setIsDetailDialogOpen(true);
+  };
+
   return (
     <div className='overflow-y-auto p-4'>
-      {/* Hiển thị danh sách action items */}
+      {/* Action Item Detail Dialog */}
+      <ActionItemDetailDialog
+        actionItem={actionItem as IActionItem}
+        isOpen={isDetailDialogOpen}
+        onClose={() => setIsDetailDialogOpen(false)}
+        roomId={retroId}
+      />
       {actionItems && actionItems.length > 0 && (
         <div className='space-y-3'>
           {actionItems.map((actionItem: IActionItem) => (
@@ -117,6 +132,7 @@ const DrawerActionItemContent = ({ retroId }: DrawerActionItemContentProps) => {
               isDeletingActionItem={isDeletingActionItem}
               setIsOpenEditDialog={setIsOpenEditDialog}
               isOpenEditDialog={isOpenEditDialog}
+              setEditActionItem={handleEditActionItem}
             />
           ))}
         </div>

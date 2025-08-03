@@ -24,7 +24,13 @@ export const editActionItem = async (data: IActionItem) => {
     `${ACTION_ITEM_API_URL.EDIT}/${data._id}`,
     {
       method: 'PUT',
-      data
+      data: {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        assignee_to: data.assignee_to
+      }
     },
     API_KEYS.BASE_API
   );

@@ -36,6 +36,7 @@ type ActionItemCardProps = {
   isDeletingActionItem: boolean;
   isOpenEditDialog: boolean;
   setIsOpenEditDialog: (isOpen: boolean) => void;
+  setEditActionItem: (actionItem: IActionItem) => void;
 };
 
 const ActionItemCard = ({
@@ -43,7 +44,8 @@ const ActionItemCard = ({
   handleDeleteActionItem,
   isDeletingActionItem,
   isOpenEditDialog,
-  setIsOpenEditDialog
+  setIsOpenEditDialog,
+  setEditActionItem
 }: ActionItemCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -73,51 +75,95 @@ const ActionItemCard = ({
   };
 
   return (
-    <div className='relative mb-3 rounded-lg border p-4 transition-all'>
-      {/* Left accent line */}
-      <div className='bg-primary absolute top-0 left-0 h-full w-1 rounded-l-lg'></div>
+    <>
+      <div className='hover:bg-accent/50 relative mb-3 cursor-pointer rounded-lg border p-4 transition-all'>
+        {/* Left accent line */}
+        <div className='bg-primary absolute top-0 left-0 h-full w-1 rounded-l-lg'></div>
 
-      {/* Header */}
-      <div className='mb-3 flex items-start justify-between'>
-        <h3 className='pr-8 text-lg font-semibold'>{actionItem.title}</h3>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger className='focus:outline-none'>
-            <MoreVertical className='h-4 w-4 text-gray-500 transition-colors hover:text-gray-700' />
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent
-            align='end'
-            sideOffset={8}
-            className='animate-in fade-in zoom-in-75 w-40 rounded-md border border-gray-200 bg-white p-1 shadow-xl'
+        {/* Header */}
+        <div className='mb-3 flex items-start justify-between'>
+          <h3
+            className='pr-8 text-lg font-semibold hover:cursor-pointer hover:text-green-700'
+            onClick={() => setEditActionItem(actionItem)}
           >
-            <DropdownMenuItem
-              disabled={isOpenEditDialog}
-              className='flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-black'
-            >
-              <Edit3 className='h-3 w-3 text-blue-500' />
-              <span>Edit</span>
-            </DropdownMenuItem>
+            {actionItem.title}
+          </h3>
 
-            <DropdownMenuItem
-              disabled={isDeletingActionItem}
-              className='flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 transition hover:bg-red-50 hover:text-red-700'
-              onSelect={(e) => {
-                e.preventDefault();
-                setIsOpenEditDialog(true);
-              }}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className='focus:outline-none'
+              onClick={(e) => e.stopPropagation()}
             >
-              {isDeletingActionItem ? (
-                <Loader2 className='h-3 w-3 animate-spin' />
-              ) : (
-                <>
-                  <Trash2 className='h-3 w-3 text-red-500' />
-                  <span>Delete</span>
-                </>
-              )}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <MoreVertical className='h-4 w-4 text-gray-500 transition-colors hover:text-gray-700' />
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align='end'
+              sideOffset={8}
+              className='animate-in fade-in zoom-in-75 w-40 rounded-md border border-gray-200 bg-white p-1 shadow-xl'
+            >
+              <DropdownMenuItem
+                disabled={isOpenEditDialog}
+                className='flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 hover:text-black'
+              >
+                <Edit3 className='h-3 w-3 text-blue-500' />
+                <span>Edit</span>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                disabled={isDeletingActionItem}
+                className='flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 transition hover:bg-red-50 hover:text-red-700'
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setIsOpenEditDialog(true);
+                }}
+              >
+                {isDeletingActionItem ? (
+                  <Loader2 className='h-3 w-3 animate-spin' />
+                ) : (
+                  <>
+                    <Trash2 className='h-3 w-3 text-red-500' />
+                    <span>Delete</span>
+                  </>
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Description */}
+        {actionItem.description && (
+          <div className='mb-4 text-sm'>
+            <p className='mb-1'>{actionItem.description}</p>
+          </div>
+        )}
+
+        {/* Status indicators */}
+        <div className='flex items-center justify-between text-xs text-gray-300'>
+          <div className='flex items-center gap-1'>
+            <User className='h-3 w-3' />
+            <span>{actionItem.assignee_to || 'Not Assigned'}</span>
+          </div>
+
+          <div className='flex items-center gap-1'>
+            <TrendingUp className='h-3 w-3' />
+            {/* Note: I'm using a placeholder priority color here as the data isn't in your actionItem object */}
+            <span
+              className={`capitalize ${getPriorityColor(
+                actionItem.priority || ''
+              )}`}
+            >
+              {actionItem.priority || ''}
+            </span>
+          </div>
+
+          <div className='flex items-center gap-1'>
+            <Clock className='h-3 w-3' />
+            <span className={`capitalize ${getStatusColor(actionItem.status)}`}>
+              {actionItem.status}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* The confirmation dialog component */}
@@ -152,35 +198,7 @@ const ActionItemCard = ({
           </AlertDialogContent>
         </AlertDialog>
       </Dialog>
-
-      {/* Description */}
-      {actionItem.description && (
-        <div className='mb-4 text-sm'>
-          <p className='mb-1'>{actionItem.description}</p>
-        </div>
-      )}
-
-      {/* Status indicators */}
-      <div className='flex items-center justify-between text-xs text-gray-300'>
-        <div className='flex items-center gap-1'>
-          <User className='h-3 w-3' />
-          <span>{actionItem.assignee_to || 'Not Assigned'}</span>
-        </div>
-
-        <div className='flex items-center gap-1'>
-          <TrendingUp className='h-3 w-3' />
-          {/* Note: I'm using a placeholder priority color here as the data isn't in your actionItem object */}
-          <span className={getPriorityColor('medium')}>Medium</span>
-        </div>
-
-        <div className='flex items-center gap-1'>
-          <Clock className='h-3 w-3' />
-          <span className={`capitalize ${getStatusColor(actionItem.status)}`}>
-            {actionItem.status}
-          </span>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 
