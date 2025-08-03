@@ -1,9 +1,11 @@
 'use client';
 import {
   BarChart3,
+  Download,
   Filter,
   MessageSquareMore,
   Search,
+  Share,
   SortAsc,
   SquarePen,
   ThumbsUp
@@ -41,6 +43,7 @@ import { KanbanBoard } from './kanban-board';
 import NewTaskDialog from './new-task-dialog';
 import PollModal from './polls';
 import RadarChartDialog from './radar-chart-dialog';
+import RetroSummary from './summary/retro-summary';
 
 export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const [isRadarChartOpen, setIsRadarChartOpen] = useState(false);
@@ -96,9 +99,13 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
         <NewTaskDialog />
       </div>
 
-      <div className='flex-1 overflow-hidden'>
-        <KanbanBoard />
-      </div>
+      {step === 3 ? (
+        <RetroSummary />
+      ) : (
+        <div className='flex-1 overflow-hidden'>
+          <KanbanBoard />
+        </div>
+      )}
 
       {/* Radar Chart Dialog */}
       <RadarChartDialog
@@ -119,6 +126,16 @@ export function HeaderBar({
   const retroSession = useRetroSessionStore((state) => state.retroSession);
   const user = useUserStore((state) => state.user);
   const isOwner = user?._id === retroSession?.created_by;
+  const step = useTaskStore((state) => state.step);
+
+  let stepName = '';
+  if (step === 1) {
+    stepName = 'Reflect';
+  } else if (step === 2) {
+    stepName = 'Discuss';
+  } else if (step === 3) {
+    stepName = 'Summary';
+  }
 
   const isActiveRadarChart = useMemo(() => {
     return (
@@ -131,8 +148,8 @@ export function HeaderBar({
     <div className='text-md flex w-full items-center justify-between space-x-2 border-b px-4 py-2'>
       {/* Left section */}
       <div className='flex items-center gap-2'>
-        <h2 className='text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100'>
-          {retroSession?.name}
+        <h2 className='text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100'>
+          {retroSession?.name} - {stepName}
         </h2>
       </div>
 
@@ -149,7 +166,6 @@ export function HeaderBar({
             <p>Total votes</p>
           </TooltipContent>
         </Tooltip>
-
         <Tooltip>
           <TooltipTrigger asChild>
             <Button className='flex cursor-pointer items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-700 shadow-sm transition-all duration-200 hover:bg-blue-100 hover:shadow-md dark:border-blue-700 dark:bg-blue-950/20 dark:text-blue-300 dark:hover:bg-blue-950/40'>
@@ -161,7 +177,6 @@ export function HeaderBar({
             <p>Total comments</p>
           </TooltipContent>
         </Tooltip>
-
         <Tooltip>
           <TooltipTrigger asChild>
             <div className='relative'>
@@ -177,11 +192,9 @@ export function HeaderBar({
             <p>Search items</p>
           </TooltipContent>
         </Tooltip>
-
         <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
           <SortAsc className='h-4 w-4' />
         </Button>
-
         <Tooltip>
           <TooltipTrigger asChild>
             <Button className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'>
@@ -192,7 +205,6 @@ export function HeaderBar({
             <p>Filter items</p>
           </TooltipContent>
         </Tooltip>
-
         <Tooltip>
           <TooltipTrigger asChild>
             <div>
@@ -209,15 +221,45 @@ export function HeaderBar({
             <p>View performance chart</p>
           </TooltipContent>
         </Tooltip>
-
         {isOwner && (
           <>
             <InviteRetroDialog retroId={retroSession?._id} />
             <PollModal />
           </>
         )}
-
         <div className='mx-2 h-8 w-px bg-gray-300 dark:bg-gray-600' />
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                disabled
+                className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+              >
+                <Share className='h-4 w-4' />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Share item</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                disabled
+                className='flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 shadow-sm transition-all duration-200 hover:scale-105 hover:bg-slate-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+              >
+                <Download className='h-4 w-4' />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Download item</p>
+          </TooltipContent>
+        </Tooltip>
 
         <Drawer direction='right'>
           <DrawerTrigger>
