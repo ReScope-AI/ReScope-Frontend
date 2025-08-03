@@ -47,7 +47,7 @@ export default function Header() {
         {showSteps && (
           <>
             <div className='flex items-center gap-2 overflow-x-auto p-2'>
-              <div className='text-md font-semibold'>
+              <div className='text-sm font-semibold'>
                 {new Date(
                   retroSession?.created_at as string
                 ).toLocaleDateString('en-US', {
@@ -61,7 +61,7 @@ export default function Header() {
               {initialSteps.map((stepItem, index) => (
                 <React.Fragment key={stepItem.id}>
                   <div
-                    className={`flex-shrink-0 rounded-md px-2 py-2 text-sm font-semibold transition-colors duration-200 ${
+                    className={`flex-shrink-0 rounded-md px-2 py-1 text-sm font-semibold transition-colors duration-200 ${
                       index === step - 1
                         ? 'bg-green-700 text-white'
                         : isDisabled

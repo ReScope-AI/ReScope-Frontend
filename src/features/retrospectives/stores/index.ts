@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -63,14 +62,12 @@ const initialInvitedRetroSessions: RetroSession[] = [];
 const initialSprints: SprintName[] = [];
 const initialRetroSessionParticipants: RetroSessionParticipant[] = [];
 export type Actions = {
-  addTeam: (name: string) => void;
   removeTeam: (id: string) => void;
   setTeams: (updatedTeams: TeamName[]) => void;
   setRetroSessions: (updatedRetroSessions: RetroSession[]) => void;
   setInvitedRetroSessions: (
     updatedInvitedRetroSessions: RetroSession[]
   ) => void;
-  addSprint: (name: string) => void;
   removeSprint: (id: string) => void;
   setSprints: (updatedSprints: SprintName[]) => void;
   clearStorage: () => void;
@@ -87,10 +84,6 @@ export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
       invitedRetroSessions: initialInvitedRetroSessions,
       sprints: initialSprints,
       retroSessionParticipants: initialRetroSessionParticipants,
-      addTeam: (name: string) =>
-        set((state) => ({
-          teams: [...state.teams, { id: uuid(), name }]
-        })),
       removeTeam: (id: string) =>
         set((state) => ({
           teams: state.teams.filter((team) => team.id !== id)
@@ -100,10 +93,6 @@ export const useRetrospectiveStore = create<RetroSpectiveState & Actions>()(
         set({ retroSessions: updatedRetroSessions }),
       setInvitedRetroSessions: (updatedInvitedRetroSessions: RetroSession[]) =>
         set({ invitedRetroSessions: updatedInvitedRetroSessions }),
-      addSprint: (name: string) =>
-        set((state) => ({
-          sprints: [...state.sprints, { id: uuid(), name }]
-        })),
       removeSprint: (id: string) =>
         set((state) => ({
           sprints: state.sprints.filter((sprint) => sprint.id !== id)
