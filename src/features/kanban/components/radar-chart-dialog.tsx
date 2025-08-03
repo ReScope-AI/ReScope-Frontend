@@ -1,5 +1,6 @@
 'use client';
 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -27,7 +28,16 @@ export default function RadarChartDialog({
           </DialogTitle>
         </DialogHeader>
         <div className='mt-4'>
-          <RadarChartComponent />
+          <Card className='border-border mx-auto w-full max-w-xl border shadow-md'>
+            <CardHeader>
+              <CardTitle className='text-center text-lg font-semibold'>
+                Performance Evaluation
+              </CardTitle>
+            </CardHeader>
+            <CardContent className='h-[400px] p-4'>
+              <RadarChartComponent />
+            </CardContent>
+          </Card>
         </div>
       </DialogContent>
     </Dialog>

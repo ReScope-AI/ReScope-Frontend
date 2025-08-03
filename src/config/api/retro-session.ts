@@ -89,3 +89,26 @@ export const addRetroSessionParticipant = async (
   );
   return response;
 };
+
+export const downloadRetroSession = async (id: string) => {
+  const response = await request(
+    `${SESSION_API_URL.GET}/${id}/download-report`,
+    {
+      method: 'GET',
+      responseType: 'blob'
+    },
+    API_KEYS.BASE_API
+  );
+
+  const blob = new Blob([response], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `retro-session-${id}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+
+  return response;
+};
