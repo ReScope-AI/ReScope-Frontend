@@ -91,7 +91,7 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
     if (retroSession?.plans && retroSession?.plans?.length > 0) {
       setTasks(
         retroSession?.plans?.map((plan) => ({
-          _id: uuidv4(),
+          _id: plan?._id || uuidv4(),
           title: plan.text,
           status: plan?.category_id,
           votes: 0

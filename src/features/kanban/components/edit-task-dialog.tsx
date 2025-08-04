@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,51 +22,73 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useRetroSocket } from '@/hooks/use-retro-socket';
-import { emitAddPlan } from '@/lib/retro-socket';
+import { emitChangePositionPlan, emitEditPlan } from '@/lib/retro-socket';
 
-import { useTaskStore } from '../utils/store';
+import { useTaskStore, type ColumnId, type Task } from '../utils/store';
 
-export default function NewTaskDialog() {
-  const openDialog = useTaskStore((state) => state.openDialog);
-  const setOpenDialog = useTaskStore((state) => state.setOpenDialog);
+interface EditTaskDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  task: Task;
+}
+
+export default function EditTaskDialog({
+  isOpen,
+  onClose,
+  task
+}: EditTaskDialogProps) {
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description || '');
+  const [status, setStatus] = useState<ColumnId>(task.status);
+
   const columns = useTaskStore((state) => state.columns);
-
-  // Get retroId from useRetroSocket hook
   const { retroId } = useRetroSocket();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    const { title, status } = Object.fromEntries(formData);
+    if (!retroId) return;
 
-    if (typeof title !== 'string' || typeof status !== 'string') return;
-
-    // Emit add plan event if retroId is provided
-    if (retroId) {
-      emitAddPlan({
+    // Emit edit plan event for text changes
+    if (title !== task.title) {
+      emitEditPlan({
         roomId: retroId,
-        session_id: retroId,
-        category_id: status,
+        id: String(task._id),
         text: title
       });
     }
 
-    setOpenDialog(false);
+    // Emit change position plan event for status/category changes
+    if (status !== task.status) {
+      emitChangePositionPlan({
+        roomId: retroId,
+        changePlan: String(task._id),
+        category_id: String(status)
+      });
+    }
+
+    onClose();
+  };
+
+  const handleCancel = () => {
+    // Reset form to original values
+    setTitle(task.title);
+    setDescription(task.description || '');
+    setStatus(task.status);
+    onClose();
   };
 
   return (
-    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
-            What do you want to get done today?
+            Make changes to your task here. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <form
-          id='todo-form'
+          id='edit-task-form'
           className='grid gap-4 py-4'
           onSubmit={handleSubmit}
         >
@@ -74,7 +98,8 @@ export default function NewTaskDialog() {
             </Label>
             <Input
               id='title'
-              name='title'
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder='Task title...'
               className='col-span-3'
               required
@@ -85,8 +110,8 @@ export default function NewTaskDialog() {
               Category
             </Label>
             <Select
-              name='status'
-              defaultValue={String(columns[0]?.id)}
+              value={String(status)}
+              onValueChange={(value) => setStatus(value as ColumnId)}
               required
             >
               <SelectTrigger className='col-span-3'>
@@ -107,15 +132,19 @@ export default function NewTaskDialog() {
             </Label>
             <Textarea
               id='description'
-              name='description'
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder='Description...'
               className='col-span-3'
             />
           </div>
         </form>
         <DialogFooter>
-          <Button type='submit' size='sm' form='todo-form'>
-            Add Task
+          <Button type='button' variant='outline' onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button type='submit' size='sm' form='edit-task-form'>
+            Save Changes
           </Button>
         </DialogFooter>
       </DialogContent>
