@@ -1,14 +1,25 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { IconGripVertical, IconMinus, IconPlus } from '@tabler/icons-react';
+import {
+  IconEdit,
+  IconGripVertical,
+  IconMinus,
+  IconPlus,
+  IconTrash
+} from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
+import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { useRetroSocket } from '@/hooks/use-retro-socket';
+import { emitDeletePlan } from '@/lib/retro-socket';
 
 import { getTaskColorClasses } from '../utils';
-import { Task, useTaskStore } from '../utils/store';
+import { useTaskStore, type Task } from '../utils/store';
+
+import EditTaskDialog from './edit-task-dialog';
 
 interface TaskCardProps {
   task: Task;
@@ -49,6 +60,25 @@ export function TaskCard({
 
   const updateTaskVotes = useTaskStore((state) => state.updateTaskVotes);
   const columns = useTaskStore((state) => state.columns);
+  const { retroId } = useRetroSocket();
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const handleEditTask = () => {
+    setIsEditDialogOpen(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setIsEditDialogOpen(false);
+  };
+
+  const handleDeleteTask = () => {
+    if (!retroId) return;
+    emitDeletePlan({
+      roomId: retroId,
+      id: String(task._id)
+    });
+  };
 
   const style = {
     transition,
@@ -91,12 +121,30 @@ export function TaskCard({
           <span className='sr-only'>Move task</span>
           <IconGripVertical />
         </Button>
-        <Badge
-          variant={'outline'}
-          className={`ml-auto font-semibold ${colorClasses.badge}`}
-        >
-          {taskColumn?.title || task.status}
-        </Badge>
+        <div className='ml-auto flex items-center gap-1'>
+          <Button
+            variant='ghost'
+            size='sm'
+            className='h-6 w-6 p-0 text-gray-500 hover:text-blue-600'
+            onClick={handleEditTask}
+          >
+            <IconEdit className='h-3 w-3' />
+          </Button>
+          <Button
+            variant='ghost'
+            size='sm'
+            className='h-6 w-6 p-0 text-gray-500 hover:text-red-600'
+            onClick={handleDeleteTask}
+          >
+            <IconTrash className='h-3 w-3' />
+          </Button>
+          <Badge
+            variant={'outline'}
+            className={`font-semibold ${colorClasses.badge}`}
+          >
+            {taskColumn?.title || task.status}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent className='px-3 pt-3 pb-3 text-left'>
         <div className='mb-3 whitespace-pre-wrap'>{task.title}</div>
@@ -124,6 +172,11 @@ export function TaskCard({
           </div>
         </div>
       </CardContent>
+      <EditTaskDialog
+        isOpen={isEditDialogOpen}
+        onClose={handleCloseEditDialog}
+        task={task}
+      />
     </Card>
   );
 }

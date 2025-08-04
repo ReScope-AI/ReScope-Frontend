@@ -15,6 +15,7 @@ export type Task = {
   description?: string;
   status: ColumnId;
   votes?: number;
+  position?: number;
 };
 
 export type State = {
@@ -41,6 +42,7 @@ export type Actions = {
   removeTask: (id: TaskId) => void;
   removeCol: (id: ColumnId) => void;
   setTasks: (updatedTask: Task[]) => void;
+  setTask: (task: Task) => void;
   setCols: (categories: ICategory[]) => void;
   setColumns: (cols: Column[]) => void;
   updateCol: (id: UniqueIdentifier, newName: string) => void;
@@ -100,6 +102,29 @@ export const useTaskStore = create<State & Actions>((set) => ({
       columns: state.columns.filter((col) => col.id !== id)
     })),
   setTasks: (newTasks: Task[]) => set({ tasks: newTasks }),
+  setTask: (newTask: Task) =>
+    set((state) => {
+      // Check if task already exists
+      const existingTaskIndex = state.tasks.findIndex(
+        (task) => task._id === newTask._id
+      );
+
+      if (existingTaskIndex !== -1) {
+        // Update existing task
+        const updatedTasks = [...state.tasks];
+        updatedTasks[existingTaskIndex] = newTask;
+        return { tasks: updatedTasks };
+      } else {
+        // Add new task and sort all tasks by position
+        const updatedTasks = [...state.tasks, newTask];
+        updatedTasks.sort((a, b) => {
+          const posA = a.position || 0;
+          const posB = b.position || 0;
+          return posA - posB;
+        });
+        return { tasks: updatedTasks };
+      }
+    }),
   setCols: (categories) =>
     set({
       columns: categories.map((category) => ({

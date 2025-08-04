@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
+import { queryClient } from '@/config/query-client';
+import { QUERY_CONSTANTS } from '@/constants/query';
 import { PlanItemAction, useTaskStore } from '@/features/kanban/utils/store';
 import { isDev } from '@/lib/env';
 import {
@@ -47,6 +49,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     usePollStore((state) => state);
   const retroId = roomId || session?._id;
   const setTasks = useTaskStore((state) => state.setTasks);
+  const setTask = useTaskStore((state) => state.setTask);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
   const tasks = useTaskStore((state) => state.tasks);
   const setStep = useTaskStore((state) => state.setStep);
@@ -102,14 +105,23 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
       }
     };
     const leaveRoomListener = () => {};
-    const addPlanListener = () => {};
-    const editPlanListener = () => {};
-    const deletePlanListener = () => {};
-    const changePositionPlanListener = () => {};
+    const changePositionPlanListener = (data: any) => {
+      if (data.code === 200) {
+        const updatedTask = {
+          _id: data.data._id,
+          title: data.data.text,
+          status: data.data.category_id,
+          votes: 0,
+          position: data.data.position
+        };
+        setTask(updatedTask);
+      } else {
+        toast.error(data.msg);
+      }
+    };
     const createRadarCriteriaListener = (
       data: SocketResponse<RetroListenEvents['create-radar-criteria']>
     ) => {
-      console.log('createRadarCriteriaListener', data);
       if (data.code === 200) {
         setRetroSession({
           ...session!,
@@ -194,7 +206,6 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     };
 
     const deleteActionItemListener = (data: any) => {
-      console.log('deleteActionItemListener', data);
       if (data.code === 200) {
         setRetroSession({
           ...session!,
@@ -213,6 +224,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
         setPollQuestions(res.data.questions);
       }
     };
+
     const votePollQuestionListener = (res: any) => {
       if (
         res.code === 200 &&
@@ -235,7 +247,6 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
       });
     });
     const deletePollQuestionListener = (res: any) => {
-      console.log('deletePollQuestionListener ', res);
       if (res.code === 200) {
         removePollQuestion(res.data.id);
       }
@@ -246,9 +257,50 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
       }
     };
     onLeaveRoom(leaveRoomListener);
-    onAddPlan(addPlanListener);
-    onEditPlan(editPlanListener);
-    onDeletePlan(deletePlanListener);
+    onAddPlan(({ code, data, msg }) => {
+      if (code === 200) {
+        const newTask = {
+          _id: data._id,
+          title: data.text,
+          status: data.category_id,
+          votes: 0,
+          position: data.position
+        };
+        setTask(newTask);
+      } else {
+        toast.error(msg);
+      }
+    });
+    onEditPlan((data) => {
+      if (data.code === 200) {
+        const updatedTask = {
+          _id: data.data._id,
+          title: data.data.text,
+          status: data.data.category_id || data.data.status,
+          votes: 0,
+          position: data.data.position
+        };
+        setTask(updatedTask);
+      } else {
+        toast.error(data.msg);
+      }
+    });
+    onDeletePlan((data) => {
+      if (data.code === 200) {
+        // Remove the task from the local store
+        const updatedTasks = tasks.filter((task) => task._id !== data.data._id);
+        setTasks(updatedTasks);
+        // Invalidate the retro session query to refetch fresh data
+        queryClient.invalidateQueries({
+          queryKey: [
+            QUERY_CONSTANTS.RETRO_SESSION.GET_RETRO_SESSION_BY_ID,
+            retroId
+          ]
+        });
+      } else {
+        toast.error(data.msg);
+      }
+    });
     onChangePositionPlan(changePositionPlanListener);
     onEditPollQuestion(editPollQuestionListener);
     onVotePollQuestion(votePollQuestionListener);
@@ -259,13 +311,13 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onJoinFailed(joinFailedListener);
     onRadarCriteriaCreated(createRadarCriteriaListener);
     onCreateKeyInsights(createKeyInsightsListener);
-
     onAddActionItem(addActionItemListener);
     onEditActionItem(editActionItemListener);
     onDeleteActionItem(deleteActionItemListener);
     onCreateQuestion(createQuestionListener);
 
     return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initializeSocket, cleanup, retroId, accessToken]);
 
   const hasError = useMemo(() => error !== null, [error]);
@@ -273,6 +325,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   return {
     error,
     hasError,
-    isDev
+    isDev,
+    retroId
   };
 };

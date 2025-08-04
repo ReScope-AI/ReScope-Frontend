@@ -97,7 +97,18 @@ export interface RetroListenEvents {
   'join-room': any;
   'join-failed': never;
   'leave-room': any;
-  'add-plan': any;
+  'add-plan': {
+    session_id: string;
+    category_id: string;
+    position: number;
+    text: string;
+    created_by: string;
+    updated_by: string;
+    _id: string;
+    created_at: string;
+    updated_at: string;
+    __v: number;
+  };
   'edit-plan': any;
   'delete-plan': any;
   'change-position-plan': any;
