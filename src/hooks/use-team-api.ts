@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
   createTeam,
   deleteTeam,
@@ -6,7 +8,7 @@ import {
   ICreateTeam
 } from '@/config/api/team';
 import { QUERY_CONSTANTS } from '@/constants/query';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRetrospectiveStore } from '@/features/retrospectives/stores';
 
 export const useCreateTeam = () => {
   const queryClient = useQueryClient();
@@ -38,12 +40,14 @@ export const useGetTeams = () => {
 
 export const useDeleteTeam = () => {
   const queryClient = useQueryClient();
+  const retroStore = useRetrospectiveStore();
 
   return useMutation({
     mutationFn: (teamId: string) => deleteTeam(teamId),
-    onSuccess: (data) => {
+    onSuccess: (data, teamId) => {
       console.log('Team deleted successfully:', data);
       // Invalidate and refetch teams
+      retroStore.removeTeam(teamId);
       queryClient.invalidateQueries({ queryKey: ['teams'] });
     },
     onError: (error) => {

@@ -68,7 +68,7 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
         setTeamName('');
       }
     } catch (error) {
-      toast.error('Failed to add team name');
+      // Not need to show notification
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +88,7 @@ const TeamNameSelector = ({ value, onValueChange }: TeamNameSelectorProps) => {
         onValueChange('');
       }
     } catch (error) {
-      toast.error('Failed to delete team name');
+      // Not need to show toast, because it already handled by the request configurate
     }
   };
 

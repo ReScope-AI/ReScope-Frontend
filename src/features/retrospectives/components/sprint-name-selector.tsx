@@ -74,7 +74,7 @@ const SprintNameSelector = ({
         setSprintName('');
       }
     } catch (error) {
-      toast.error('Failed to add sprint name');
+      // Not need to notification error
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +94,7 @@ const SprintNameSelector = ({
         onValueChange('');
       }
     } catch (error) {
-      toast.error('Failed to delete sprint name');
+      // Not need to show toast, because it already handled by the request configurate
     }
   };
 

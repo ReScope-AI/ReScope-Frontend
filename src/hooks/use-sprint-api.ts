@@ -1,4 +1,6 @@
 /* eslint-disable no-console */
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import {
   createSprint,
   deleteSprint,
@@ -6,7 +8,7 @@ import {
   ICreateSprint
 } from '@/config/api/sprint';
 import { QUERY_CONSTANTS } from '@/constants/query';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRetrospectiveStore } from '@/features/retrospectives/stores';
 
 export const useCreateSprint = () => {
   const queryClient = useQueryClient();
@@ -37,12 +39,14 @@ export const useGetSprintsByUser = () => {
 
 export const useDeleteSprint = () => {
   const queryClient = useQueryClient();
+  const retroStore = useRetrospectiveStore();
 
   return useMutation({
     mutationFn: (sprintId: string) => deleteSprint(sprintId),
-    onSuccess: (data) => {
+    onSuccess: (data, sprintId) => {
       console.log('Sprint deleted successfully:', data);
       // Invalidate and refetch sprints
+      retroStore.removeSprint(sprintId);
       queryClient.invalidateQueries({ queryKey: ['sprints'] });
     },
     onError: (error) => {
