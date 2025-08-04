@@ -3,13 +3,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
-import { showNotification } from '@/components/common';
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
-import {
-  PlanItemAction,
-  Status,
-  useTaskStore
-} from '@/features/kanban/utils/store';
+import { PlanItemAction, useTaskStore } from '@/features/kanban/utils/store';
 import { isDev } from '@/lib/env';
 import {
   connect,
@@ -41,8 +36,6 @@ import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { IRetroSession } from '@/types';
 import { RetroListenEvents, SocketResponse } from '@/types/retro-socket';
-
-import { useSignOut } from './use-auth';
 
 type ErrorInfo = { title: string; message: string } | null;
 
@@ -137,7 +130,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
           ...(data.data?.map((item: PlanItemAction) => ({
             _id: uuidv4(),
             title: item.description,
-            status: item.action_type as Status,
+            status: item.action_type,
             votes: 0
           })) || [])
         ]);

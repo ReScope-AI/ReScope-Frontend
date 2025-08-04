@@ -9,35 +9,33 @@ import { useTaskStore } from '../../utils/store';
 import RadarChartComponent from '../radar-chart';
 
 const SummaryOverview = () => {
-  const tasks = useTaskStore();
+  const tasks = useTaskStore((state) => state.tasks);
+  const columns = useTaskStore((state) => state.columns);
   const { retroSession } = useRetroSessionStore();
 
-  const totalAddItems = tasks.tasks.filter(
-    (task) => task.status === 'ADD'
-  ).length;
+  // Create a map of category counts
+  const categoryCounts = columns.reduce(
+    (acc, column) => {
+      acc[column.id] = tasks.filter((task) => task.status === column.id).length;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const totalImproveItems = tasks.tasks.filter(
-    (task) => task.status === 'IMPROVE'
-  ).length;
+  const totalItems = Object.values(categoryCounts).reduce(
+    (sum, count) => sum + count,
+    0
+  );
 
-  const totalKeepItems = tasks.tasks.filter(
-    (task) => task.status === 'KEEP'
-  ).length;
-
-  const totalDropItems = tasks.tasks.filter(
-    (task) => task.status === 'DROP'
-  ).length;
-
-  const totalItems =
-    totalAddItems + totalImproveItems + totalKeepItems + totalDropItems;
-
-  const keepPercentage =
-    totalItems > 0 ? (totalKeepItems / totalItems) * 100 : 0;
-  const improvePercentage =
-    totalItems > 0 ? (totalImproveItems / totalItems) * 100 : 0;
-  const dropPercentage =
-    totalItems > 0 ? (totalDropItems / totalItems) * 100 : 0;
-  const addPercentage = totalItems > 0 ? (totalAddItems / totalItems) * 100 : 0;
+  // Calculate percentages for each category
+  const categoryPercentages = columns.reduce(
+    (acc, column) => {
+      acc[column.id] =
+        totalItems > 0 ? (categoryCounts[column.id] / totalItems) * 100 : 0;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   return (
     <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
@@ -97,66 +95,25 @@ const SummaryOverview = () => {
         </CardHeader>
         <CardContent>
           <div className='space-y-4'>
-            <div className='flex items-center justify-between'>
-              <span className='text-sm font-medium'>
-                Keep (What&apos;s working)
-              </span>
-              <div className='flex items-center gap-2'>
-                <div className='h-2 w-20 rounded-full bg-gray-200'>
-                  <div
-                    className='h-2 rounded-full bg-green-500'
-                    style={{ width: `${keepPercentage}%` }}
-                  ></div>
+            {columns.map((column) => (
+              <div
+                key={column.id}
+                className='flex items-center justify-between'
+              >
+                <span className='text-sm font-medium'>{column.title}</span>
+                <div className='flex items-center gap-2'>
+                  <div className='h-2 w-20 rounded-full bg-gray-200'>
+                    <div
+                      className='h-2 rounded-full bg-blue-500'
+                      style={{ width: `${categoryPercentages[column.id]}%` }}
+                    ></div>
+                  </div>
+                  <span className='text-sm text-gray-600'>
+                    {categoryCounts[column.id]} items
+                  </span>
                 </div>
-                <span className='text-sm text-gray-600'>
-                  {totalKeepItems} items
-                </span>
               </div>
-            </div>
-            <div className='flex items-center justify-between'>
-              <span className='text-sm font-medium'>
-                Improve (Areas for growth)
-              </span>
-              <div className='flex items-center gap-2'>
-                <div className='h-2 w-20 rounded-full bg-gray-200'>
-                  <div
-                    className='h-2 rounded-full bg-blue-500'
-                    style={{ width: `${improvePercentage}%` }}
-                  ></div>
-                </div>
-                <span className='text-sm text-gray-600'>
-                  {totalImproveItems} items
-                </span>
-              </div>
-            </div>
-            <div className='flex items-center justify-between'>
-              <span className='text-sm font-medium'>Drop (Stop doing)</span>
-              <div className='flex items-center gap-2'>
-                <div className='h-2 w-20 rounded-full bg-gray-200'>
-                  <div
-                    className='h-2 rounded-full bg-red-500'
-                    style={{ width: `${dropPercentage}%` }}
-                  ></div>
-                </div>
-                <span className='text-sm text-gray-600'>
-                  {totalDropItems} items
-                </span>
-              </div>
-            </div>
-            <div className='flex items-center justify-between'>
-              <span className='text-sm font-medium'>Add (New practices)</span>
-              <div className='flex items-center gap-2'>
-                <div className='h-2 w-20 rounded-full bg-gray-200'>
-                  <div
-                    className='h-2 rounded-full bg-purple-500'
-                    style={{ width: `${addPercentage}%` }}
-                  ></div>
-                </div>
-                <span className='text-sm text-gray-600'>
-                  {totalAddItems} items
-                </span>
-              </div>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>

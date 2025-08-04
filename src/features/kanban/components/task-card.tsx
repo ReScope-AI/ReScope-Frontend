@@ -1,11 +1,14 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Task, useTaskStore } from '../utils/store';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { IconGripVertical, IconMinus, IconPlus } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
-import { IconGripVertical, IconPlus, IconMinus } from '@tabler/icons-react';
+
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+
+import { getTaskColorClasses } from '../utils';
+import { Task, useTaskStore } from '../utils/store';
 
 interface TaskCardProps {
   task: Task;
@@ -19,49 +22,6 @@ export interface TaskDragData {
   type: TaskType;
   task: Task;
 }
-
-const getTaskColorClasses = (status: string) => {
-  switch (status) {
-    case 'DROP':
-      return {
-        bg: 'bg-red-100 dark:bg-red-900/30',
-        border: 'border-red-200 dark:border-red-800',
-        text: 'text-red-800 dark:text-red-200',
-        badge: 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
-      };
-    case 'ADD':
-      return {
-        bg: 'bg-green-100 dark:bg-green-900/30',
-        border: 'border-green-200 dark:border-green-800',
-        text: 'text-green-800 dark:text-green-200',
-        badge:
-          'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
-      };
-    case 'KEEP':
-      return {
-        bg: 'bg-green-100 dark:bg-green-900/30',
-        border: 'border-green-200 dark:border-green-800',
-        text: 'text-green-800 dark:text-green-200',
-        badge:
-          'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
-      };
-    case 'IMPROVE':
-      return {
-        bg: 'bg-orange-100 dark:bg-orange-900/30',
-        border: 'border-orange-200 dark:border-orange-800',
-        text: 'text-orange-800 dark:text-orange-200',
-        badge:
-          'bg-orange-200 text-orange-800 dark:bg-orange-800 dark:text-orange-200'
-      };
-    default:
-      return {
-        bg: 'bg-gray-100 dark:bg-gray-900/30',
-        border: 'border-gray-200 dark:border-gray-800',
-        text: 'text-gray-800 dark:text-gray-200',
-        badge: 'bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
-      };
-  }
-};
 
 export function TaskCard({
   task,
@@ -88,13 +48,18 @@ export function TaskCard({
   });
 
   const updateTaskVotes = useTaskStore((state) => state.updateTaskVotes);
+  const columns = useTaskStore((state) => state.columns);
 
   const style = {
     transition,
     transform: CSS.Translate.toString(transform)
   };
 
-  const colorClasses = getTaskColorClasses(task.status);
+  // Find the column for this task
+  const taskColumn = columns.find((col) => col.id === task.status);
+
+  // Get color classes based on task status
+  const colorClasses = getTaskColorClasses(taskColumn?.title || '');
 
   const variants = cva(
     `mb-2 ${colorClasses.bg} ${colorClasses.border} border-2 py-2`,
@@ -130,7 +95,7 @@ export function TaskCard({
           variant={'outline'}
           className={`ml-auto font-semibold ${colorClasses.badge}`}
         >
-          {task.status}
+          {taskColumn?.title || task.status}
         </Badge>
       </CardHeader>
       <CardContent className='px-3 pt-3 pb-3 text-left'>

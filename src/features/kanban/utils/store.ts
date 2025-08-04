@@ -6,15 +6,14 @@ import { ICategory } from '@/types';
 
 import { Column } from '../components/board-column';
 
-export type Status = 'DROP' | 'ADD' | 'KEEP' | 'IMPROVE' | 'POLL';
-
-export type ColumnId = string;
+export type ColumnId = UniqueIdentifier;
+export type TaskId = UniqueIdentifier;
 
 export type Task = {
-  _id: string;
+  _id: TaskId;
   title: string;
   description?: string;
-  status: Status;
+  status: ColumnId;
   votes?: number;
 };
 
@@ -36,18 +35,18 @@ export type PlanItemAction = {
 const initialTasks: Task[] = [];
 
 export type Actions = {
-  addTask: (title: string, description?: string, status?: Status) => void;
+  addTask: (title: string, columnId: ColumnId, description?: string) => void;
   addCol: (title: string) => void;
-  dragTask: (id: string | null) => void;
-  removeTask: (title: string) => void;
-  removeCol: (id: UniqueIdentifier) => void;
+  dragTask: (id: TaskId | null) => void;
+  removeTask: (id: TaskId) => void;
+  removeCol: (id: ColumnId) => void;
   setTasks: (updatedTask: Task[]) => void;
   setCols: (categories: ICategory[]) => void;
   setColumns: (cols: Column[]) => void;
   updateCol: (id: UniqueIdentifier, newName: string) => void;
   setOpenDialog: (open: boolean) => void;
-  updateTaskVotes: (taskId: string, increment: boolean) => void;
-  updateTask: (taskId: string, updates: Partial<Omit<Task, '_id'>>) => void;
+  updateTaskVotes: (taskId: TaskId, increment: boolean) => void;
+  updateTask: (taskId: TaskId, updates: Partial<Omit<Task, '_id'>>) => void;
   updateTasks: (tasksList: Task[]) => void;
   clearStorage: () => void;
   setStep: (step: number) => void;
@@ -62,11 +61,17 @@ export const useTaskStore = create<State & Actions>((set) => ({
   openDialog: false,
   step: 1,
   isGenerating: false,
-  addTask: (title: string, description?: string, status?: Status) =>
+  addTask: (title, columnId, description?: string) =>
     set((state) => ({
       tasks: [
         ...state.tasks,
-        { _id: uuid(), title, description, status: status || 'DROP', votes: 0 }
+        {
+          _id: uuid(),
+          title,
+          description,
+          status: columnId,
+          votes: 0
+        }
       ]
     })),
   updateCol: (id: UniqueIdentifier, newName: string) =>
@@ -85,8 +90,8 @@ export const useTaskStore = create<State & Actions>((set) => ({
         }
       ]
     })),
-  dragTask: (id: string | null) => set({ draggedTask: id }),
-  removeTask: (id: string) =>
+  dragTask: (id) => set({ draggedTask: String(id) }),
+  removeTask: (id) =>
     set((state) => ({
       tasks: state.tasks.filter((task) => task._id !== id)
     })),
@@ -104,7 +109,7 @@ export const useTaskStore = create<State & Actions>((set) => ({
     }),
   setColumns: (cols) => set({ columns: cols }),
   setOpenDialog: (open: boolean) => set({ openDialog: open }),
-  updateTaskVotes: (taskId: string, increment: boolean) =>
+  updateTaskVotes: (taskId: TaskId, increment: boolean) =>
     set((state) => ({
       tasks: state.tasks.map((task) =>
         task._id === taskId
@@ -115,7 +120,7 @@ export const useTaskStore = create<State & Actions>((set) => ({
           : task
       )
     })),
-  updateTask: (taskId: string, updates: Partial<Omit<Task, '_id'>>) =>
+  updateTask: (taskId: TaskId, updates: Partial<Omit<Task, '_id'>>) =>
     set((state) => ({
       tasks: state.tasks.map((task) =>
         task._id === taskId ? { ...task, ...updates } : task

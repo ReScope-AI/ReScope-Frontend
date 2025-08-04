@@ -39,7 +39,7 @@ import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { useUserStore } from '@/stores/userStore';
 
 import { convertData } from '../utils';
-import { Status, useTaskStore } from '../utils/store';
+import { useTaskStore } from '../utils/store';
 
 import DrawerActionItemContent from './action-items/drawer-action-item-content';
 import { KanbanBoard } from './kanban-board';
@@ -92,7 +92,7 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
         retroSession?.plans?.map((plan) => ({
           _id: uuidv4(),
           title: plan.text,
-          status: plan?.category?.name as Status,
+          status: plan?.category_id,
           votes: 0
         })) || []
       );
