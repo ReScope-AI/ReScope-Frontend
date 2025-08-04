@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getRetroSessionById } from '@/config/api/retro-session';
 import { QUERY_CONSTANTS } from '@/constants/query';
 import { useTaskStore } from '@/features/kanban/utils/store';
+import { useGetCategories } from '@/hooks/use-category-api';
 import { useRetroSocket } from '@/hooks/use-retro-socket';
 import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
@@ -43,6 +44,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const setTasks = useTaskStore((state) => state.setTasks);
   const resetState = useTaskStore((state) => state.resetState);
+  const { data: categoriesData } = useGetCategories();
 
   useEffect(() => {
     if (hasError) {
@@ -60,6 +62,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     setShowErrorDialog(false);
     router.push('/dashboard/retrospective');
   };
+
+  const setCols = useTaskStore((state) => state.setCols);
 
   useEffect(() => {
     if (retro && retro.code === 200) {
@@ -81,6 +85,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retro, retroId]);
+
+  useEffect(() => {
+    if (categoriesData?.data) {
+      setCols(categoriesData.data);
+    }
+  }, [categoriesData, setCols]);
 
   if (isLoading) {
     return <Skeleton className='h-10 w-full' />;

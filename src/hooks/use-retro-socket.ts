@@ -57,13 +57,16 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   } = usePollStore((state) => state);
   const retroId = roomId || session?._id;
   const setTasks = useTaskStore((state) => state.setTasks);
-  const { columns, setTask } = useTaskStore((state) => state);
+  const setTask = useTaskStore((state) => state.setTask);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
   const tasks = useTaskStore((state) => state.tasks);
   const setStep = useTaskStore((state) => state.setStep);
   const setRetroSession = useRetroSessionStore(
     (state) => state.setRetroSession
   );
+
+  const columns = useTaskStore((state) => state.columns);
+
   const initializeSocket = useCallback(() => {
     if (!SOCKET_URL || !accessToken || isConnected()) {
       return;

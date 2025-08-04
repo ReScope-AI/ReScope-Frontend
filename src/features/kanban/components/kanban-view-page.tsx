@@ -57,16 +57,7 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const pollQuestions = usePollStore((state) => state.pollQuestions);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
   const setTasks = useTaskStore((state) => state.setTasks);
-  const setCols = useTaskStore((state) => state.setCols);
   const tasks = useTaskStore((state) => state.tasks);
-
-  const { data: categoriesData } = useGetCategories();
-
-  useEffect(() => {
-    if (categoriesData?.data) {
-      setCols(categoriesData.data);
-    }
-  }, [categoriesData, setCols]);
 
   useEffect(() => {
     if (step === 2 && retroSession?.plans?.length === 0 && tasks.length === 0) {
