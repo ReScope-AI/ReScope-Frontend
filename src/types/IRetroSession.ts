@@ -88,15 +88,8 @@ export interface IPlan {
 export interface ICategory {
   _id: string;
   name: string;
-  description: string;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
+  description?: string;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
 }
-
-// export interface ICreatePollQuestion extends Omit<IQuestion, '_id' | 'votes' | 'created_by' | 'updated_by' | 'created_at' | 'updated_at'> {
-//   text: string;
-//   session_id: string;
-//   criterion: 'communication' | 'quality' | 'process' | 'estimate' | 'timeBound';
-//   options: string[];
-// }

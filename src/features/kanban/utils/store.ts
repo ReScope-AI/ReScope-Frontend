@@ -2,42 +2,13 @@ import { UniqueIdentifier } from '@dnd-kit/core';
 import { v4 as uuid } from 'uuid';
 import { create } from 'zustand';
 
+import { ICategory } from '@/types';
+
 import { Column } from '../components/board-column';
 
 export type Status = 'DROP' | 'ADD' | 'KEEP' | 'IMPROVE' | 'POLL';
 
-export const defaultCols = [
-  {
-    id: 'DROP' as const,
-    title: 'Drop',
-    question: 'What practices should we stop or discontinue?',
-    color: 'red',
-    icon: 'minus'
-  },
-  {
-    id: 'ADD' as const,
-    title: 'Add',
-    question: 'What new practices should we adopt?',
-    color: 'green',
-    icon: 'plus'
-  },
-  {
-    id: 'KEEP' as const,
-    title: 'Keep',
-    question: "What's working well that we should continue?",
-    color: 'green',
-    icon: 'loop'
-  },
-  {
-    id: 'IMPROVE' as const,
-    title: 'Improve',
-    question: 'What could we do better?',
-    color: 'orange',
-    icon: 'gear'
-  }
-] satisfies (Column & { question: string; color: string; icon: string })[];
-
-export type ColumnId = (typeof defaultCols)[number]['id'];
+export type ColumnId = string;
 
 export type Task = {
   _id: string;
@@ -49,7 +20,7 @@ export type Task = {
 
 export type State = {
   tasks: Task[];
-  columns: (Column & { question: string; color: string; icon: string })[];
+  columns: Column[];
   draggedTask: string | null;
   openDialog: boolean;
   step: number;
@@ -71,9 +42,8 @@ export type Actions = {
   removeTask: (title: string) => void;
   removeCol: (id: UniqueIdentifier) => void;
   setTasks: (updatedTask: Task[]) => void;
-  setCols: (
-    cols: (Column & { question: string; color: string; icon: string })[]
-  ) => void;
+  setCols: (categories: ICategory[]) => void;
+  setColumns: (cols: Column[]) => void;
   updateCol: (id: UniqueIdentifier, newName: string) => void;
   setOpenDialog: (open: boolean) => void;
   updateTaskVotes: (taskId: string, increment: boolean) => void;
@@ -87,16 +57,16 @@ export type Actions = {
 
 export const useTaskStore = create<State & Actions>((set) => ({
   tasks: initialTasks,
-  columns: defaultCols,
+  columns: [],
   draggedTask: null,
   openDialog: false,
   step: 1,
   isGenerating: false,
-  addTask: (title: string, description?: string, status: Status = 'DROP') =>
+  addTask: (title: string, description?: string, status?: Status) =>
     set((state) => ({
       tasks: [
         ...state.tasks,
-        { _id: uuid(), title, description, status, votes: 0 }
+        { _id: uuid(), title, description, status: status || 'DROP', votes: 0 }
       ]
     })),
   updateCol: (id: UniqueIdentifier, newName: string) =>
@@ -111,10 +81,7 @@ export const useTaskStore = create<State & Actions>((set) => ({
         ...state.columns,
         {
           title,
-          id: title.toUpperCase() as Status,
-          question: '',
-          color: 'gray',
-          icon: 'default'
+          id: title.toUpperCase()
         }
       ]
     })),
@@ -128,9 +95,14 @@ export const useTaskStore = create<State & Actions>((set) => ({
       columns: state.columns.filter((col) => col.id !== id)
     })),
   setTasks: (newTasks: Task[]) => set({ tasks: newTasks }),
-  setCols: (
-    newCols: (Column & { question: string; color: string; icon: string })[]
-  ) => set({ columns: newCols }),
+  setCols: (categories) =>
+    set({
+      columns: categories.map((category) => ({
+        id: category._id,
+        title: category.name
+      }))
+    }),
+  setColumns: (cols) => set({ columns: cols }),
   setOpenDialog: (open: boolean) => set({ openDialog: open }),
   updateTaskVotes: (taskId: string, increment: boolean) =>
     set((state) => ({
@@ -177,7 +149,7 @@ export const useTaskStore = create<State & Actions>((set) => ({
   resetState: () =>
     set({
       tasks: initialTasks,
-      columns: defaultCols,
+      columns: [],
       step: 1,
       isGenerating: false,
       draggedTask: null,

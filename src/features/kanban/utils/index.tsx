@@ -1,10 +1,10 @@
 import { Active, DataRef, Over } from '@dnd-kit/core';
 import {
-  IconPlus,
+  IconChartHistogram,
   IconMinus,
+  IconPlus,
   IconRotate360,
-  IconSettings,
-  IconChartHistogram
+  IconSettings
 } from '@tabler/icons-react';
 
 import { IOption, IQuestion } from '@/types';
@@ -31,6 +31,48 @@ export function hasDraggableData<T extends Active | Over>(
 
   return false;
 }
+
+// Function to map category names to display properties
+export const getCategoryProperties = (name: string) => {
+  const categoryMap: Record<
+    string,
+    { title: string; color: string; icon: string; question: string }
+  > = {
+    DROP: {
+      title: 'Drop',
+      question: 'What practices should we stop or discontinue?',
+      color: 'red',
+      icon: 'minus'
+    },
+    ADD: {
+      title: 'Add',
+      question: 'What new practices should we adopt?',
+      color: 'green',
+      icon: 'plus'
+    },
+    KEEP: {
+      title: 'Keep',
+      question: "What's working well that we should continue?",
+      color: 'green',
+      icon: 'loop'
+    },
+    IMPROVE: {
+      title: 'Improve',
+      question: 'What could we do better?',
+      color: 'orange',
+      icon: 'gear'
+    }
+  };
+
+  return (
+    categoryMap[name] || {
+      title: name,
+      question: `What about ${name}?`,
+      color: 'gray',
+      icon: 'default'
+    }
+  );
+};
 
 export const getColumnIcon = (icon: string) => {
   switch (icon) {

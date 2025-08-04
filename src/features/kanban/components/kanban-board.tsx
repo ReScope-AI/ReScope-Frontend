@@ -19,7 +19,7 @@ import { createPortal } from 'react-dom';
 import { usePollStore } from '@/stores/pollStore';
 
 import { hasDraggableData } from '../utils';
-import { defaultCols, Task, useTaskStore, type Status } from '../utils/store';
+import { Task, useTaskStore, type Status } from '../utils/store';
 
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
@@ -31,8 +31,8 @@ import type { Column } from './board-column';
 export function KanbanBoard() {
   const columns = useTaskStore((state) => state.columns);
   const pollsCol = usePollStore((state) => state.getPollsColumn());
-  const setColumns = useTaskStore((state) => state.setCols);
-  const pickedUpTaskColumn = useRef<Status>(defaultCols[0].id as Status);
+  const setColumns = useTaskStore((state) => state.setColumns);
+  const pickedUpTaskColumn = useRef<Status>('DROP' as Status);
   const columnsId = useMemo(
     () => columns.map((col) => col.id as Status),
     [columns]
@@ -115,7 +115,7 @@ export function KanbanBoard() {
     },
     onDragEnd({ active, over }) {
       if (!hasDraggableData(active) || !hasDraggableData(over)) {
-        pickedUpTaskColumn.current = defaultCols[0].id as Status;
+        pickedUpTaskColumn.current = 'DROP' as Status;
         return;
       }
       if (
@@ -146,10 +146,10 @@ export function KanbanBoard() {
           tasksInColumn.length
         } in column ${column?.title}`;
       }
-      pickedUpTaskColumn.current = defaultCols[0].id as Status;
+      pickedUpTaskColumn.current = 'DROP' as Status;
     },
     onDragCancel({ active }) {
-      pickedUpTaskColumn.current = defaultCols[0].id as Status;
+      pickedUpTaskColumn.current = 'DROP' as Status;
       if (!hasDraggableData(active)) return;
       return `Dragging ${active.data.current?.type} cancelled.`;
     }

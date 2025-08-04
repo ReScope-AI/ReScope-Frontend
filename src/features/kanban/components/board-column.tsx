@@ -12,7 +12,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
-import { getColumnColorClasses, getColumnIcon } from '../utils';
+import {
+  getCategoryProperties,
+  getColumnColorClasses,
+  getColumnIcon
+} from '../utils';
 import { Task, useTaskStore } from '../utils/store';
 
 import { ColumnActions } from './column-action';
@@ -21,10 +25,6 @@ import { TaskCard } from './task-card';
 export interface Column {
   id: UniqueIdentifier;
   title: string;
-  question?: string;
-  color?: string;
-  icon?: string;
-  disableDragExternal?: boolean;
 }
 
 export type ColumnType = 'Column';
@@ -79,7 +79,8 @@ export function BoardColumn({
     transform: CSS.Translate.toString(transform)
   };
 
-  const colorClasses = getColumnColorClasses(column.color || 'gray');
+  const categoryProperties = getCategoryProperties(column.title);
+  const colorClasses = getColumnColorClasses(categoryProperties.color);
 
   const variants = cva(
     `h-[80vh] max-h-[80vh] w-[300px] sm:w-[350px] flex flex-col shrink-0 snap-start ${colorClasses.bg} ${colorClasses.border} border-2 gap-2`,
@@ -110,19 +111,19 @@ export function BoardColumn({
             {...listeners}
             className={`${colorClasses.icon} relative -ml-2 h-auto cursor-grab p-1`}
           >
-            <span className='sr-only'>{`Move column: ${column.title}`}</span>
+            <span className='sr-only'>{`Move column: ${categoryProperties.title}`}</span>
             <IconGripVertical />
           </Button>
           <div className='flex items-center gap-2'>
             <div className={`${colorClasses.icon}`}>
-              {getColumnIcon(column.icon || 'default')}
+              {getColumnIcon(categoryProperties.icon)}
             </div>
           </div>
-          <ColumnActions id={column.id} title={column.title} />
+          <ColumnActions id={column.id} title={categoryProperties.title} />
         </div>
-        {column.question && (
+        {categoryProperties.question && (
           <p className={`text-sm ${colorClasses.text} mt-2 opacity-80`}>
-            {column.question}
+            {categoryProperties.question}
           </p>
         )}
       </CardHeader>
@@ -144,7 +145,7 @@ export function BoardColumn({
                 <div className='mb-3 flex items-center justify-between'>
                   <Badge
                     variant='secondary'
-                    className={`${column.color} bg-opacity-20 text-xs`}
+                    className={`${categoryProperties.color} bg-opacity-20 text-xs`}
                   >
                     <Loader2 className='mr-1 h-3 w-3 animate-spin' />
                     GENERATING...
