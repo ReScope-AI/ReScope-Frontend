@@ -19,7 +19,7 @@ import { createPortal } from 'react-dom';
 import { usePollStore } from '@/stores/pollStore';
 
 import { hasDraggableData } from '../utils';
-import { defaultCols, Task, useTaskStore, type Status } from '../utils/store';
+import { Task, useTaskStore, type ColumnId } from '../utils/store';
 
 import { BoardColumn, BoardContainer } from './board-column';
 import NewSectionDialog from './new-section-dialog';
@@ -31,12 +31,9 @@ import type { Column } from './board-column';
 export function KanbanBoard() {
   const columns = useTaskStore((state) => state.columns);
   const pollsCol = usePollStore((state) => state.getPollsColumn());
-  const setColumns = useTaskStore((state) => state.setCols);
-  const pickedUpTaskColumn = useRef<Status>(defaultCols[0].id as Status);
-  const columnsId = useMemo(
-    () => columns.map((col) => col.id as Status),
-    [columns]
-  );
+  const setColumns = useTaskStore((state) => state.setColumns);
+  const pickedUpTaskColumn = useRef<ColumnId>(columns?.[0]?.id || '');
+  const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
 
   const tasks = useTaskStore((state) => state.tasks);
   const setTasks = useTaskStore((state) => state.setTasks);
@@ -49,9 +46,16 @@ export function KanbanBoard() {
     setIsMounted(true);
   }, [isMounted]);
 
+  // Update pickedUpTaskColumn when columns change
+  useEffect(() => {
+    if (columns.length > 0 && !pickedUpTaskColumn.current) {
+      pickedUpTaskColumn.current = columns?.[0].id;
+    }
+  }, [columns]);
+
   if (!isMounted) return;
 
-  function getDraggingTaskData(taskId: UniqueIdentifier, columnId: Status) {
+  function getDraggingTaskData(taskId: UniqueIdentifier, columnId: ColumnId) {
     const tasksInColumn = tasks.filter((task) => task.status === columnId);
     const taskPosition = tasksInColumn.findIndex((task) => task._id === taskId);
     const column = columns.find((col) => col.id === columnId);
@@ -115,7 +119,7 @@ export function KanbanBoard() {
     },
     onDragEnd({ active, over }) {
       if (!hasDraggableData(active) || !hasDraggableData(over)) {
-        pickedUpTaskColumn.current = defaultCols[0].id as Status;
+        pickedUpTaskColumn.current = columns?.[0]?.id || '';
         return;
       }
       if (
@@ -146,10 +150,10 @@ export function KanbanBoard() {
           tasksInColumn.length
         } in column ${column?.title}`;
       }
-      pickedUpTaskColumn.current = defaultCols[0].id as Status;
+      pickedUpTaskColumn.current = columns?.[0]?.id || '';
     },
     onDragCancel({ active }) {
-      pickedUpTaskColumn.current = defaultCols[0].id as Status;
+      pickedUpTaskColumn.current = columns?.[0]?.id || '';
       if (!hasDraggableData(active)) return;
       return `Dragging ${active.data.current?.type} cancelled.`;
     }
@@ -290,7 +294,7 @@ export function KanbanBoard() {
       const activeIndex = tasks.findIndex((t) => t._id === activeId);
       const activeTask = tasks[activeIndex];
       if (activeTask) {
-        activeTask.status = overId as Status;
+        activeTask.status = overId;
         setTasks(arrayMove(tasks, activeIndex, activeIndex));
       }
     }

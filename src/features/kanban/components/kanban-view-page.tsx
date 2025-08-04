@@ -29,6 +29,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { useGetCategories } from '@/hooks/use-category-api';
 import { useDownloadRetroSession } from '@/hooks/use-retro-session-api';
 import {
   emitGeneratePlanItems,
@@ -39,7 +40,7 @@ import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { useUserStore } from '@/stores/userStore';
 
 import { convertData } from '../utils';
-import { Status, useTaskStore } from '../utils/store';
+import { useTaskStore } from '../utils/store';
 
 import DrawerActionItemContent from './action-items/drawer-action-item-content';
 import { KanbanBoard } from './kanban-board';
@@ -56,7 +57,16 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const pollQuestions = usePollStore((state) => state.pollQuestions);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
   const setTasks = useTaskStore((state) => state.setTasks);
+  const setCols = useTaskStore((state) => state.setCols);
   const tasks = useTaskStore((state) => state.tasks);
+
+  const { data: categoriesData } = useGetCategories();
+
+  useEffect(() => {
+    if (categoriesData?.data) {
+      setCols(categoriesData.data);
+    }
+  }, [categoriesData, setCols]);
 
   useEffect(() => {
     if (step === 2 && retroSession?.plans?.length === 0 && tasks.length === 0) {
@@ -83,7 +93,7 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
         retroSession?.plans?.map((plan) => ({
           _id: uuidv4(),
           title: plan.text,
-          status: plan?.category?.name as Status,
+          status: plan?.category_id,
           votes: 0
         })) || []
       );

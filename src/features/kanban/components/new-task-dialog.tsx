@@ -10,7 +10,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -18,14 +18,15 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
-import { useTaskStore, type Status } from '../utils/store';
+import { useTaskStore, type ColumnId } from '../utils/store';
 
 export default function NewTaskDialog() {
   const addTask = useTaskStore((state) => state.addTask);
   const openDialog = useTaskStore((state) => state.openDialog);
   const setOpenDialog = useTaskStore((state) => state.setOpenDialog);
+  const columns = useTaskStore((state) => state.columns);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,7 +36,7 @@ export default function NewTaskDialog() {
     const { title, description, status } = Object.fromEntries(formData);
 
     if (typeof title !== 'string' || typeof status !== 'string') return;
-    addTask(title, description as string, status as Status);
+    addTask(title, status as ColumnId, description as string);
     setOpenDialog(false);
   };
 
@@ -69,15 +70,20 @@ export default function NewTaskDialog() {
             <Label htmlFor='status' className='text-right'>
               Category
             </Label>
-            <Select name='status' defaultValue='DROP' required>
+            <Select
+              name='status'
+              defaultValue={String(columns[0]?.id)}
+              required
+            >
               <SelectTrigger className='col-span-3'>
                 <SelectValue placeholder='Select category' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='DROP'>Drop - Stop doing</SelectItem>
-                <SelectItem value='ADD'>Add - Start doing</SelectItem>
-                <SelectItem value='KEEP'>Keep - Continue doing</SelectItem>
-                <SelectItem value='IMPROVE'>Improve - Do better</SelectItem>
+                {columns.map((column) => (
+                  <SelectItem key={column.id} value={String(column.id)}>
+                    {column.title}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
