@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { showNotification } from '@/components/common';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -96,7 +97,7 @@ const ActionItemDetailDialog = ({
       onClose();
     },
     (error) => {
-      toast.error(error.message);
+      showNotification('error', 'Action item updated failed', error.message);
     }
   );
 

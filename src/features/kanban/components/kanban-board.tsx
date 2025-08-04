@@ -31,6 +31,7 @@ import type { Column } from './board-column';
 export function KanbanBoard() {
   const columns = useTaskStore((state) => state.columns);
   const pollsCol = usePollStore((state) => state.getPollsColumn());
+  const pollQuestions = usePollStore((state) => state.pollQuestions);
   const setColumns = useTaskStore((state) => state.setColumns);
   const pickedUpTaskColumn = useRef<ColumnId>(columns?.[0]?.id || '');
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
@@ -161,7 +162,7 @@ export function KanbanBoard() {
 
   return (
     <section className='flex flex-row'>
-      {pollsCol && (
+      {pollsCol && pollQuestions && pollQuestions.length > 0 && (
         <BoardContainer>
           <PollsColumn column={pollsCol} />
         </BoardContainer>

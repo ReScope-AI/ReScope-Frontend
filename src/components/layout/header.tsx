@@ -10,6 +10,7 @@ import { emitSetStep } from '@/lib/retro-socket';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { useUserStore } from '@/stores/userStore';
 
+import { showNotification } from '../common';
 import SearchInput from '../search-input';
 import { ThemeSelector } from '../theme-selector';
 
@@ -70,7 +71,10 @@ export default function Header() {
                     }`}
                     onClick={() => {
                       if (isDisabled) {
-                        toast.error('You are not allowed to change the step');
+                        showNotification(
+                          'error',
+                          'You are not allowed to change the step'
+                        );
                         return;
                       }
                       handleSetStep(index + 1);
@@ -80,7 +84,6 @@ export default function Header() {
                   </div>
                   {index < initialSteps.length - 1 && (
                     <ChevronRight className='h-4 w-4 flex-shrink-0 text-gray-400' />
-                    //
                   )}
                 </React.Fragment>
               ))}

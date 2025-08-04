@@ -3,9 +3,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
+import { showNotification } from '@/components/common';
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
 import { queryClient } from '@/config/query-client';
 import { QUERY_CONSTANTS } from '@/constants/query';
+import { Column } from '@/features/kanban/components/board-column';
 import { PlanItemAction, useTaskStore } from '@/features/kanban/utils/store';
 import { isDev } from '@/lib/env';
 import {
@@ -39,17 +41,23 @@ import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { IRetroSession } from '@/types';
 import { RetroListenEvents, SocketResponse } from '@/types/retro-socket';
 
+import { useSignOut } from './use-auth';
+
 type ErrorInfo = { title: string; message: string } | null;
 
 export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   const accessToken = useAuthStore((state) => state.accessToken);
   const [error, setError] = useState<ErrorInfo>(null);
   const session = useRetroSessionStore((state) => state.retroSession);
-  const { updatePollQuestion, setPollQuestions, removePollQuestion } =
-    usePollStore((state) => state);
+  const {
+    addPollsColumn,
+    updatePollQuestion,
+    setPollQuestions,
+    removePollQuestion
+  } = usePollStore((state) => state);
   const retroId = roomId || session?._id;
   const setTasks = useTaskStore((state) => state.setTasks);
-  const setTask = useTaskStore((state) => state.setTask);
+  const { columns, setTask } = useTaskStore((state) => state);
   const setIsGenerating = useTaskStore((state) => state.setIsGenerating);
   const tasks = useTaskStore((state) => state.tasks);
   const setStep = useTaskStore((state) => state.setStep);
@@ -89,6 +97,17 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
       disconnect();
     }
   }, []);
+
+  const getTaskStatus = (status: string, columns: Column[]) => {
+    const mapper = columns.map((column) => {
+      if (column.title.toUpperCase() === status.toUpperCase()) {
+        return column.id;
+      } else {
+        return null;
+      }
+    });
+    return mapper.find((item) => item !== null);
+  };
 
   useEffect(() => {
     if (retroId && SOCKET_URL && accessToken) {
@@ -137,15 +156,16 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     };
     const generatePlanItemsListener = (data: any) => {
       if (data.data && data.data?.length > 0) {
-        setTasks([
+        const newTasks = [
           ...tasks,
           ...(data.data?.map((item: PlanItemAction) => ({
             _id: uuidv4(),
             title: item.description,
-            status: item.action_type,
+            status: getTaskStatus(item.action_type, columns),
             votes: 0
           })) || [])
-        ]);
+        ];
+        setTasks(newTasks);
       }
       setIsGenerating(false);
     };
@@ -253,6 +273,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     };
     const createQuestionListener = (res: any) => {
       if (res?.questions && res?.questions?.length > 0) {
+        addPollsColumn('Polls Question');
         setPollQuestions(res?.questions || []);
       }
     };

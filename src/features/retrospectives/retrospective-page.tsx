@@ -35,6 +35,8 @@ import {
   useGetInvitedRetroSessions,
   useGetRetroSessions
 } from '@/hooks/use-retro-session-api';
+import { useGetSprintsByUser } from '@/hooks/use-sprint-api';
+import { useGetTeams } from '@/hooks/use-team-api';
 import { useUserStore } from '@/stores/userStore';
 
 import DialogSelectBoard from './components/dialog-select-board';
@@ -55,11 +57,14 @@ export default function DashboardPage() {
     setRetroSessionParticipants,
     retroSessionParticipants,
     setInvitedRetroSessions,
-    invitedRetroSessions
+    invitedRetroSessions,
+    setSprints,
+    setTeams
   } = useRetrospectiveStore();
   const retroSessionData = getAllRetroSessions.data?.data;
   const invitedRetroSessionsData = getInvitedRetroSessions.data?.data;
-
+  const teamsData = useGetTeams().data?.data;
+  const sprintsData = useGetSprintsByUser().data?.data;
   const { user } = useUserStore();
 
   const handleOpenDialogSelectBoard = () => {
@@ -101,12 +106,32 @@ export default function DashboardPage() {
         })) || []
       );
     }
+
+    // Set teams and sprints
+    if (teamsData) {
+      setTeams(
+        teamsData.teams?.map((team: Team) => ({
+          ...team,
+          id: team._id
+        })) || []
+      );
+    }
+    if (sprintsData) {
+      setSprints(
+        sprintsData.sprints?.map((sprint: Sprint) => ({
+          ...sprint,
+          id: sprint._id
+        })) || []
+      );
+    }
   }, [
     retroSessionData,
     setRetroSessionParticipants,
     setRetroSessions,
     setInvitedRetroSessions,
-    invitedRetroSessionsData
+    invitedRetroSessionsData,
+    teamsData,
+    sprintsData
   ]);
 
   const renderDialogConfirmDelete = () => {

@@ -1,5 +1,12 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+
+import { showNotification } from '@/components/common';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -20,13 +27,9 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { useCreateRetroSession } from '@/hooks/use-retro-session-api';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+
 import { sprintFormSchema, type SprintFormData } from '../schemas/validation';
+
 import SprintNameSelector from './sprint-name-selector';
 import TeamNameSelector from './team-name-selector';
 
@@ -52,7 +55,7 @@ const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
 
   const handleSubmit = async (data: SprintFormData) => {
     if (!data.teamId) {
-      toast.error('Please select a team');
+      showNotification('error', 'Please select a team');
       return;
     }
 
@@ -65,11 +68,14 @@ const DialogSelectBoard = ({ open, onOpenChange }: DialogSelectBoardProps) => {
         end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
       });
 
-      toast.success('Sprint and Retro Session created successfully!');
+      showNotification(
+        'success',
+        'Sprint and Retro Session created successfully!'
+      );
 
       router.push(`/dashboard/retrospective/${retroResult.data._id}`);
     } catch (error) {
-      toast.error('Failed to create retro session. ' + error);
+      // Not need to show notification
     } finally {
       setIsSubmitting(false);
     }

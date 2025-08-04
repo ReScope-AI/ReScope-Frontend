@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import { showNotification } from '@/components/common';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,9 +59,7 @@ const DrawerActionItemContent = ({ retroId }: DrawerActionItemContentProps) => {
       setIsAddingActionItem(false);
     },
     (error) => {
-      toast.error('Action item created failed', {
-        description: error.message
-      });
+      showNotification('error', 'Action item created failed', error.message);
     }
   );
 
@@ -74,9 +73,7 @@ const DrawerActionItemContent = ({ retroId }: DrawerActionItemContentProps) => {
         setIsOpenEditDialog(false);
       },
       (error) => {
-        toast.error('Action item deleted failed', {
-          description: error.message
-        });
+        showNotification('error', 'Action item deleted failed', error.message);
       }
     );
 
