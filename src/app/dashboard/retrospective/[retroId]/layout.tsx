@@ -40,7 +40,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   });
 
   // Initialize socket connection for this retrospective session
-  const { hasError, error } = useRetroSocket();
+  const { hasError, error, initializeAndSetupSocket } = useRetroSocket({
+    roomId: retroId
+  });
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const setTasks = useTaskStore((state) => state.setTasks);
   const resetState = useTaskStore((state) => state.resetState);
@@ -91,6 +93,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       setCols(categoriesData.data);
     }
   }, [categoriesData, setCols]);
+
+  useEffect(() => {
+    initializeAndSetupSocket();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (isLoading) {
     return <Skeleton className='h-10 w-full' />;

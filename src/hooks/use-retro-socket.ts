@@ -1,9 +1,8 @@
 import { isArray } from 'lodash';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
-import { showNotification } from '@/components/common';
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
 import { queryClient } from '@/config/query-client';
 import { QUERY_CONSTANTS } from '@/constants/query';
@@ -40,8 +39,6 @@ import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
 import { IRetroSession } from '@/types';
 import { RetroListenEvents, SocketResponse } from '@/types/retro-socket';
-
-import { useSignOut } from './use-auth';
 
 type ErrorInfo = { title: string; message: string } | null;
 
@@ -101,20 +98,9 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     }
   }, []);
 
-  const getTaskStatus = (status: string, columns: Column[]) => {
-    const mapper = columns.map((column) => {
-      if (column.title.toUpperCase() === status.toUpperCase()) {
-        return column.id;
-      } else {
-        return null;
-      }
-    });
-    return mapper.find((item) => item !== null);
-  };
-
-  useEffect(() => {
-    if (retroId && SOCKET_URL && accessToken) {
-      initializeSocket();
+  const setupSocketListeners = useCallback(() => {
+    if (!retroId || !SOCKET_URL || !accessToken) {
+      return;
     }
 
     // Listen to all events and log the data (temporary debug)
@@ -311,9 +297,6 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     });
     onDeletePlan((data) => {
       if (data.code === 200) {
-        // Remove the task from the local store
-        const updatedTasks = tasks.filter((task) => task._id !== data.data._id);
-        setTasks(updatedTasks);
         // Invalidate the retro session query to refetch fresh data
         queryClient.invalidateQueries({
           queryKey: [
@@ -339,17 +322,47 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onEditActionItem(editActionItemListener);
     onDeleteActionItem(deleteActionItemListener);
     onCreateQuestion(createQuestionListener);
+  }, [
+    retroId,
+    accessToken,
+    session,
+    setTasks,
+    setTask,
+    setIsGenerating,
+    tasks,
+    setStep,
+    setRetroSession,
+    updatePollQuestion,
+    setPollQuestions,
+    removePollQuestion,
+    addPollsColumn,
+    columns
+  ]);
 
-    return cleanup;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initializeSocket, cleanup, retroId, accessToken]);
+  const getTaskStatus = (status: string, columns: Column[]) => {
+    const mapper = columns.map((column) => {
+      if (column.title.toUpperCase() === status.toUpperCase()) {
+        return column.id;
+      } else {
+        return null;
+      }
+    });
+    return mapper.find((item) => item !== null);
+  };
 
   const hasError = useMemo(() => error !== null, [error]);
+
+  const initializeAndSetupSocket = useCallback(() => {
+    initializeSocket();
+    setupSocketListeners();
+  }, [initializeSocket, setupSocketListeners]);
 
   return {
     error,
     hasError,
     isDev,
-    retroId
+    retroId,
+    cleanup,
+    initializeAndSetupSocket
   };
 };
