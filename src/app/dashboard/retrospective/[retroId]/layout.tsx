@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { notFound, useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import {
   Dialog,
@@ -16,8 +17,13 @@ import { QUERY_CONSTANTS } from '@/constants/query';
 import { useTaskStore } from '@/features/kanban/utils/store';
 import { useGetCategories } from '@/hooks/use-category-api';
 import { useRetroSocket } from '@/hooks/use-retro-socket';
+import {
+  onCreateKeyInsights,
+  onRadarCriteriaCreated
+} from '@/lib/retro-socket';
 import { usePollStore } from '@/stores/pollStore';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { RetroListenEvents, SocketResponse } from '@/types/retro-socket';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
@@ -42,13 +48,19 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   });
 
   // Initialize socket connection for this retrospective session
-  const { hasError, error, initializeAndSetupSocket } = useRetroSocket({
+  const {
+    hasError,
+    error,
+    initializeAndSetupSocket,
+    setupSocketListeners,
+    cleanup
+  } = useRetroSocket({
     roomId: retroId
   });
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const setTasks = useTaskStore((state) => state.setTasks);
   const { data: categoriesData } = useGetCategories();
-
+  const session = useRetroSessionStore((state) => state.retroSession);
   useEffect(() => {
     if (hasError) {
       setShowErrorDialog(true);
@@ -60,7 +72,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       clearStorage(); // Clear persisted data when component unmounts
       setRetroSession(null);
     };
-  }, [hasError, clearStorage, resetState, setRetroSession, setTasks]);
+  }, [hasError, clearStorage, resetState, setTasks, setRetroSession]);
 
   const handleDialogClose = () => {
     setShowErrorDialog(false);
@@ -73,6 +85,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (retro && retro.code === 200) {
       setRetroSession(retro.data);
+
       setStep(retro.data.step || 1);
       // Clear existing poll options when session changes
       clearPollQuestions();
@@ -99,7 +112,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     initializeAndSetupSocket();
+    setupSocketListeners();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    return () => {
+      cleanup();
+    };
   }, []);
 
   if (isLoading) {

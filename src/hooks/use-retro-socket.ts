@@ -1,13 +1,12 @@
 import { isArray } from 'lodash';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'uuid';
 
 import { BASE_API as SOCKET_URL } from '@/config/proxy';
 import { queryClient } from '@/config/query-client';
 import { QUERY_CONSTANTS } from '@/constants/query';
 import { Column } from '@/features/kanban/components/board-column';
-import { PlanItemAction, useTaskStore } from '@/features/kanban/utils/store';
+import { useTaskStore } from '@/features/kanban/utils/store';
 import { isDev } from '@/lib/env';
 import {
   connect,
@@ -127,30 +126,15 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
         toast.error(data.msg);
       }
     };
-    const createRadarCriteriaListener = (
-      data: SocketResponse<RetroListenEvents['create-radar-criteria']>
-    ) => {
-      if (data.code === 200) {
-        setRetroSession({
-          ...session!,
-          radar_criteria: data.data.map((item) => ({
-            _id: item._id,
-            criteria: item.criteria,
-            score: item.score
-          }))
-        });
-      } else {
-        toast.error(data.msg);
-      }
-    };
+
     const generatePlanItemsListener = (data: any) => {
       if (data.data && data.data?.length > 0) {
         const newTasks = [
           ...tasks,
-          ...(data.data?.map((item: PlanItemAction) => ({
-            _id: uuidv4(),
-            title: item.description,
-            status: getTaskStatus(item.action_type, columns),
+          ...(data.data?.map((item: any) => ({
+            _id: item._id,
+            title: item.text,
+            status: item.category_id,
             votes: 0
           })) || [])
         ];
@@ -163,21 +147,6 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
       setStep(step);
     };
     const setStepSuccessListener = (data: any) => {};
-
-    const createKeyInsightsListener = (
-      data: SocketResponse<RetroListenEvents['create-key-insights']>
-    ) => {
-      if (data.code === 200) {
-        setRetroSession({
-          ...session!,
-          keyInsights: data.data.map((item) => ({
-            _id: item._id,
-            title: item.title,
-            description: item.description
-          }))
-        });
-      }
-    };
 
     const addActionItemListener = (data: any) => {
       if (data.code === 200) {
@@ -322,8 +291,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     onSetStep(setStepListener);
     onSetStepSuccess(setStepSuccessListener);
     onJoinFailed(joinFailedListener);
-    onRadarCriteriaCreated(createRadarCriteriaListener);
-    onCreateKeyInsights(createKeyInsightsListener);
+
     onAddActionItem(addActionItemListener);
     onEditActionItem(editActionItemListener);
     onDeleteActionItem(deleteActionItemListener);
@@ -331,18 +299,18 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
   }, [
     retroId,
     accessToken,
-    session,
-    setTasks,
     setTask,
     setIsGenerating,
     tasks,
+    setTasks,
+    columns,
     setStep,
     setRetroSession,
-    updatePollQuestion,
+    session,
     setPollQuestions,
+    updatePollQuestion,
     removePollQuestion,
-    addPollsColumn,
-    columns
+    addPollsColumn
   ]);
 
   const getTaskStatus = (status: string, columns: Column[]) => {
@@ -360,8 +328,45 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
 
   const initializeAndSetupSocket = useCallback(() => {
     initializeSocket();
-    setupSocketListeners();
-  }, [initializeSocket, setupSocketListeners]);
+  }, [initializeSocket]);
+
+  useEffect(() => {
+    const createRadarCriteriaListener = (
+      data: SocketResponse<RetroListenEvents['create-radar-criteria']>
+    ) => {
+      if (data.code === 200) {
+        const newSession = {
+          ...session!,
+          radar_criteria: data.data.map((item) => ({
+            _id: item._id,
+            criteria: item.criteria,
+            score: item.score
+          }))
+        };
+        setRetroSession(newSession);
+      } else {
+        toast.error(data.msg);
+      }
+    };
+
+    const createKeyInsightsListener = (
+      data: SocketResponse<RetroListenEvents['create-key-insights']>
+    ) => {
+      if (data.code === 200) {
+        setRetroSession({
+          ...session!,
+          keyInsights: data.data.map((item) => ({
+            _id: item._id,
+            title: item.title,
+            description: item.description
+          }))
+        });
+      }
+    };
+
+    onRadarCriteriaCreated(createRadarCriteriaListener);
+    onCreateKeyInsights(createKeyInsightsListener);
+  }, [session, setRetroSession]);
 
   return {
     error,
@@ -369,6 +374,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
     isDev,
     retroId,
     cleanup,
-    initializeAndSetupSocket
+    initializeAndSetupSocket,
+    setupSocketListeners
   };
 };

@@ -190,7 +190,7 @@ export const useTaskStore = create<State & Actions>()(
         })
     }),
     {
-      name: 'task-store', // unique name for localStorage key
+      name: 'task-store',
       partialize: (state) => ({
         tasks: state.tasks,
         columns: state.columns,

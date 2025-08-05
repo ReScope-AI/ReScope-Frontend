@@ -20,10 +20,9 @@ import { UserNav } from './user-nav';
 export default function Header() {
   const pathname = usePathname();
   const showSteps = pathname.includes('/dashboard/retrospective/');
-  const { retroSession } = useRetroSessionStore();
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
   const step = useTaskStore((state) => state.step);
   const user = useUserStore((state) => state.user);
-  const retroId = useRetroSessionStore((state) => state.retroSession?._id);
   const createdBy = useRetroSessionStore(
     (state) => state.retroSession?.created_by
   );
@@ -35,7 +34,7 @@ export default function Header() {
   ];
 
   const handleSetStep = (step: number) => {
-    emitSetStep(retroId || '', step);
+    emitSetStep(retroSession?._id || '', step);
   };
 
   const isDisabled = useMemo(() => {
