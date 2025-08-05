@@ -135,6 +135,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
             _id: item._id,
             title: item.text,
             status: item.category_id,
+            isAIGenerate: true,
             votes: 0
           })) || [])
         ];

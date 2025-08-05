@@ -60,7 +60,13 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
   const tasks = useTaskStore((state) => state.tasks);
 
   useEffect(() => {
-    if (step === 2 && retroSession?.plans?.length === 0 && tasks.length === 0) {
+    const isGenerated = tasks.some((task) => task.isAIGenerate);
+    if (
+      step === 2 &&
+      pollQuestions &&
+      pollQuestions?.length > 0 &&
+      !isGenerated
+    ) {
       const mappedQuestions = convertData(pollQuestions);
       setIsGenerating(true);
       console.log('Emitting generate-plan-items', mappedQuestions);

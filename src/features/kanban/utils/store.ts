@@ -17,6 +17,7 @@ export type Task = {
   status: ColumnId;
   votes?: number;
   position?: number;
+  isAIGenerate?: boolean;
 };
 
 export type State = {
