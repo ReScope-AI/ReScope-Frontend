@@ -1,11 +1,9 @@
 import { useDndContext, type UniqueIdentifier } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { IconGripVertical, IconPlus } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
 import { useMemo } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -13,7 +11,6 @@ import { usePollStore } from '@/stores/pollStore';
 
 import { getColumnColorClasses, getColumnIcon } from '../utils';
 
-import { ColumnActions } from './column-action';
 import { PollQuestionCard } from './poll-question-card';
 
 export interface Column {
@@ -49,14 +46,7 @@ export function PollsColumn({
     return pollQuestions.map((question) => question._id);
   }, [pollQuestions]);
 
-  const {
-    setNodeRef,
-    attributes,
-    listeners,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({
+  const { setNodeRef, transform, transition, isDragging } = useSortable({
     id: column.id,
     data: {
       type: 'Column',
@@ -99,22 +89,13 @@ export function PollsColumn({
       <CardHeader className='flex flex-col items-start space-y-2 border-b-2 p-4 text-left'>
         <div className='flex w-full items-center justify-between gap-3'>
           <div className='flex items-center gap-3'>
-            <Button
-              variant={'ghost'}
-              {...attributes}
-              {...listeners}
-              className={`${colorClasses.icon} relative h-8 w-8 cursor-grab p-0 hover:bg-white/50 dark:hover:bg-gray-800/50`}
-            >
-              <span className='sr-only'>{`Move column: ${column.title}`}</span>
-              <IconGripVertical className='h-4 w-4' />
-            </Button>
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-lg bg-white/50 dark:bg-gray-800/50 ${colorClasses.icon}`}
             >
               {getColumnIcon(column.icon || 'default')}
             </div>
+            <div className='text-base font-semibold'> {column.question} </div>
           </div>
-          <ColumnActions id={column.id} title={column.question || 'Polls'} />
         </div>
 
         <div className='w-full'>

@@ -30,6 +30,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     clearPollQuestions
   } = usePollStore((state) => state);
   const setStep = useTaskStore((state) => state.setStep);
+  const clearStorage = useTaskStore((state) => state.clearStorage);
+  const resetState = useTaskStore((state) => state.resetState);
   const retroId = params.retroId as string;
 
   const { data: retro, isLoading } = useQuery({
@@ -45,7 +47,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   });
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const setTasks = useTaskStore((state) => state.setTasks);
-  const resetState = useTaskStore((state) => state.resetState);
   const { data: categoriesData } = useGetCategories();
 
   useEffect(() => {
@@ -56,12 +57,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     return () => {
       setTasks([]);
       resetState();
+      clearStorage(); // Clear persisted data when component unmounts
       setRetroSession(null);
     };
-  }, [hasError]);
+  }, [hasError, clearStorage, resetState, setRetroSession, setTasks]);
 
   const handleDialogClose = () => {
     setShowErrorDialog(false);
+    clearStorage(); // Clear persisted data when navigating away due to error
     router.push('/dashboard/retrospective');
   };
 

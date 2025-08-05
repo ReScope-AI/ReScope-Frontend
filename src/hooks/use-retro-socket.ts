@@ -163,6 +163,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
       setStep(step);
     };
     const setStepSuccessListener = (data: any) => {};
+
     const createKeyInsightsListener = (
       data: SocketResponse<RetroListenEvents['create-key-insights']>
     ) => {
@@ -177,6 +178,7 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
         });
       }
     };
+
     const addActionItemListener = (data: any) => {
       if (data.code === 200) {
         setRetroSession((currentSession: IRetroSession | null) => {
@@ -216,11 +218,15 @@ export const useRetroSocket = ({ roomId = '' }: { roomId?: string } = {}) => {
 
     const deleteActionItemListener = (data: any) => {
       if (data.code === 200) {
-        setRetroSession({
-          ...session!,
-          actionItems: session!.actionItems.filter(
-            (item) => item._id !== data.data._id
-          )
+        setRetroSession((currentSession: IRetroSession | null) => {
+          if (!currentSession) return currentSession;
+
+          return {
+            ...currentSession,
+            actionItems: currentSession.actionItems.filter(
+              (item) => item._id !== data.data._id
+            )
+          };
         });
       } else {
         toast.error(data.msg);

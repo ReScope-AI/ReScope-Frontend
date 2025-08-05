@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { useUserStore } from '@/stores/userStore';
 
 import {
   getCategoryProperties,
@@ -95,6 +97,12 @@ export function BoardColumn({
     }
   );
 
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
+
+  const user = useUserStore((state) => state.user);
+
+  const isOwner = retroSession?.created_by === user?._id;
+
   return (
     <Card
       ref={setNodeRef}
@@ -104,22 +112,28 @@ export function BoardColumn({
       })}
     >
       <CardHeader className='space-between flex flex-col items-start border-b-2 p-4 text-left'>
-        <div className='flex w-full items-center justify-between'>
-          <Button
-            variant={'ghost'}
-            {...attributes}
-            {...listeners}
-            className={`${colorClasses.icon} relative -ml-2 h-auto cursor-grab p-1`}
-          >
-            <span className='sr-only'>{`Move column: ${categoryProperties.title}`}</span>
-            <IconGripVertical />
-          </Button>
+        <div className='flex w-full items-center justify-start'>
+          {isOwner && (
+            <Button
+              variant={'ghost'}
+              {...attributes}
+              {...listeners}
+              className={`${colorClasses.icon} relative -ml-2 h-auto cursor-grab p-1`}
+            >
+              <span className='sr-only'>{`Move column: ${categoryProperties.title}`}</span>
+              <IconGripVertical />
+            </Button>
+          )}
           <div className='flex items-center gap-2'>
             <div className={`${colorClasses.icon}`}>
               {getColumnIcon(categoryProperties.icon)}
             </div>
+
+            <div className='text-base font-semibold'>
+              {categoryProperties.title}
+            </div>
           </div>
-          <ColumnActions id={column.id} title={categoryProperties.title} />
+          {/* <ColumnActions id={column.id} title={categoryProperties.title} /> */}
         </div>
         {categoryProperties.question && (
           <p className={`text-sm ${colorClasses.text} mt-2 opacity-80`}>

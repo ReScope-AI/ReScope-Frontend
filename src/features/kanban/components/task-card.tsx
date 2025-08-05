@@ -1,12 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import {
-  IconEdit,
-  IconGripVertical,
-  IconMinus,
-  IconPlus,
-  IconTrash
-} from '@tabler/icons-react';
+import { IconEdit, IconGripVertical, IconTrash } from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
 import { useState } from 'react';
 
@@ -15,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useRetroSocket } from '@/hooks/use-retro-socket';
 import { emitDeletePlan } from '@/lib/retro-socket';
+import { useRetroSessionStore } from '@/stores/retroSessionStore';
+import { useUserStore } from '@/stores/userStore';
 
 import { getTaskColorClasses } from '../utils';
 import { useTaskStore, type Task } from '../utils/store';
@@ -58,7 +54,12 @@ export function TaskCard({
     disabled: disableDragExternal
   });
 
-  const updateTaskVotes = useTaskStore((state) => state.updateTaskVotes);
+  const retroSession = useRetroSessionStore((state) => state.retroSession);
+
+  const user = useUserStore((state) => state.user);
+
+  const isOwner = retroSession?.created_by === user?._id;
+
   const columns = useTaskStore((state) => state.columns);
   const { retroId } = useRetroSocket();
 
@@ -111,33 +112,41 @@ export function TaskCard({
         dragging: isOverlay ? 'overlay' : isDragging ? 'over' : undefined
       })}
     >
-      <CardHeader className='space-between border-secondary relative flex flex-row border-b-2 px-3 py-3'>
-        <Button
-          variant={'ghost'}
-          {...attributes}
-          {...listeners}
-          className='text-secondary-foreground/50 -ml-2 h-auto cursor-grab p-1'
-        >
-          <span className='sr-only'>Move task</span>
-          <IconGripVertical />
-        </Button>
+      <CardHeader
+        className={`${isOwner ? 'justify-between' : 'justify-start'} border-secondary relative flex flex-row border-b-2 px-3 py-3`}
+      >
+        {isOwner && (
+          <Button
+            variant={'ghost'}
+            {...attributes}
+            {...listeners}
+            className='text-secondary-foreground/50 -ml-2 h-auto cursor-grab p-1'
+          >
+            <span className='sr-only'>Move task</span>
+            <IconGripVertical />
+          </Button>
+        )}
         <div className='ml-auto flex items-center gap-1'>
-          <Button
-            variant='ghost'
-            size='sm'
-            className='h-6 w-6 p-0 text-gray-500 hover:text-blue-600'
-            onClick={handleEditTask}
-          >
-            <IconEdit className='h-3 w-3' />
-          </Button>
-          <Button
-            variant='ghost'
-            size='sm'
-            className='h-6 w-6 p-0 text-gray-500 hover:text-red-600'
-            onClick={handleDeleteTask}
-          >
-            <IconTrash className='h-3 w-3' />
-          </Button>
+          {isOwner && (
+            <>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-6 w-6 p-0 text-gray-500 hover:text-blue-600'
+                onClick={handleEditTask}
+              >
+                <IconEdit className='h-3 w-3' />
+              </Button>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-6 w-6 p-0 text-gray-500 hover:text-red-600'
+                onClick={handleDeleteTask}
+              >
+                <IconTrash className='h-3 w-3' />
+              </Button>
+            </>
+          )}
           <Badge
             variant={'outline'}
             className={`font-semibold ${colorClasses.badge}`}
@@ -148,29 +157,6 @@ export function TaskCard({
       </CardHeader>
       <CardContent className='px-3 pt-3 pb-3 text-left'>
         <div className='mb-3 whitespace-pre-wrap'>{task.title}</div>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-1'>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='h-6 w-6 p-0'
-              onClick={() => updateTaskVotes(task._id, false)}
-            >
-              <IconMinus className='h-3 w-3' />
-            </Button>
-            <Badge variant='secondary' className='min-w-[20px] text-center'>
-              {task.votes || 0}
-            </Badge>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='h-6 w-6 p-0'
-              onClick={() => updateTaskVotes(task._id, true)}
-            >
-              <IconPlus className='h-3 w-3' />
-            </Button>
-          </div>
-        </div>
       </CardContent>
       <EditTaskDialog
         isOpen={isEditDialogOpen}
