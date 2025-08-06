@@ -170,7 +170,7 @@ export function PollQuestionCard({
         {...listeners}
       >
         {/* Gradient overlay for visual appeal */}
-        <div className='absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 dark:from-blue-400/10 dark:via-purple-400/10 dark:to-pink-400/10' />
+        <div className='absolute inset-0 bg-gradient-to-r from-green-500/5 via-emerald-500/5 to-teal-500/5 dark:from-green-400/10 dark:via-emerald-400/10 dark:to-teal-400/10' />
 
         <CardContent className='relative p-2'>
           {/* Header section with poll type and actions */}
@@ -178,7 +178,7 @@ export function PollQuestionCard({
             <div className='flex items-center gap-3'>
               <Badge
                 variant='secondary'
-                className='bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50'
+                className='bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50'
               >
                 <IconEye size={14} className='mr-1' />
                 Public Poll
@@ -277,14 +277,14 @@ export function PollQuestionCard({
                     }}
                     className={`relative h-auto min-h-[3rem] w-full cursor-pointer justify-between overflow-hidden px-4 py-3 text-left transition-all duration-200 ${
                       isSelected
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md hover:from-blue-700 hover:to-purple-700'
+                        ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-md hover:from-green-700 hover:to-emerald-700'
                         : 'cursor-pointer border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:bg-gray-700'
                     } ${step !== 1 ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
                     {/* Progress bar background for voted options */}
                     {totalVotes > 0 && (
                       <div
-                        className={`absolute inset-0 transition-all duration-500 ease-out ${isSelected ? 'bg-white/20' : 'bg-blue-100 dark:bg-blue-900/30'} `}
+                        className={`absolute inset-0 transition-all duration-500 ease-out ${isSelected ? 'bg-white/20' : 'bg-green-100 dark:bg-green-900/30'} `}
                         style={{ width: `${percentage}%` }}
                       />
                     )}

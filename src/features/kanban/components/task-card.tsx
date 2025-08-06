@@ -1,12 +1,26 @@
+'use client';
+
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { IconEdit, IconGripVertical, IconTrash } from '@tabler/icons-react';
+import {
+  IconEdit,
+  IconGripVertical,
+  IconTrash,
+  IconDots
+} from '@tabler/icons-react';
 import { cva } from 'class-variance-authority';
+import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { useRetroSocket } from '@/hooks/use-retro-socket';
 import { emitDeletePlan } from '@/lib/retro-socket';
 import { useRetroSessionStore } from '@/stores/retroSessionStore';
@@ -55,14 +69,10 @@ export function TaskCard({
   });
 
   const retroSession = useRetroSessionStore((state) => state.retroSession);
-
   const user = useUserStore((state) => state.user);
-
   const isOwner = retroSession?.created_by === user?._id;
-
   const columns = useTaskStore((state) => state.columns);
   const { retroId } = useRetroSocket();
-
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const handleEditTask = () => {
@@ -86,10 +96,7 @@ export function TaskCard({
     transform: CSS.Translate.toString(transform)
   };
 
-  // Find the column for this task
   const taskColumn = columns.find((col) => col.id === task.status);
-
-  // Get color classes based on task status
   const colorClasses = getTaskColorClasses(taskColumn?.title || '');
 
   const variants = cva(
@@ -128,24 +135,33 @@ export function TaskCard({
         )}
         <div className='ml-auto flex items-center gap-1'>
           {isOwner && (
-            <>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='h-6 w-6 p-0 text-gray-500 hover:text-blue-600'
-                onClick={handleEditTask}
-              >
-                <IconEdit className='h-3 w-3' />
-              </Button>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='h-6 w-6 p-0 text-gray-500 hover:text-red-600'
-                onClick={handleDeleteTask}
-              >
-                <IconTrash className='h-3 w-3' />
-              </Button>
-            </>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='h-6 w-6 p-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                >
+                  <MoreHorizontal className='h-4 w-4' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='bg-background border-input dark:bg-background dark:border-input'>
+                <DropdownMenuItem
+                  onClick={handleEditTask}
+                  className='text-foreground hover:bg-muted dark:hover:bg-muted cursor-pointer'
+                >
+                  <IconEdit className='mr-2 h-4 w-4' />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleDeleteTask}
+                  className='text-foreground hover:bg-muted dark:hover:bg-muted cursor-pointer'
+                >
+                  <IconTrash className='mr-2 h-4 w-4' />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
           <Badge
             variant={'outline'}

@@ -83,10 +83,10 @@ export function InviteRetroDialog({ retroId }: InviteRetroDialogProps) {
             <TooltipTrigger asChild>
               <Button
                 onClick={() => setIsOpen(true)}
-                className='group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-purple-300 hover:from-purple-50 hover:to-slate-100 hover:text-purple-600 hover:shadow-xl dark:border-slate-700/60 dark:from-slate-800 dark:to-slate-900 dark:text-slate-400 dark:hover:border-purple-600 dark:hover:from-purple-900/20 dark:hover:to-slate-800 dark:hover:text-purple-400'
+                className='group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-green-300 hover:from-green-50 hover:to-green-100 hover:text-green-600 hover:shadow-xl dark:border-slate-700/60 dark:from-slate-800 dark:to-slate-900 dark:text-slate-400 dark:hover:border-green-600 dark:hover:from-green-900/20 dark:hover:to-slate-800 dark:hover:text-green-400'
               >
                 <UserRoundPlus className='h-5 w-5 transition-transform duration-300 group-hover:rotate-12' />
-                <div className='absolute -inset-1 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20' />
+                <div className='absolute -inset-1 rounded-xl bg-gradient-to-r from-green-600 to-green-100 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20' />
               </Button>
             </TooltipTrigger>
 
@@ -104,7 +104,7 @@ export function InviteRetroDialog({ retroId }: InviteRetroDialogProps) {
 
         <DialogContent className='flex max-w-lg flex-col overflow-hidden border-0 bg-white p-0 shadow-2xl dark:bg-slate-900'>
           {/* Header with gradient background */}
-          <div className='relative flex-shrink-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-6 py-8'>
+          <div className='relative flex-shrink-0 bg-gradient-to-r from-green-600 via-green-600 to-green-100 px-6 py-8'>
             <div className='absolute inset-0 bg-black/10' />
             <div className='relative'>
               <DialogHeader className='space-y-2'>
@@ -231,7 +231,7 @@ export function InviteRetroDialog({ retroId }: InviteRetroDialogProps) {
                   emails.length === 0 ||
                   inviteSuccess
                 }
-                className='group relative h-12 flex-1 cursor-pointer border-purple-200/60 bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-purple-300 hover:from-blue-700 hover:to-purple-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100'
+                className='group relative h-12 flex-1 cursor-pointer border-green-200/60 bg-gradient-to-br from-green-600 to-green-300 text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-green-300 hover:from-green-700 hover:to-green-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100'
               >
                 {inviteToRetroMutation.isPending ? (
                   <div className='flex items-center gap-2'>
@@ -258,7 +258,7 @@ export function InviteRetroDialog({ retroId }: InviteRetroDialogProps) {
                     </span>
                   </div>
                 )}
-                <div className='absolute -inset-1 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20' />
+                <div className='absolute -inset-1 rounded-xl bg-gradient-to-r from-green-600 to-green-100 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20' />
               </Button>
             </div>
           </div>

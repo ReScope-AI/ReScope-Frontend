@@ -65,14 +65,14 @@ export default function KanbanViewPage({ retroId }: { retroId: string }) {
       step === 2 &&
       pollQuestions &&
       pollQuestions?.length > 0 &&
-      !isGenerated
+      retroSession?.plans?.length === 0
     ) {
       const mappedQuestions = convertData(pollQuestions);
       setIsGenerating(true);
       console.log('Emitting generate-plan-items', mappedQuestions);
       emitGeneratePlanItems(retroId || '', mappedQuestions);
     }
-  }, [step]);
+  }, [step, pollQuestions]);
 
   useEffect(() => {
     onActiveGeneratePlanItems((data) => {

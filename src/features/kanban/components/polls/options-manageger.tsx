@@ -1,9 +1,11 @@
 'use client';
-import React from 'react';
-import { PollOption } from './types';
 import { GripVertical, Plus, Trash2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import React from 'react';
+
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+import { PollOption } from './types';
 
 const OptionsManager = ({
   options,
@@ -29,7 +31,7 @@ const OptionsManager = ({
               value={option.text}
               onChange={(e) => updateOption(option.id, e.target.value)}
               placeholder={`Option ${index + 1}`}
-              className='flex-1 border-gray-300 focus:border-purple-500 focus:ring-purple-500'
+              className='flex-1 border-gray-300 focus:border-green-500 focus:ring-green-500'
             />
             <Button
               variant='ghost'
@@ -46,7 +48,7 @@ const OptionsManager = ({
       <Button
         variant='ghost'
         onClick={addOption}
-        className='mt-2 text-purple-600 hover:bg-purple-50 hover:text-purple-700'
+        className='mt-2 text-green-600 hover:bg-green-50 hover:text-green-700'
       >
         <Plus className='mr-1 h-4 w-4' />
         ADD OPTION

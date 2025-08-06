@@ -1,13 +1,16 @@
 'use client';
 
+import { useMutation } from '@tanstack/react-query';
+import { Brain, Sparkles, Wand2 } from 'lucide-react';
+import { useState } from 'react';
+
 import { showNotification } from '@/components/common';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { generateAIPolls } from '@/config/api/poll-question';
-import { useMutation } from '@tanstack/react-query';
-import { Brain, Sparkles, Wand2 } from 'lucide-react';
-import { useState } from 'react';
+import { cn } from '@/lib/utils';
+
 import { promptTemplates } from './constant';
 
 interface AIGeneratedPoll {
@@ -97,9 +100,9 @@ const AIGeneratorModal = ({
       <DialogContent className='max-w-4xl bg-white p-0 dark:bg-gray-900'>
         <div className='flex h-[500px] flex-col'>
           {/* Fixed Header */}
-          <div className='flex-shrink-0 border-b border-gray-200 p-6 dark:border-gray-700'>
+          <div className='flex-shrink-0 border-b border-gray-200 p-6 dark:border-gray-700 dark:bg-gray-800/50'>
             <div className='flex items-center gap-3'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg'>
+              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-700 shadow-lg'>
                 <Sparkles className='h-5 w-5 text-white' />
               </div>
               <div>
@@ -129,7 +132,12 @@ const AIGeneratorModal = ({
                         selectedTemplate === template.id ? 'default' : 'outline'
                       }
                       size='sm'
-                      className='h-auto justify-start p-3 text-left'
+                      className={cn(
+                        'h-auto justify-start p-3 text-left',
+                        selectedTemplate === template.id
+                          ? 'bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-lg hover:from-blue-700 hover:to-green-700'
+                          : 'border-gray-300 text-gray-600 hover:border-gray-400 hover:bg-gray-50'
+                      )}
                       onClick={() => handleTemplateSelect(template)}
                     >
                       <template.icon className='mr-2 h-4 w-4' />
@@ -154,7 +162,7 @@ const AIGeneratorModal = ({
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
                     placeholder="Describe the poll you want to create... (e.g., 'Create a fun poll about team preferences' or 'Generate a poll about project satisfaction')"
-                    className='min-h-[100px] resize-none border-gray-300 focus:border-purple-500 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white'
+                    className='min-h-[100px] resize-none border-gray-300 focus:border-green-500 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white'
                   />
                   <div className='rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-blue-800 dark:from-blue-900/20 dark:to-indigo-900/20'>
                     <div className='flex gap-3'>
@@ -191,7 +199,7 @@ const AIGeneratorModal = ({
               <Button
                 onClick={handleGenerate}
                 disabled={!aiPrompt.trim() || isGenerating}
-                className='flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:from-purple-700 hover:to-pink-700'
+                className='flex-1 bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-lg hover:from-blue-700 hover:to-green-700'
               >
                 {isGenerating ? (
                   <>

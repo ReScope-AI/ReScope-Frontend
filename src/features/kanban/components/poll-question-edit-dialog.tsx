@@ -79,7 +79,7 @@ export function PollQuestionEditDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-lg'>
         <DialogHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
-          <DialogTitle className='text-xl font-semibold text-gray-900'>
+          <DialogTitle className='text-xl font-semibold text-gray-900 dark:text-white'>
             Edit Poll
           </DialogTitle>
         </DialogHeader>
@@ -89,7 +89,7 @@ export function PollQuestionEditDialog({
           <div className='space-y-2'>
             <Label
               htmlFor='question'
-              className='text-sm font-medium tracking-wide text-gray-700 uppercase'
+              className='text-sm font-medium tracking-wide text-gray-700 uppercase dark:text-white'
             >
               Question
             </Label>
@@ -104,7 +104,7 @@ export function PollQuestionEditDialog({
 
           {/* Options Section */}
           <div className='space-y-3'>
-            <Label className='text-sm font-medium tracking-wide text-gray-700 uppercase'>
+            <Label className='text-sm font-medium tracking-wide text-gray-700 uppercase dark:text-white'>
               Options
             </Label>
             <div className='space-y-2'>
@@ -135,7 +135,7 @@ export function PollQuestionEditDialog({
               type='button'
               onClick={handleAddOption}
               variant='ghost'
-              className='h-10 w-full border-2 border-dashed border-gray-200 text-purple-600 hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700'
+              className='h-10 w-full border-2 border-dashed border-gray-200 text-green-600 hover:border-green-200 hover:bg-green-50 hover:text-green-700 dark:border-gray-700 dark:text-white'
             >
               <IconPlus size={16} className='mr-2' />
               ADD OPTION
@@ -147,14 +147,14 @@ export function PollQuestionEditDialog({
           <Button
             variant='outline'
             onClick={onClose}
-            className='h-11 flex-1 bg-transparent'
+            className='h-11 flex-1 bg-transparent dark:text-white dark:hover:bg-gray-700'
           >
             CANCEL
           </Button>
           <Button
             onClick={handleSave}
             disabled={!text.trim() || options.some((o) => !o.text.trim())}
-            className='h-11 flex-1 bg-purple-600 hover:bg-purple-700'
+            className='h-11 flex-1 bg-green-600 hover:bg-green-700'
           >
             SAVE
           </Button>

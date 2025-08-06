@@ -27,7 +27,7 @@ const PreDefinedPollsSection = ({
           onClick={() =>
             showNotification('info', 'Feature will be available soon!')
           }
-          className='flex-1 border-purple-200 text-purple-600 hover:border-purple-300 hover:bg-purple-50'
+          className='flex-1 border-green-200 text-green-600 hover:border-green-300 hover:bg-green-50'
         >
           <Clipboard className='mr-2 h-4 w-4' />
           Select Template
@@ -35,7 +35,7 @@ const PreDefinedPollsSection = ({
         <Button
           variant='outline'
           onClick={() => setShowAIGenerator(!showAIGenerator)}
-          className='flex-1 border-purple-200 text-purple-600 hover:border-purple-300 hover:bg-purple-50'
+          className='flex-1 border-green-200 text-green-600 hover:border-green-300 hover:bg-green-50'
         >
           <Sparkles className='mr-2 h-4 w-4' />
           Generate with AI

@@ -82,16 +82,16 @@ const PollModal = () => {
                   <Button
                     onClick={() => setIsOpen(true)}
                     disabled={step !== 1}
-                    className='group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-purple-300 hover:from-purple-50 hover:to-slate-100 hover:text-purple-600 hover:shadow-xl dark:border-slate-700/60 dark:from-slate-800 dark:to-slate-900 dark:text-slate-400 dark:hover:border-purple-600 dark:hover:from-purple-900/20 dark:hover:to-slate-800 dark:hover:text-purple-400'
+                    className='group relative flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-green-300 hover:from-green-50 hover:to-green-100 hover:shadow-xl dark:border-slate-700/60 dark:from-slate-800 dark:to-slate-900 dark:text-slate-400 dark:hover:border-green-600 dark:hover:from-green-900/2 dark:hover:to-green-800 dark:hover:text-green-400'
                   >
                     <ChartGantt className='h-5 w-5 transition-transform duration-300 group-hover:rotate-12' />
-                    <div className='absolute -inset-1 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20' />
+                    <div className='absolute -inset-1 rounded-xl bg-gradient-to-r from-green-500 to-green-600 opacity-0 blur transition-opacity duration-300 group-hover:opacity-20' />
                   </Button>
                 </div>
               </TooltipTrigger>
               <TooltipContent
                 side='top'
-                className='bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                className='bg-slate-900 text-white dark:bg-slate-700 dark:text-slate-300'
               >
                 {step !== 1 ? (
                   <p className='font-medium'>
@@ -111,20 +111,20 @@ const PollModal = () => {
 
           <DialogContent className='flex h-[600px] max-w-2xl flex-col overflow-hidden border-0 bg-white p-0 shadow-2xl dark:bg-slate-900'>
             {/* Header with gradient background */}
-            <div className='relative flex-shrink-0 bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 px-6 py-8'>
+            <div className='relative flex-shrink-0 bg-gradient-to-r from-green-500 via-green-600 to-green-700 px-6 py-8'>
               <div className='absolute inset-0 bg-black/10' />
               <div className='relative'>
                 <DialogHeader className='space-y-2'>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-3'>
                       <div className='flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm'>
-                        <ChartGantt className='h-6 w-6 text-white' />
+                        <ChartGantt className='h-6 w-6 text-green-300' />
                       </div>
                       <div>
                         <DialogTitle className='text-2xl font-bold text-white'>
                           Create Poll
                         </DialogTitle>
-                        <p className='text-purple-100'>
+                        <p className='text-green-100'>
                           Design engaging polls for your team
                         </p>
                       </div>
@@ -133,8 +133,8 @@ const PollModal = () => {
                 </DialogHeader>
               </div>
               {/* Decorative elements */}
-              <div className='absolute -top-4 -right-4 h-24 w-24 rounded-full bg-white/10 blur-xl' />
-              <div className='absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-pink-500/20 blur-2xl' />
+              <div className='absolute -top-4 -right-4 h-24 w-24 rounded-full bg-green-500/20 blur-xl' />
+              <div className='absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-green-600/20 blur-2xl' />
             </div>
 
             {/* Scrollable Content */}
@@ -143,7 +143,7 @@ const PollModal = () => {
                 {/* Question Section */}
                 <div className='space-y-3'>
                   <div className='flex items-center gap-2'>
-                    <div className='h-2 w-2 rounded-full bg-purple-500' />
+                    <div className='h-2 w-2 rounded-full bg-green-500' />
                     <label className='text-sm font-semibold tracking-wide text-slate-700 uppercase dark:text-slate-300'>
                       Question
                     </label>
@@ -155,7 +155,7 @@ const PollModal = () => {
                       placeholder='What would you like to ask your team?'
                       className='h-12 border-slate-200 bg-slate-50/50 text-base placeholder:text-slate-400 focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-purple-500 dark:focus:bg-slate-800 dark:focus:ring-purple-900/20'
                     />
-                    <div className='pointer-events-none absolute inset-0 rounded-md bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-pink-500/0' />
+                    <div className='pointer-events-none absolute inset-0 rounded-md bg-gradient-to-r from-green-500/0 via-green-500/5 to-green-600/0' />
                   </div>
                 </div>
 
@@ -239,7 +239,7 @@ const PollModal = () => {
                 <Button
                   onClick={handleSave}
                   disabled={isLoading || !question.trim()}
-                  className='h-12 flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:from-purple-700 hover:to-pink-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50'
+                  className='h-12 flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg hover:from-green-700 hover:to-green-800 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50'
                 >
                   {isLoading ? (
                     <div className='flex items-center gap-2'>
